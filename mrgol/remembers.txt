@@ -1,0 +1,29 @@
+#slugify                      #https://stackoverflow.com/questions/6461989/populating-django-field-with-pre-save
+
+#whitch fields db_index?   put max_lenght for be fixing front styles    test_field should remove      math operation of Rating will done in view.       hamahanghi baraie meqdare max_length ha          user fielda and which shuld be index    which field blank = True which False
+
+#error messages in: model fields, amdin forms, servers error(like 404 501 and...) and help texts   https://docs.djangoproject.com/en/3.1/ref/models/fields/#help-text 
+
+#do speed test in project normal vs project collected light, temperature, water, inout fields as one field and removing db_index of category and available fields. you can do other test you want
+
+#why product.image_icon and not product.image?(and for onetoone fields)   new design of Comment in models/.py   what means in on_delete describe when you are in:  https://stackoverflow.com/questions/38388423/what-does-on-delete-do-on-django-models
+
+#pak kardan import haie ezafe
+
+#test if can backward relation with manytomany(in desctop models.py)
+
+#log out a user after a time
+
+#check CASCADE for fields that dont delete related objects unexpectly.
+
+#check can you retrive more than 20 object(for example 20 objects of product in one query) or not(it sounds django havel imitation)
+version 2:
+can put post on product
+run light, temperature, water, inout  filters
+complet tags like meta description or others..
+category level 2(example:  iphone 10 > lox class(lvl2) > phone
+
+permissions pass_reset chat_online
+
+185.51.200.2
+178.22.122.100

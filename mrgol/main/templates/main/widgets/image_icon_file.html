@@ -1,0 +1,12 @@
+{% if value %}<img id="image_icon_image" src="{{ value.url }}" width="50" height="50"> {% else %} <img id="image_icon_image" src=""> {% endif %}
+<input type="{{ widget.type }}" id="image_icon_input" style="margin-left: 15px;" onchange="document.getElementById('image_icon_image').src = window.URL.createObjectURL(this.files[0])" name="{{ widget.name }}"{% if widget.value != None %} value="{{ widget.value|stringformat:'s' }}"{% endif %}{% include "django/forms/widgets/attrs.html" %}>
+
+
+<script>                             //if we define width and height for secend tag  <img ...> directly in tag <img ..>  instead of defining by javascript, when creating new image_icone, befor uploding image an imageless area will shown to user but now it is fixed and dont shown eny image area befor uploding image by user.
+function image_icon_img_wh() {
+  var x = document.getElementById('image_icon_image');
+  x.width = "50";
+  x.height = "50";
+}
+document.getElementById("image_icon_input").addEventListener("change", image_icon_img_wh)
+</script> 

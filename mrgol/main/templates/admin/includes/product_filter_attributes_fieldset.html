@@ -1,0 +1,75 @@
+<fieldset class="module aligned {{ fieldset.classes }}">
+    {% if fieldset.name %}<h2>{{ fieldset.name }}</h2>{% endif %}
+    {% if fieldset.description %}
+        <div class="description">{{ fieldset.description|safe }}</div>
+    {% endif %}
+    {% for line in fieldset %}
+        <div class="form-row{% if line.fields|length_is:'1' and line.errors %} errors{% endif %}{% if not line.has_visible_field %} hidden{% endif %}{% for field in line %}{% if field.field.name %} field-{{ field.field.name }}{% endif %}{% endfor %}">
+            {% if line.fields|length_is:'1' %}{{ line.errors }}{% endif %}
+            {% for field in line %}																
+                <div{% if not line.fields|length_is:'1' %} class="fieldBox{% if field.field.name %} field-{{ field.field.name }}{% endif %}{% if not field.is_readonly and field.errors %} errors{% endif %}{% if field.field.is_hidden %} hidden{% endif %}"{% elif field.is_checkbox %} class="checkbox-row"{% endif %}>				
+                    {% if not line.fields|length_is:'1' and not field.is_readonly %}{{ field.errors }}{% endif %}
+                    {% if field.is_checkbox %}
+                        {{ field.field }}{{ field.label_tag }}
+                    {% else %}															
+                        {{ field.label_tag }}
+						
+
+						{% with id_filter=selectid_filters.next %}    {% with id_filter_attribute=selectid_filter_attributes.next %}   
+						<select name="{{ selectname_filters.next }}" required="" id="{{ id_filter }}" style="float: left; margin-right: 10px;">	
+							<option value=''>---------</option>
+						{% with selected_filter=selected_filters.next %}
+						{% for filter, filter_attributes in filters_filters_attributes %}							
+							<option value="{{ filter.id }}" {% if filter.id == selected_filter.id %}selected{% endif %}> {{ filter.name }} </option>
+						{% endfor %}
+						{% endwith %}
+						</select>	
+																								
+                        {% if field.is_readonly %}
+                            <div class="readonly">{{ field.contents }}</div>
+                        {% else %}
+                            {{ field.field }}
+                        {% endif %}
+						
+						<script>
+						function getType() {
+						  var x = document.getElementById("{{ id_filter }}").value;		
+						  if (x === "{{ filters_filters_attributes.0.0.id }}") {
+							items = {{ filters_filters_attributes.0.1|safe }};
+						  }							  
+						{% for filter, filter_attributes in filters_filters_attributes|slice:range_filters %} 
+						  else if (x === "{{ filter.id }}") {
+							items = {{ filter_attributes|safe }}    }
+						{% endfor %}
+						  else { 
+							items = [];
+						  }						  
+						  var str = "";
+						  var s = "";
+						  for (var item of items) {    
+							{% with selected_filter_attribute=selected_filter_attributes.next %}  
+									{% if selected_filter_attribute.id %}
+										if (item.id == {{ selected_filter_attribute.id }}) {s = " selected";} else {s = "";}
+									{% endif %}
+							{% endwith %}	
+							str += "<option value="+item.id + s +">"+item.name+"</option>"
+						  } 
+						  document.getElementById("{{ id_filter_attribute }}").innerHTML = str;
+						}
+						document.getElementById("{{ id_filter }}").addEventListener("change", getType)
+						getType()
+						</script> 							
+						{% endwith %}{% endwith %}				
+						
+						
+                    {% endif %}
+                    {% if field.field.help_text %}
+                        <div class="help">{{ field.field.help_text|safe }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+</fieldset>
+
+

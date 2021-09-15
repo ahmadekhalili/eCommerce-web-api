@@ -1,0 +1,23 @@
+<select style="font-weight: bold;" name="confirm_status" id="id_confirm_status">
+  <option style="color: #c0c0c0; font-weight: bold;" value="2" {% if obj.confirm_status == '1' %}selected{% endif %}>بررسي نشده</option>
+  <option style="color: #8ccb55; font-weight: bold;" value="1" {% if obj.confirm_status == '2' %}selected{% endif %}>تاييد</option>
+  <option style="color: #e36a6a; font-weight: bold;" value="3" {% if obj.confirm_status == '3' %}selected{% endif %}>رد</option>
+</select>
+
+
+<script>
+function change_style() {
+  var confirm_status = document.getElementById("id_confirm_status");
+  if (confirm_status.value === "1"){
+  confirm_status.style.color = '#70bf2b';  
+  }
+  else   if (confirm_status.value === "2"){
+  confirm_status.style.color = '#c0c0c0';  
+  }
+  else  if (confirm_status.value === "3"){
+  confirm_status.style.color = '#e36a6a';  
+  }
+}
+ document.getElementById("id_confirm_status").addEventListener("change", change_style)
+ change_style();
+</script> 

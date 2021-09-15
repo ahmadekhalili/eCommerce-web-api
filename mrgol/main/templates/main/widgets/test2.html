@@ -1,0 +1,5 @@
+<select>
+	{% for filter_attribute in filter_attributes %}
+		<option value="{{ filter_attribute.id }}"> {{ filter_attribute.name }} </option>
+	{% endfor %}
+</select>

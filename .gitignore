@@ -1,0 +1,14 @@
+mrgol/static/
+mrgol/media/
+mrgol/cart/migrations/
+mrgol/cart/static/
+mrgol/main/migrations/
+mrgol/main/static/
+mrgol/orders/migrations/
+mrgol/orders/static/
+mrgol/payment/migrations/
+mrgol/payment/static/
+mrgol/users/migrations/
+mrgol/users/static/
+
+mrgol/db.sqlite3

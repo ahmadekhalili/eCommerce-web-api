@@ -1,0 +1,6 @@
+<select name="level" required="" id="id_level">	
+{% for level in roots_level_range %}							
+	<option value="{{ level }}" {% if selected_level_range == level %}selected{% endif %}> {{ level }} </option>
+{% endfor %}
+</select>		
+<p style="display:inline">&nbsp;</p>

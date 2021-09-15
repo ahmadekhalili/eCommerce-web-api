@@ -1,0 +1,91 @@
+<select name="filters1" required="" id="id_filters">	
+{% with selected_filter=selected_filters.next %}
+	<option value=''>---------</option>
+{% for filter, filter_attributes in filters_filters_attributes %}							
+	<option value="{{ filter.id }}" {% if filter.id == selected_filter.id %}selected{% endif %}> {{ filter.name }} </option>
+{% endfor %}
+{% endwith %}
+</select>						
+<p style="display:inline">&nbsp;</p>							
+<select name="filter_attributes1" required="" id="id_filter_attributes">
+	<option value="">---------</option>
+</select> 
+
+<script>
+function getType() {
+  var x = document.getElementById("id_filters").value;
+  
+  if (x === "{{ filters_filters_attributes.0.0.id }}") {
+    items = {{ filters_filters_attributes.0.1|safe }};
+  }	
+  
+{% for filter, filter_attributes in filters_filters_attributes|slice:range_filters %} 
+  else if (x === "{{ filter.id }}") {
+    items = {{ filter_attributes|safe }}    }
+{% endfor %}
+
+  else { 
+    items = [];
+  }
+  
+  var str = "";
+  var s;
+  for (var item of items) {    
+    if (item.id == {{ selected_filter_attributes.next.id }}) {s = " selected";} else {s = "";}
+    str += "<option value="+item.id + s +">"+item.name+"</option>"
+  } 
+  document.getElementById("id_filter_attributes").innerHTML = str;
+}
+document.getElementById("id_filters").addEventListener("change", getType)
+getType()
+</script> 
+
+
+
+{% for selected_filter in selected_filters.list %} 
+{% with id_filter=selectid_filters.next %}   {% with id_filter_attribute=selectid_filter_attributes.next %}   
+<p></p>
+<label class="required"></label>						
+<select name="{{ selectname_filters.next }}" required="" id="{{ id_filter }}">	
+	<option value=''>---------</option>
+{% for filter, filter_attributes in filters_filters_attributes %}							
+	<option value="{{ filter.id }}" {% if filter.id == selected_filter.id %}selected{% endif %}> {{ filter.name }} </option>
+{% endfor %}
+</select>						
+<p style="display:inline">&nbsp;</p>							
+<select name="{{ selectname_filter_attributes.next }}" required="" id="{{ id_filter_attribute }}">
+</select> 
+
+ <script>
+function getType() {
+  var x = document.getElementById("{{ id_filter }}").value;
+  
+  if (x === "{{ filters_filters_attributes.0.0.id }}") {
+    items = {{ filters_filters_attributes.0.1|safe }};
+  }	
+  
+{% for filter, filter_attributes in filters_filters_attributes|slice:range_filters %} 
+  else if (x === "{{ filter.id }}") {
+    items = {{ filter_attributes|safe }}    }
+{% endfor %}
+
+  else { 
+    items = [];
+  }
+  
+  var str = "";
+  var s;
+  for (var item of items) {    
+    if (item.id == {{ selected_filter_attributes.next.id }}) {s = " selected";} else {s = "";}
+    str += "<option value="+item.id + s +">"+item.name+"</option>"
+  } 
+  document.getElementById("{{ id_filter_attribute }}").innerHTML = str;
+}
+document.getElementById("{{ id_filter }}").addEventListener("change", getType)
+getType()
+</script> 
+
+{% endwith %}{% endwith %}
+{% endfor %}
+
+
