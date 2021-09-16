@@ -16,11 +16,9 @@ class Cart(object):
         if self.request.user.is_authenticated:
             ob = SesKey.objects.get(user=self.request.user)     #SesKey created with post_save signal.
             self.session = SessionStore(session_key=ob.ses_key)      
-            self.cart_session = True
         else:
             self.session = request.session
-            self.cart_session = False
-        cart = self.session.get(settings.CART_SESSION_ID, {})   #if our cart is blank (self.session['cart'] was blank) dont return None because it will raise error in self.cart.get(...) error: None type has not get method!!!!
+        cart = self.session._get_session(no_load=False).get(settings.CART_SESSION_ID, {})   #if our cart is blank (self.session['cart'] was blank) dont return None because it will raise error in self.cart.get(...) error: None type has not get method!!!!
         if not cart:
             cart = self.session[settings.CART_SESSION_ID] = {}  #eny changing self.session will affect request.sessio(mutable)
             self.session.modified = False 
