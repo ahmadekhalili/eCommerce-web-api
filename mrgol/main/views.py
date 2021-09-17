@@ -95,13 +95,6 @@ class SupporterDatasSerializer(views.APIView):     #important: you can use class
     def all_datas(self, request, **kwargs):
         datas = {}
         datas_selector = kwargs.get('datas_selector') if kwargs.get('datas_selector') else ''        
-        if 'products' in datas_selector:
-            serializers, cart, total_prices = [], Cart(request), Decimal(0)
-            for item in cart:
-                serializers.append({**CartProductSerializer(item['product'], context={'request': request}).data, 'price': str(item['price']), 'quantity': item['quantity'], 'price_changes': item['price_changes'], 'total_price': str(item['total_price'])})
-                total_prices += item['total_price']
-            datas = {**datas, **{'sabad': serializers, 'products_count': cart.get_products_count(), 'total_prices': str(total_prices)}}
-            
         if 'favorites' in datas_selector:
             pass
             #datas = {**datas, **{'favorites': Cart(request).get_favorite_products()}}
@@ -114,6 +107,10 @@ class SupporterDatasSerializer(views.APIView):     #important: you can use class
             datas = {**datas, **{'csrfmiddlewaretoken': get_token(request), 'csrftoken': get_token(request)}}
         return datas
 
+        if 'sessionid' in datas_selector:
+            datas = {**datas, 'sessionid': request.session.session_key}
+        return datas
+    
     def get(self, request, *args, **kwargs):        
         return Response(self.all_datas(request, **kwargs))
     

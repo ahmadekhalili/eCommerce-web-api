@@ -10,7 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 from .myserializers import UserSerializer, UserChangeSerializer
 from .mymethods import login_validate
 from .models import User
-from main.views import SupporterDatasSerializer
+from cart.views import CartMenuView
 from cart.cart import Cart
 from orders.models import ProfileOrder
 from orders.myserializers import ProfileOrderSerializer
@@ -24,7 +24,7 @@ class LogIn(views.APIView):
         input in header cookie "" or "favorite_products_ids=1,2,3"
         output {"csrfmiddlewaretoken": "...",  "csrftoken": "..."}
         '''
-        return Response({**SupporterDatasSerializer().get(request, datas_selector='csrf').data})              #dont need sending product or other, supose user request several time this page(refreshing page), why in every reqeust, send products and other, for optain product front can request to other link and optain it and save it and in refreshing page dont need send products again(cach it in user browser).
+        return Response({**CartMenuView().get(request, datas_selector='csrf').data})              #dont need sending product or other, supose user request several time this page(refreshing page), why in every reqeust, send products and other, for optain product front can request to other link and optain it and save it and in refreshing page dont need send products again(cach it in user browser).
 
     def post(self, request, *args, **kwargs):                            #an example for acceesing to LogIn.post:   http POST http://192.168.114.6:8000/users/login/ email=a@gmail.com password=a13431343 csrfmiddlewaretoken=jKnAefVUhdxR0fS3Jh0uozdtBc3FwtDOy2ghKVucLG479jQMYFTSxxIpjVjEEkds cookie:"csrftoken=uBvlhHOgqfaYmASnY3BtanycxOKz00cVJTo2NnnyUIHevEQ6druRjl38fx0y8RMz; favorite_products_ids=1,3,4"        
         
@@ -46,7 +46,7 @@ class LogIn(views.APIView):
         cart = Cart(request)
         if cart_1:
             [cart.add(key, cart_1[key]['quantity']) for key in cart_1]
-        supporter_datas = SupporterDatasSerializer().get(request, datas_selector='products_user').data                              
+        supporter_datas = CartMenuView().get(request, datas_selector='products_user').data                              
         return Response({'sessionid': request.session.session_key, **supporter_datas})  
 
        
@@ -66,7 +66,7 @@ class SignUp(views.APIView):
         #serializer = Test4Serializer(data={'field_1': 'aaaaaaa'})
         #serializer.is_valid(raise_exception=True)
         return Response({})       
-        #return Response({**SupporterDatasSerializer().get(request, datas_selector='csrf').data})
+        #return Response({**CartMenuView().get(request, datas_selector='csrf').data})
 
     def post(self, request, *args, **kwargs):
         '''
@@ -92,7 +92,7 @@ class UserChange(views.APIView):
         method get is done in front, front create a userchangeform and request url /supporter_datas/user/ to optain user datas for prepopulate fields.__________
         for decide which user fields should provide in userchangeform, you can see User table in /static/app1/mrgol_visualized.png/
         '''
-        return Response({**SupporterDatasSerializer().get(request, datas_selector='user_csrf').data})
+        return Response({**CartMenuView().get(request, datas_selector='user_csrf').data})
     
     def put(self, request, *args, **kwargs):                #connect like this:   http PUT http://192.168.114.21:3000/users/userchange/ cookie:"sessionid=87y70z4bnj6kj9698qbpas1a0w3ncfpx; csrftoken=SSp1m9eJ7mHuIncE88iEwF2VzspDFi7uOWlXamzNjd1vDZT9YjxrFgNjyDUIs7wQ" first_name="تچیز" csrfmiddlewaretoken=KZNz210BMpQLjRurCxxMtDnILetmQxMDG3JvQelFYgaMetbWsIMzCe86KpYrDmbZ        important: if you dont pot partial=True always raise error 
         '''
@@ -115,7 +115,7 @@ class UserChange(views.APIView):
         serializer = UserSerializer(request.user, data=request.data, partial=True)          
         if serializer.is_valid():
             serializer.save()
-            return Response(dict([(key, serializer.data.get(key)) for key in request.data if serializer.data.get(key)]))             #{**SupporterDatasSerializer().get(request, datas_selector='user').data}
+            return Response(dict([(key, serializer.data.get(key)) for key in request.data if serializer.data.get(key)]))             #{**CartMenuView().get(request, datas_selector='user').data}
         else:
             return Response(serializer.errors)
 

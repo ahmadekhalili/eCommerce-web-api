@@ -32,7 +32,7 @@ class Cart(object):
             if product_id not in self.cart:
                 self.cart[product_id] = {'quantity': quantity, 'price': str(item.price), 'old_price': str(item.price), 'shopfilteritem_id': shopfilteritem_id}        #if item.price was decimal raise json serializer error(because session only can save str)               
             else:
-                self.cart[product_id] = {'quantity': quantity, 'price': str(item.price), 'old_price': self.cart[product_id]['price'], 'shopfilteritem_id': shopfilteritem_id}     #important: we must not update old_price to current price "chon hata ba ezafe kardane kalaii ba qeimat taqir yafte moshkeli nist chon beharhal baraie namaiesh kalahaie sabad baiad be __ietr__ beravad barname var dar anja error taqir qeimat tolid va old_price be qeimat jadid update mishvad. ta dobare error namaiesh nadahad!"        
+                self.cart[product_id] = {'quantity': quantity, 'price': str(item.price), 'old_price': self.cart[product_id]['old_price'], 'shopfilteritem_id': shopfilteritem_id}     #important: we must not update old_price to current price "chon hata ba ezafe kardane kalaii ba qeimat taqir yafte moshkeli nist chon beharhal baraie namaiesh kalahaie sabad baiad be __ietr__ beravad barname var dar anja error taqir qeimat tolid va old_price be qeimat jadid update mishvad. ta dobare error namaiesh nadahad!"        
             self.save()
     
     def save(self):
@@ -57,7 +57,8 @@ class Cart(object):
                 item['price'] = item['shopfilteritem'].price if item['shopfilteritem'] else item['product'].price        #django_rest framework convert decimal to str so we convert to str not int!           
                 price_changes = item['price'] - Decimal(item['old_price']) 
                 item['price_changes'] = price_changes if price_changes>=0 else price_changes*(-1)
-                self.cart[id]['old_price'] = self.cart[id]['price'] = str(item['price'])               #if self.cart[id]['price'] dont update to current price, with changing product.price in admin panel price in cart dont change at all.  if dont update self.cart[id]['old_price'], if we change product.price, after that in every refreshing site we have change price warning message!!!(only in first should shown) 
+                self.cart[id]['price'] = str(item['price'])               #if self.cart[id]['price'] dont update to current price, with changing product.price in admin panel price in cart dont change at all.  
+                self.cart[id]['old_price'] = self.cart[id]['price']                    #self.cart[id]['old_price'] sohuld update to current price only if user visited cart page
                 item['total_price'] = item['price'] * item['quantity']
                 yield item
         self.save()
@@ -71,7 +72,7 @@ class Cart(object):
     def get_total_prices(self):
         return sum(item['total_price'] for item in self)
 
-    def clear(self):                                                    #cart.clear work after .add for example supose you have:  cart.clear()  next run cart.add(product_id=data['product_id'], ...)  cart.clear dont ward!!!
+    def clear(self):                                                    #important: cart.clear work after .add for example supose you have:  cart.clear()  next run cart.add(product_id=data['product_id'], ...)  cart.clear dont ward!!!
         self.session[settings.CART_SESSION_ID] = {}
         self.session['profile_order_id'] = ''
         self.session.save()

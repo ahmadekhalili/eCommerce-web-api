@@ -6,9 +6,9 @@ from rest_framework.permissions import IsAuthenticated
 
 from decimal import Decimal
 
-from main.views import SupporterDatasSerializer
 from main.models import Product, ShopFilterItem
 from main.model_methods import update_product_stock
+from cart.views import CartMenuView
 from cart.cart import Cart
 from payment.views import PaymentStart
 from .models import ProfileOrder, Order, OrderItem
@@ -24,12 +24,12 @@ class ListCreateProfileOrder(views.APIView):
         if user.is_authenticated:
             profileorders = user.profileorders.all()
             if profileorders:
-                return Response({**SupporterDatasSerializer().get(request, datas_selector='products_user_csrf').data, 'profileorders': ProfileOrderSerializer(profileorders, many=True).data})   #here front side must create "checkbox like" element  refrencing to ListCreateOrderItem, also front should create price changes message if item['old_price'] vs item['price'] is different.
+                return Response({**CartMenuView().get(request).data, 'profileorders': ProfileOrderSerializer(profileorders, many=True).data})   #here front side must create "checkbox like" element  refrencing to ListCreateOrderItem, also front should create price changes message if item['old_price'] vs item['price'] is different.
             else:
                 
-                return Response({**SupporterDatasSerializer().get(request, datas_selector='products_user_csrf').data, 'profileorders': None})     #here front side must create blank ProfileOrder Form with action refrenced to ListCreateProfileOrder.post. (you can create form and its html elements by django modelform and say to front html elements)
+                return Response({**CartMenuView().get(request, datas_selector='products_user_csrf').data, 'profileorders': None})     #here front side must create blank ProfileOrder Form with action refrenced to ListCreateProfileOrder.post. (you can create form and its html elements by django modelform and say to front html elements)
         else:                                     
-            return Response({**SupporterDatasSerializer().get(request, datas_selector='user_csrf').data})        #redirect to login page by front.
+            return Response({**CartMenuView().get(request, datas_selector='user_csrf').data})        #redirect to login page by front.
 
     def post(self, request, *args, **kwargs):                             #here ProfileOrder cerated from Form datas sended by user.
         if request.user.is_authenticated:
@@ -40,11 +40,11 @@ class ListCreateProfileOrder(views.APIView):
             serializer  = ProfileOrderSerializer(data=data)     #data must be like {"user": 1, "first_name": "javad", "last_name":"haghi", "phone":"09127761277", "email":"aa@gmail.com", "address":"tehran", "postal_code":"1111111111"} to save ProfileOrder object successfuly. id of user can be int or str dont different.
             if serializer.is_valid():
                 profileorder = serializer.save()                           
-                return Response({**SupporterDatasSerializer().get(request, datas_selector='products_user_csrf').data, 'profileorders': ProfileOrderSerializer(request.user.profileorders.all(), many=True).data})   #why dont use like: OrderSerializer(order).data?   answer: may user create second order, so we need alwayes use user.orders.all() .
+                return Response({**CartMenuView().get(request, datas_selector='products_user_csrf').data, 'profileorders': ProfileOrderSerializer(request.user.profileorders.all(), many=True).data})   #why dont use like: OrderSerializer(order).data?   answer: may user create second order, so we need alwayes use user.orders.all() .
             else:
                 return Response(serializer.errors)
         else:                                     
-            return Response({**SupporterDatasSerializer().get(request, datas_selector='user_csrf').data})
+            return Response({**CartMenuView().get(request, datas_selector='user_csrf').data})
 
 
 
@@ -100,7 +100,7 @@ class ListCreateOrderItem(views.APIView):
                 payment_start = PaymentStart().post(request, total_prices=total_prices)
                 return payment_start
             else:
-                return Response({'price_changed': price_changed, 'quantity_ended': quantity_ended, **SupporterDatasSerializer().get(request, datas_selector='products_user_csrf').data})       #redirect to cart page by front.
+                return Response({'price_changed': price_changed, 'quantity_ended': quantity_ended, **CartMenuView().get(request, datas_selector='products_user_csrf').data})       #redirect to cart page by front.
 
         else:
             return Response({})
