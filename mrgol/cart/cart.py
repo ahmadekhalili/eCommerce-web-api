@@ -13,6 +13,7 @@ class Cart(object):
 
     def __init__(self, request):
         self.request = request
+        self.cart_page = False
         if self.request.user.is_authenticated:
             ob = SesKey.objects.get(user=self.request.user)     #SesKey created with post_save signal.
             self.session = SessionStore(session_key=ob.ses_key)      
@@ -58,7 +59,7 @@ class Cart(object):
                 price_changes = item['price'] - Decimal(item['old_price']) 
                 item['price_changes'] = price_changes if price_changes>=0 else price_changes*(-1)
                 self.cart[id]['price'] = str(item['price'])               #if self.cart[id]['price'] dont update to current price, with changing product.price in admin panel price in cart dont change at all.  
-                self.cart[id]['old_price'] = self.cart[id]['price']                    #self.cart[id]['old_price'] sohuld update to current price only if user visited cart page
+                self.cart[id]['old_price'] = self.cart[id]['price'] if self.cart_page else self.cart[id]['old_price']                    #self.cart[id]['old_price'] sohuld update to current price only if user visited cart page
                 item['total_price'] = item['price'] * item['quantity']
                 yield item
         self.save()

@@ -15,6 +15,7 @@ from customed_files.rest_framework.rest_framework_customed_classes.custom_rest_a
 class CartPageView(views.APIView):       #user come from 'sabad'(in header) to here. 
     def get(self, request, *args, **kwargs):                                       #supose user refresh /cart/ page
         serializers, cart, total_prices = [], Cart(request), Decimal(0)
+        cart.cart_page = True
         for item in cart:
             serializers.append({**CartProductSerializer(item['product'], context={'request': request}).data, 'price': str(item['price']), 'quantity': item['quantity'], 'price_changes': item['price_changes'], 'total_price': str(item['total_price'])})
             total_prices += item['total_price']
