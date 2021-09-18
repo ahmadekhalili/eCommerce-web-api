@@ -1,6 +1,6 @@
 from django import forms
 
-from customed_files.django.django_customed_classes.custom_BoundField import CustomBoundField
+from .custom_BoundField import CustomBoundField
 from main.models import Root
 
 

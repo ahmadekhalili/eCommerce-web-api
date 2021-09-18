@@ -107,9 +107,9 @@ class father_root_widget(forms.Select):
     template_name = 'main/widgets/root_father_root.html'
 
     def get_context(self, name, value, attrs):
-        two_select_context = super().get_context(name, value, attrs)
+        two_select_context = super().get_context(name, value.father_root_id, attrs)
 
-        roots = list(Root.objects.all())
+        roots = list(Root.objects.exclude(id=value.id))
         roots_level_range = list(range(roots[0].level, roots[-1].level+1)) if roots else []        #we we have not eny root in db return [].
         roots_by_level = []
         for i in roots_level_range:
@@ -125,8 +125,8 @@ class father_root_widget(forms.Select):
         two_select_context['rootsbyleveljs_levels'] = rootsbyleveljs_levels
         two_select_context['selected_root_id'] = -1
 
-        if value:
-            two_select_context['selected_root_id'] = value
+        if value.father_root_id:
+            two_select_context['selected_root_id'] = value.father_root_id
 
         return two_select_context
 

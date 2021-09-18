@@ -59,7 +59,7 @@ class CommentForm(forms.ModelForm):
 
 class RootForm(forms.ModelForm):
     level = custom_form_fields.CustomIntegerField(widget=level_widget, label='سطح' if settings.ERROR_LANGUAGE=='pr' else 'level')
-    father_root = forms.ModelChoiceField(queryset=Root.objects.all(), widget=father_root_widget, required=False, label='ريشه پدر' if settings.ERROR_LANGUAGE=='pr' else 'menu')       #puting CustomModelChoiceField will cease: when creating new root with level 1, father root will feel auto after saving!
+    father_root = custom_form_fields.CustomModelChoiceField(queryset=Root.objects.all(), widget=father_root_widget, required=False, label='ريشه پدر' if settings.ERROR_LANGUAGE=='pr' else 'menu')       #puting CustomModelChoiceField will cease: when creating new root with level 1, father root will feel auto after saving!
         
     class Meta:
         model = Root
