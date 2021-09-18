@@ -1,4 +1,5 @@
 from django import forms
+from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
 from phonenumber_field.formfields import PhoneNumberField
@@ -14,7 +15,7 @@ class CustomUserCreationForm(UserCreationForm):
 
 
 class CustomUserChangeForm(UserChangeForm):
-    address = forms.CharField(max_length=255, required=False, widget=forms.TextInput(attrs={'style': 'direction: rtl; text-align: right;'}))
+    address = forms.CharField(max_length=255, required=False, widget=forms.TextInput(attrs={'style': 'direction: rtl; text-align: right;'}), label=_('address'))
     #phone = PhoneNumberField()
     class Meta:
         model = User

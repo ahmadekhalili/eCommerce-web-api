@@ -33,10 +33,10 @@ class ProductForm(ProductModelForm):
                  empty_permitted, instance, use_required_attribute,
                  renderer)
         
-    #root = custom_form_fields.CustomChoiceField(choices=(), widget=product_root_widget, required=True, label='منو' if settings.ERROR_LANGUAGE=='pr' else 'menu')
-    root = custom_form_fields.CustomModelChoiceField(queryset=Root.objects.all(), widget=product_root_widget, required=True, label='منو' if settings.ERROR_LANGUAGE=='pr' else 'menu')
-    image = forms.ImageField(widget=image_icon_widget, required=True, label='تصوير آيکن' if settings.ERROR_LANGUAGE=='pr' else 'image icon')
-    alt = forms.CharField(max_length=55, label='توضيحات عکس' if settings.ERROR_LANGUAGE=='pr' else 'alt')
+    #root = custom_form_fields.CustomChoiceField(choices=(), widget=product_root_widget, required=True, label=_('menu'))
+    root = custom_form_fields.CustomModelChoiceField(queryset=Root.objects.all(), widget=product_root_widget, required=True, label=_('menu'))
+    image = forms.ImageField(widget=image_icon_widget, required=True, label=_('image icon'))
+    alt = forms.CharField(max_length=55, label=_('alt'))
     
     class Meta:                                          #filter_attributes, visible, image_icon, alt fields dont listed in fields       , 'image', 'alt' 
         model = Product
@@ -46,9 +46,9 @@ class ProductForm(ProductModelForm):
 
 #statuses_en_pr = [[('1', 'confirmed'), ('2', 'not checked'), ('3', 'not confirmed')],  [('1', 'تاييد'), ('2', 'بررسي نشده'), ('3', 'رد')]]
 class CommentForm(forms.ModelForm):
-    confirm_status = custom_form_fields.CustomField(widget=confirm_status_widget, required=True, label='وضعيت تاييد')
-    #published_date = CustomField(disabled=True, widget=published_date_widget, label='تاريخ انتشار')
-    confermer = custom_form_fields.CustomField(widget=confermer_widget, label='تاييد/رد کننده')           #can user choicefield, problem in saving that.
+    confirm_status = custom_form_fields.CustomField(widget=confirm_status_widget, required=True, label=_('confirm status'))
+    #published_date = CustomField(disabled=True, widget=published_date_widget, label=_('published date'))
+    confermer = custom_form_fields.CustomField(widget=confermer_widget, label='confermer')           #can user choicefield, problem in saving that.
     
     class Meta:
         model = Comment
@@ -58,8 +58,8 @@ class CommentForm(forms.ModelForm):
 
 
 class RootForm(forms.ModelForm):
-    level = custom_form_fields.CustomIntegerField(widget=level_widget, label='سطح' if settings.ERROR_LANGUAGE=='pr' else 'level')
-    father_root = custom_form_fields.CustomModelChoiceField(queryset=Root.objects.all(), widget=father_root_widget, required=False, label='ريشه پدر' if settings.ERROR_LANGUAGE=='pr' else 'menu')       #puting CustomModelChoiceField will cease: when creating new root with level 1, father root will feel auto after saving!
+    level = custom_form_fields.CustomIntegerField(widget=level_widget, label=_('level'))
+    father_root = custom_form_fields.CustomModelChoiceField(queryset=Root.objects.all(), widget=father_root_widget, required=False, label=_('father root'))       #puting CustomModelChoiceField will cease: when creating new root with level 1, father root will feel auto after saving!
         
     class Meta:
         model = Root

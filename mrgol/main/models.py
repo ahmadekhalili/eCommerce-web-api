@@ -259,7 +259,11 @@ class ShopFilterItem(models.Model):
         self.available = False if self.stock < 1 else True
         super().save(*args, **kwargs)
 
-        
+    class Meta:
+        verbose_name = _('shopfilteritem')
+        verbose_name_plural = _('shopfilteritems')
+
+    
 class ShopFilterItem_Filter_Attributes(models.Model):
     shopfilteritem = models.ForeignKey(ShopFilterItem, on_delete=models.CASCADE,  blank=True, null=True, verbose_name=_('shopfilteritem'))
     filter_attribute = models.ForeignKey(Filter_Attribute, on_delete=models.CASCADE, blank=True, null=True, verbose_name=_('Filter Attribute'))            #without blank=True and blank=True in admin panel cant save product with blank filter_attribute

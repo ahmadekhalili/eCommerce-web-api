@@ -96,7 +96,7 @@ price                                 قيمت
 available                             موجود
 created                            ساخته شده
 updated                            تغيير يافته  
-filter attributes                آيتم هاي فيلتر 
+filter attributes                آيتم های فيلتر 
 rating                             رتبه بندی
 stock                             موجودی انبار
 brand                                برند
@@ -109,6 +109,7 @@ Product_Filter_Attribute        آيتم فيلتر و کالا
 Product_Filter_Attributes       آيتم هاي فيلتر و کالا
 
 shopfilteritem                    آیتم فیلتر فروش
+shopfilteritems                   آیتم های فیلتر فروش
 ShopFilterItem_Filter_Attribute  آیتم فیلتر و آیتم فیلتر فروش
 ShopFilterItem_Filter_Attributes آیتم های فیلتر و آیتم فیلتر فروش
 
@@ -125,7 +126,7 @@ SmallImages                      تصاویر کوچک شده
 
 confirm status                     وضعيت تاييد
 content                              محتوا
-confermer                         تاييد کننده
+confermer                         تایید/رد کننده
 post                                پست
 Comment                             نظر
 Comments                           نظرات
