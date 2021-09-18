@@ -19,6 +19,7 @@ from . import myforms
 from .models import *
 from .mymethods import make_next
 from .mycontexts import PROJECT_VERBOSE_NAME
+from .model_methods import set_levels_afterthis_all_childes_id
 
 TO_FIELD_VAR = '_to_field'
 csrf_protect_m = method_decorator(csrf_protect)
@@ -241,8 +242,20 @@ class RootAdmin(admin.ModelAdmin):
     form = myforms.RootForm
     list_display = ['str_ob', 'id']
     ordering = ['id']
+    
     def str_ob(self, obj):
         return obj.__str__()
+
+    def delete_queryset(self, request, queryset):
+        roots = list(queryset)
+        dict_ids = [root.id for root in roots]
+        queryset.delete()
+        
+        for id, root in zip(dict_ids, roots):
+            previous_father_queryset = Root.objects.filter(id=root.father_root_id).select_related('father_root__'*5+'father_root') if root.father_root_id else None
+            root.id, root.father_root, root.father_root_id = id, None, None
+            roots_before_join, roots_after_join = set_levels_afterthis_all_childes_id(previous_father_queryset, [root], Root._meta.get_field('level').validators[1].limit_value, delete=True) 
+            Root.objects.bulk_update(roots_before_join, ['levels_afterthis', 'all_childes_id']) if roots_before_join else None 
     
     '''
     @csrf_protect_m

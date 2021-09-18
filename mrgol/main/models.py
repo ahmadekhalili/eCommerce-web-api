@@ -57,7 +57,15 @@ class Root(models.Model):                                  #note: supose roor2 o
         Root.objects.bulk_update(roots_before_join, ['levels_afterthis', 'all_childes_id']) if roots_before_join else None     
         Root.objects.bulk_update(roots_after_join, ['levels_afterthis', 'all_childes_id']) if roots_after_join else None
 
-
+    def delete(self, using=None, keep_parents=False):
+        id = self.id
+        dell = super().delete(using, keep_parents)
+        previous_father_queryset = Root.objects.filter(id=self.father_root_id).select_related('father_root__'*5+'father_root') if self.father_root_id else None
+        self.id, self.father_root, self.father_root_id = id, None, None                                               #we need self.id in list_childes_id
+        roots_before_join, roots_after_join = set_levels_afterthis_all_childes_id(previous_father_queryset, [self], Root._meta.get_field('level').validators[1].limit_value, delete=True) 
+        Root.objects.bulk_update(roots_before_join, ['levels_afterthis', 'all_childes_id']) if roots_before_join else None 
+        return dell
+    
 
 
    

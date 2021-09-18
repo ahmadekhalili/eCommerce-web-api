@@ -44,33 +44,34 @@ def is_circle(root):
         return False
 
         
-def set_levels_afterthis_all_childes_id(previous_father_queryset, root_queryset, max_limit_value):            
+def set_levels_afterthis_all_childes_id(previous_father_queryset, root_queryset, max_limit_value, delete=False):            
     root = root_queryset[0]
     previous_root = previous_father_queryset[0] if previous_father_queryset else None              #if previous_father_queryset, previous_father_queryset[0] raise error.  dont change previous_root variabe name, "recursive effect".
     list_childes_id = [root.all_childes_id + f',{root.id}' if root.all_childes_id else f'{root.id}'][0].split(',')
     previous_roots, roots  = [], []
-    if previous_root and previous_root.id != root.father_root.id:
-        if is_circle(previous_root):
-            previous_roots = circle_roots(root=root, previous_root=previous_root)
-        else:
-            upper_root_levels_afterthis, changed_root = root.levels_afterthis, root            
-            while(True):
-                previous_root.all_childes_id = ','.join([s for s in previous_root.all_childes_id.split(',') if s and s not in list_childes_id])
-                if previous_root.levels_afterthis == upper_root_levels_afterthis + 1:
-                    childs = previous_root.root_childs.all().values('id', 'levels_afterthis')
-                    for child in childs:
-                        if child['id'] == changed_root.id:
-                            child['levels_afterthis'] = changed_root.levels_afterthis
-                    levels_afterthis_list = sorted([c['levels_afterthis'] for c in childs], reverse=True)
-                    biggest_levels_afterthis = levels_afterthis_list[0]+1 if levels_afterthis_list else 0
-                    upper_root_levels_afterthis = previous_root.levels_afterthis                                   #why we used previous_root_father_levels_afterthis and upper_root together? and dont remove previous_root_father_levels_afterthis? because in upper_root = previous_root  objects are mutable and upper_root.levels_afterthis will change after changing previous_root.levels_afterthis
-                    previous_root.levels_afterthis = biggest_levels_afterthis
-                    changed_root = previous_root
+    if previous_root:
+        if delete or previous_root.id != root.father_root.id:
+            if is_circle(previous_root):
+                previous_roots = circle_roots(root=root, previous_root=previous_root)
+            else:
+                upper_root_levels_afterthis, changed_root = root.levels_afterthis, root            
+                while(True):
+                    previous_root.all_childes_id = ','.join([s for s in previous_root.all_childes_id.split(',') if s and s not in list_childes_id])
+                    if previous_root.levels_afterthis == upper_root_levels_afterthis + 1:
+                        childs = previous_root.root_childs.all().values('id', 'levels_afterthis')
+                        for child in childs:
+                            if child['id'] == changed_root.id:
+                                child['levels_afterthis'] = changed_root.levels_afterthis
+                        levels_afterthis_list = sorted([c['levels_afterthis'] for c in childs], reverse=True)
+                        biggest_levels_afterthis = levels_afterthis_list[0]+1 if levels_afterthis_list else 0
+                        upper_root_levels_afterthis = previous_root.levels_afterthis                                   #why we used previous_root_father_levels_afterthis and upper_root together? and dont remove previous_root_father_levels_afterthis? because in upper_root = previous_root  objects are mutable and upper_root.levels_afterthis will change after changing previous_root.levels_afterthis
+                        previous_root.levels_afterthis = biggest_levels_afterthis
+                        changed_root = previous_root
 
-                previous_roots += [previous_root]
-                previous_root = previous_root.father_root                                                                                #note: select_related doesnt lost in recursive and work completly fine(doesnt run additional query)
-                if not previous_root:
-                    break    
+                    previous_roots += [previous_root]
+                    previous_root = previous_root.father_root                                                                                #note: select_related doesnt lost in recursive and work completly fine(doesnt run additional query)
+                    if not previous_root:
+                        break    
 
     
     first_root_id = root.id         
