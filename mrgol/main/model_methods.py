@@ -51,7 +51,7 @@ def set_levels_afterthis_all_childes_id(previous_father_queryset, root_queryset,
     previous_roots, roots  = [], []
     updated_to_1level_root = True if root.level==1 and previous_root.level>1 else False                  #this will true when supose you have a root with level=4, now convert it to level=1, now root.root.father_root is None so we should handle program with this instead "previous_root.id != root.father_root.id"
     if previous_root:
-        if delete or updated_to_1level_root or previous_root.id != root.father_root.id:                 #updated_to_1level_root must be before previous_root.id != root.father_root.id otherwise raise error
+        if delete or updated_to_1level_root or previous_root.id != root.father_root.id:                  #updated_to_1level_root must be before previous_root.id != root.father_root.id otherwise raise error
             if is_circle(previous_root):
                 previous_roots = circle_roots(root=root, previous_root=previous_root)
             else:
