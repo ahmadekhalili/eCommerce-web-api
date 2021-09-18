@@ -17,7 +17,7 @@ class CartPageView(views.APIView):       #user come from 'sabad'(in header) to h
         serializers, cart, total_prices = [], Cart(request), Decimal(0)
         cart.cart_page = True
         for item in cart:
-            serializers.append({**CartProductSerializer(item['product'], context={'request': request}).data, 'price': str(item['price']), 'quantity': item['quantity'], 'price_changes': item['price_changes'], 'total_price': str(item['total_price'])})
+            serializers.append({**CartProductSerializer(item['product'], context={'request': request}).data, 'price': str(item['price']), 'quantity': item['quantity'], 'price_changes': item['price_changes'], 'lach_quantity': item['lach_quantity'], 'total_price': str(item['total_price'])})
             total_prices += item['total_price']
         return Response({'sabad': serializers, 'products_count': cart.get_products_count(), 'total_prices': str(total_prices)})
 
@@ -28,7 +28,7 @@ class CartMenuView(views.APIView):       #'sabad'(in header)
     def get(self, request, *args, **kwargs):                                       #supose user refresh /cart/ page
         serializers, cart, total_prices = [], Cart(request), Decimal(0)
         for item in cart:
-            serializers.append({**CartProductSerializer(item['product'], context={'request': request}).data, 'price': str(item['price']), 'quantity': item['quantity'], 'price_changes': item['price_changes'], 'total_price': str(item['total_price'])})
+            serializers.append({**CartProductSerializer(item['product'], context={'request': request}).data, 'price': str(item['price']), 'quantity': item['quantity'], 'price_changes': item['price_changes'], 'lach_quantity': item['lach_quantity'],'total_price': str(item['total_price'])})
             total_prices += item['total_price']
         return Response({'sabad': serializers, 'products_count': cart.get_products_count(), 'total_prices': str(total_prices)})
 
