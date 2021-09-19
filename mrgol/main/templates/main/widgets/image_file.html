@@ -1,5 +1,5 @@
 {% with "img_"|add:widget.attrs.id as img_id %}      <!-- inputs ids created by ImageInline.formset and we just create imgs ids from inputs ids                 -->          
-{% if value %}<img id="{{ img_id }}" src="{{ value.url }}" width="50" height="50"> {% else %} <img id="{{ img_id }}" src=""> {% endif %}
+{% if value %}<a href="{{ value.url }}"><img id="{{ img_id }}" src="{{ value.url }}" width="50" height="50"></a> {% else %} <img id="{{ img_id }}" src=""> {% endif %}
 <input type="{{ widget.type }}" style="margin-left: 15px;" onchange="document.getElementById('{{ img_id }}').src = window.URL.createObjectURL(this.files[0])" name="{{ widget.name }}"{% if widget.value != None %} value="{{ widget.value|stringformat:'s' }}"{% endif %}{% include "django/forms/widgets/attrs.html" %}>
 
 

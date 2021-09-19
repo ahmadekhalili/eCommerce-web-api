@@ -1,4 +1,4 @@
-{% if value %}<img id="image_icon_image" src="{{ value.url }}" width="50" height="50"> {% else %} <img id="image_icon_image" src=""> {% endif %}
+{% if value %}<a href="{{ value.url }}"><img id="image_icon_image" src="{{ value.url }}" width="50" height="50"></a> {% else %} <img id="image_icon_image" src=""> {% endif %}
 <input type="{{ widget.type }}" id="image_icon_input" style="margin-left: 15px;" onchange="document.getElementById('image_icon_image').src = window.URL.createObjectURL(this.files[0])" name="{{ widget.name }}"{% if widget.value != None %} value="{{ widget.value|stringformat:'s' }}"{% endif %}{% include "django/forms/widgets/attrs.html" %}>
 
 
