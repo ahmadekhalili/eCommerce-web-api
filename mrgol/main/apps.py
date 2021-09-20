@@ -7,5 +7,5 @@ PROJECT_VERBOSE_NAME = _('MRGol')                    #add traslation of this in 
 
 class MainConfig(AppConfig):
     name = 'main'
-    verbose_name = _('main')
+    verbose_name = _('main app')
 

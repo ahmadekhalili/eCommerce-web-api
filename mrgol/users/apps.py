@@ -4,4 +4,4 @@ from django.utils.translation import gettext_lazy as _
 
 class UsersConfig(AppConfig):
     name = 'users'
-    verbose_name = _('USERS')             #dont user 'users' dublicate!!
+    verbose_name = _('users app')             #dont user 'users' dublicate!!

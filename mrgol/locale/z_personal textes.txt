@@ -7,7 +7,7 @@ in cart app
 
 --------
 apps.py
-cart                                       بخش سبد
+cart app                                   بخش سبد
 
 --------
 models.py
@@ -33,7 +33,7 @@ delete                                       حذف
 
 
 ------------------
-in main app
+in main app                                 بخش اصلی   
 
 --------
 admin.py
@@ -45,7 +45,7 @@ published date                    تاريخ انتشار
 --------
 apps.py
 MRGol                              ام آر گل
-main                              بخش اصلی
+main app                           بخش اصلی
 
 --------
 models.py
@@ -175,7 +175,7 @@ postal code                 کد پستي
 
 --------
 apps.py:
-orders                          بخش سفارشات
+orders app                          بخش سفارشات
 
 --------
 models.py:
@@ -196,12 +196,26 @@ canceled                  لغو شده
 paid type                 نوع پرداخت
 paid                        پرداخت
 cd peigiry                  کد پیگیری	
+shipping price             هزینه ارسال  
+delivery date               زمان تحویل
 order status              وضعیت سفارش
 order                        سفارش
 
 quantity                     تعداد
 order item                آيتم سفارش
 order items             آيتم های سفارشات
+
+default shipping price  هزینه ارسال پیش فرض
+delivery date delay    مدت زمان تا تحویل
+delivery date-shipping price      زمان تحویل-هزینه ارسال
+
+
+------------------
+in payment app
+
+--------
+apps.py:
+payment app                    بخش پرداخت
 
 
 
@@ -213,7 +227,7 @@ in users app
 
 --------
 apps.py:
-USERS                               بخش کاربران
+users app                               بخش کاربران
 
 --------
 models.py:

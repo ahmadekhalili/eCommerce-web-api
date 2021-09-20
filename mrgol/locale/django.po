@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-09-18 18:39+0000\n"
+"POT-Creation-Date: 2021-09-20 07:28+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,10 +19,10 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #: cart/apps.py:8
-msgid "cart"
+msgid "cart app"
 msgstr "بخش سبد"
 
-#: cart/models.py:10 orders/models.py:17 users/models.py:70
+#: cart/models.py:10 orders/models.py:19 users/models.py:70
 msgid "user"
 msgstr "کاربر"
 
@@ -35,8 +35,8 @@ msgid "ses keys"
 msgstr "کليد سشن ها"
 
 #: customed_files/django/django_customed_classes/custom_ModelAdmin.py:9
-#: main/models.py:159 main/models.py:198 orders/models.py:25
-#: orders/models.py:46 orders/models.py:68 users/models.py:61
+#: main/models.py:159 main/models.py:198 orders/models.py:27
+#: orders/models.py:52 orders/models.py:80 users/models.py:61
 msgid "delete"
 msgstr "حذف"
 
@@ -61,7 +61,7 @@ msgid "MRGol"
 msgstr "ام آر گل"
 
 #: main/apps.py:10
-msgid "main"
+msgid "main app"
 msgstr "بخش اصلی"
 
 #: main/models.py:25 main/models.py:73 main/models.py:102 main/models.py:190
@@ -208,8 +208,8 @@ msgstr "پست ها"
 msgid "detailed description"
 msgstr "توضيحات مشروح"
 
-#: main/models.py:196 main/models.py:253 orders/models.py:43
-#: orders/models.py:66
+#: main/models.py:196 main/models.py:253 orders/models.py:47
+#: orders/models.py:78
 msgid "price"
 msgstr "قيمت"
 
@@ -217,7 +217,7 @@ msgstr "قيمت"
 msgid "available"
 msgstr "موجود"
 
-#: main/models.py:199 orders/models.py:45
+#: main/models.py:199 orders/models.py:51
 msgid "created"
 msgstr "ساخته شده"
 
@@ -254,7 +254,7 @@ msgid "Products"
 msgstr "کالا ها"
 
 #: main/models.py:235 main/models.py:250 main/models.py:303 main/models.py:319
-#: main/models.py:354 orders/models.py:69
+#: main/models.py:354 orders/models.py:81
 msgid "product"
 msgstr "کالا"
 
@@ -342,7 +342,7 @@ msgstr "نظر"
 msgid "Comments"
 msgstr "نظرات"
 
-#: main/models.py:369 main/models.py:372 orders/admin.py:53 orders/models.py:20
+#: main/models.py:369 main/models.py:372 orders/admin.py:53 orders/models.py:22
 #: users/models.py:56
 msgid "phone number"
 msgstr "شماره تلفن"
@@ -467,7 +467,7 @@ msgstr "با تشکر از شما برای گذراندن وقت با ارزشت
 msgid "Log in again"
 msgstr ""
 
-#: orders/admin.py:32 orders/admin.py:61 orders/models.py:22 users/forms.py:18
+#: orders/admin.py:32 orders/admin.py:61 orders/models.py:24 users/forms.py:18
 #: users/models.py:60
 msgid "address"
 msgstr "آدرس"
@@ -480,97 +480,127 @@ msgstr "نام و نام خانوادگی"
 msgid "ordered with name"
 msgstr "سفارش به نام"
 
-#: orders/admin.py:57 orders/models.py:21 users/models.py:58
+#: orders/admin.py:57 orders/models.py:23 users/models.py:58
 msgid "email address"
 msgstr "آدرس ایمیل"
 
-#: orders/admin.py:65 orders/models.py:23
+#: orders/admin.py:65 orders/models.py:25
 msgid "postal code"
 msgstr "کد پستي"
 
-#: orders/apps.py:8 orders/models.py:53
-msgid "orders"
+#: orders/apps.py:8
+#, fuzzy
+#| msgid "orders"
+msgid "orders app"
 msgstr "بخش سفارشات"
 
-#: orders/models.py:14
+#: orders/models.py:16
 msgid "10 digit postal code"
 msgstr "کد پستي ده رقمي است."
 
-#: orders/models.py:18
+#: orders/models.py:20
 msgid "first name"
 msgstr "نام"
 
-#: orders/models.py:19
+#: orders/models.py:21
 msgid "last name"
 msgstr "نام خانوادگی"
 
-#: orders/models.py:24
+#: orders/models.py:26
 msgid "main profileorder"
 msgstr "آدرس اصلی"
 
-#: orders/models.py:29 orders/models.py:34 orders/models.py:47
+#: orders/models.py:31 orders/models.py:36 orders/models.py:53
 msgid "profile order"
 msgstr "آدرس"
 
-#: orders/models.py:30
+#: orders/models.py:32
 msgid "profile orders"
 msgstr "آدرس ها"
 
-#: orders/models.py:37
+#: orders/models.py:41
 msgid "online payment"
 msgstr "پرداخت آنلاین"
 
-#: orders/models.py:37
+#: orders/models.py:41
 msgid "cash on delivery"
 msgstr "پرداخت در محل"
 
-#: orders/models.py:38
+#: orders/models.py:42
 msgid "in processing"
 msgstr "در حال پردازش"
 
-#: orders/models.py:38
+#: orders/models.py:42
 msgid "delivered"
 msgstr "تحويل شده"
 
-#: orders/models.py:38
+#: orders/models.py:42
 msgid "returned"
 msgstr "مرجوعی"
 
-#: orders/models.py:38
+#: orders/models.py:42
 msgid "canceled"
 msgstr "لغو شده"
 
-#: orders/models.py:40
+#: orders/models.py:44
 msgid "paid type"
 msgstr "نوع پرداخت"
 
-#: orders/models.py:41
+#: orders/models.py:45
 msgid "paid"
 msgstr "پرداخت"
 
-#: orders/models.py:42
+#: orders/models.py:46
 msgid "cd peigiry"
 msgstr "کد پیگیری"
 
-#: orders/models.py:44
+#: orders/models.py:48
+msgid "shipping price"
+msgstr "هزینه ارسال"
+
+#: orders/models.py:49
+msgid "delivery date"
+msgstr "زمان تحویل"
+
+#: orders/models.py:50
 msgid "order status"
 msgstr "وضعیت سفارش"
 
-#: orders/models.py:52 orders/models.py:56 orders/models.py:65
+#: orders/models.py:58 orders/models.py:62 orders/models.py:77
 msgid "order"
 msgstr "سفارش"
 
-#: orders/models.py:67
+#: orders/models.py:59
+msgid "orders"
+msgstr "سفارشات"
+
+#: orders/models.py:79
 msgid "quantity"
 msgstr "تعداد"
 
-#: orders/models.py:71 orders/models.py:75
+#: orders/models.py:83 orders/models.py:87
 msgid "order item"
 msgstr "آيتم سفارش"
 
-#: orders/models.py:72
+#: orders/models.py:84
 msgid "order items"
 msgstr "آيتم های سفارشات"
+
+#: orders/models.py:102
+msgid "default shipping price"
+msgstr "هزینه ارسال پیش فرض"
+
+#: orders/models.py:103
+msgid "delivery date delay"
+msgstr "مدت زمان تا تحویل"
+
+#: orders/models.py:106 orders/models.py:107 orders/models.py:110
+msgid "delivery date-shipping price"
+msgstr "زمان تحویل-هزینه ارسال"
+
+#: payment/apps.py:8
+msgid "payment app"
+msgstr "بخش پرداخت"
 
 #: users/admin.py:19
 msgid "Personal info"
@@ -585,7 +615,7 @@ msgid "Important dates"
 msgstr ""
 
 #: users/apps.py:7
-msgid "USERS"
+msgid "users app"
 msgstr "بخش کاربران"
 
 #: users/models.py:18
@@ -615,6 +645,8 @@ msgstr "شماره تلفن و پسورد باید وارد شوند."
 #: users/myserializers.py:102
 msgid "admin"
 msgstr "ادمین"
+
+
 
 
 
