@@ -58,7 +58,7 @@ class Cart(object):
                 item['price'] = item['shopfilteritem'].price if item['shopfilteritem'] else item['product'].price        #django_rest framework convert decimal to str so we convert to str not int!           
                 price_changes = item['price'] - Decimal(item['old_price']) 
                 item['price_changes'] = price_changes if price_changes>=0 else price_changes*(-1)
-                item['lach_quantity'] = item['quantity']-item['shopfilteritem'].stock  if item['shopfilteritem'] and item['quantity']>item['shopfilteritem'].stock else item['quantity']-item['product'].stock if item['quantity']>item['product'].stock else 0
+                item['lach_quantity'] = item['quantity']-item['shopfilteritem'].stock  if item['shopfilteritem'] and item['quantity']>item['shopfilteritem'].stock else item['quantity']-item['product'].stock if not item['shopfilteritem'] and item['quantity']>item['product'].stock else 0
                 self.cart[id]['quantity'] = item['quantity']-item['lach_quantity'] if self.cart_page else self.cart[id]['quantity']
                 self.cart[id]['price'] = str(item['price'])               #if self.cart[id]['price'] dont update to current price, with changing product.price in admin panel price in cart dont change at all.  
                 self.cart[id]['old_price'] = self.cart[id]['price'] if self.cart_page else self.cart[id]['old_price']                    #self.cart[id]['old_price'] sohuld update to current price only if user visited cart page
