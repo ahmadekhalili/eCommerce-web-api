@@ -5,13 +5,17 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
 from decimal import Decimal
+from datetime import datetime
 
+from customed_files.date_convertor import MiladiToShamsi
+from customed_files.states_towns import list_states_towns
 from main.models import Product, ShopFilterItem
 from main.model_methods import update_product_stock
+from main.mymethods import PostDispatchPrice
 from cart.views import CartMenuView
 from cart.cart import Cart
 from payment.views import PaymentStart
-from .models import ProfileOrder, Order, OrderItem
+from .models import ProfileOrder, Order, OrderItem, Shipping, Dispatch
 from .forms import OrderCreateForm
 from .myserializers import ProfileOrderSerializer, OrderSerializer, OrderItemSerializer
 
@@ -24,12 +28,17 @@ class ListCreateProfileOrder(views.APIView):
         if user.is_authenticated:
             profileorders = user.profileorders.all()
             if profileorders:
-                return Response({**CartMenuView().get(request).data, 'profileorders': ProfileOrderSerializer(profileorders, many=True).data})   #here front side must create "checkbox like" element  refrencing to ListCreateOrderItem, also front should create price changes message if item['old_price'] vs item['price'] is different.
+                if request.data.get('profileorder_id'):
+                    profileorder = profileorders.filter(id=request.data.get('profileorder_id'))[0]
+                    shipping = Shipping.objects.first()
+                    post_price = PostDispatchPrice.get_price(cart_menu['total_weight'],  cart_menu['dimensions'], shipping.state, shipping.town, profileorder.state, profileorder.town)
+                cart_menu = CartMenuView().get(request).data
+                return Response({**cart_menu, 'profileorders': ProfileOrderSerializer(profileorders, many=True).data})   #here front side must create "checkbox like" element  refrencing to ListCreateOrderItem, also front should create price changes message if item['old_price'] vs item['price'] is different.
             else:
                 
-                return Response({**CartMenuView().get(request, datas_selector='products_user_csrf').data, 'profileorders': None})     #here front side must create blank ProfileOrder Form with action refrenced to ListCreateProfileOrder.post. (you can create form and its html elements by django modelform and say to front html elements)
+                return Response({**CartMenuView().get(request).data, 'profileorders': None})     #here front side must create blank ProfileOrder Form with action refrenced to ListCreateProfileOrder.post. (you can create form and its html elements by django modelform and say to front html elements)
         else:                                     
-            return Response({**CartMenuView().get(request, datas_selector='user_csrf').data})        #redirect to login page by front.
+            return Response({**CartMenuView().get(request).data})        #redirect to login page by front.
 
     def post(self, request, *args, **kwargs):                             #here ProfileOrder cerated from Form datas sended by user.
         if request.user.is_authenticated:
@@ -69,6 +78,10 @@ class ListCreateOrderItem(views.APIView):
                 orderitems.append(OrderItem(product=item['product'], price=item['total_price'], quantity=item['quantity']))
         
             if not price_changed and not quantity_ended:
+                now = datetime.now()
+                delivery_days = delivery_shipping.objects.first().delivery_date_delay.split('-')
+                y, m, d = MiladiToShamsi(now.year, now.month, now.day+delivery_days[0]).result()
+                y2, m2, d2 = MiladiToShamsi(now.year, now.month, now.day+delivery_days[1]).result() if delivery_days[1] else (None,None,None)
                 order = Order.objects.create(profile_order_id=request.data['profile_order_id'], paid_type='cod', price=total_prices, order_status='0')
                 for orderitem in orderitems:
                     orderitem.order = order 

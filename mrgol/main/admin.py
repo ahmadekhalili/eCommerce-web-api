@@ -73,7 +73,11 @@ class ProductAdmin(CustModelAdmin):
         (None, {
             'fields': ('name', 'slug', 'brief_description', 'detailed_description', 'price', 'available', 'image', 'alt', 'root', 'rating', 'stock', 'brand', 'weight')
         }),
-        ('فيلد هاي سئو', {
+        (_('size'), {
+            'classes': ('collapse',),
+            'fields': ('length', 'width', 'height'),
+        }),
+        (_('seo fields'), {
             'classes': ('collapse',),
             'fields': ('meta_title', 'meta_description'),
         }),

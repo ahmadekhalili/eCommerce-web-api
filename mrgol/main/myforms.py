@@ -14,13 +14,15 @@ from .models import Test1, Test2, Product, Root, Image, Comment, Filter_Attribut
 
 
 
-           
+from itertools import chain           
 class ProductForm(ProductModelForm):
     def __init__(self, data=None, files=None, auto_id='id_%s', prefix=None,
                  initial=None, error_class=ErrorList, label_suffix=None,
                  empty_permitted=False, instance=None, use_required_attribute=None,
                  renderer=None):
         initial = initial if initial else {}
+        length, width, height = [int(i) for i in instance.size.split(',')] if instance else (None,None,None)
+        initial = {**initial, 'length': length, 'width': width, 'height': height} if length else initial
         try:
             image_icon = instance.image_icon
             image, alt = image_icon.image, image_icon.alt
@@ -37,13 +39,20 @@ class ProductForm(ProductModelForm):
     root = custom_form_fields.CustomModelChoiceField(queryset=Root.objects.all(), widget=product_root_widget, required=True, label=_('menu'))
     image = forms.ImageField(widget=image_icon_widget, required=True, label=_('image icon'))
     alt = forms.CharField(max_length=55, label=_('alt'))
+    length = forms.IntegerField(label=_('length'))
+    width = forms.IntegerField(label=_('width'))
+    height = forms.IntegerField(label=_('height'))
     
-    class Meta:                                          #filter_attributes, visible, image_icon, alt fields dont listed in fields       , 'image', 'alt' 
+    class Meta:                                          #take fields from admin.fiedset but this is needed to for validation.
         model = Product
-        fields = ['name', 'slug', 'meta_title', 'meta_description', 'brief_description', 'price', 'available', 'visible', 'filter_attributes', 'root', 'rating', 'image', 'alt']
-
-
-
+        fields = ['name', 'slug', 'meta_title', 'meta_description', 'brief_description', 'price', 'available', 'visible', 'filter_attributes', 'root', 'rating', 'image', 'alt', 'length', 'width', 'height']
+                
+    def save(self, commit=True):
+        length, width, height = self.cleaned_data.get('length'), self.cleaned_data.get('width'), self.cleaned_data.get('height')
+        self.cleaned_data['size'] = str(length) + ',' + str(width) + ',' + str(height) if length and width and height else ''
+        self.instance.size = self.cleaned_data['size']
+        return super().save(commit)
+        
 #statuses_en_pr = [[('1', 'confirmed'), ('2', 'not checked'), ('3', 'not confirmed')],  [('1', 'تاييد'), ('2', 'بررسي نشده'), ('3', 'رد')]]
 class CommentForm(forms.ModelForm):
     confirm_status = custom_form_fields.CustomField(widget=confirm_status_widget, required=True, label=_('confirm status'))

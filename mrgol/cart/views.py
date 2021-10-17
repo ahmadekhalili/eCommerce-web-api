@@ -26,11 +26,14 @@ class CartPageView(views.APIView):       #user come from 'sabad'(in header) to h
     
 class CartMenuView(views.APIView):       #'sabad'(in header)
     def get(self, request, *args, **kwargs):                                       #supose user refresh /cart/ page
-        serializers, cart, total_prices = [], Cart(request), Decimal(0)
-        for item in cart:
+        serializers, cart, total_prices, total_weight, dimensions, dimensions_fail  = [], Cart(request), Decimal(0), 0, [], False          #we sended dimensions not volume for using in future (in formols for processing carton size).
+        for item in cart:           
             serializers.append({**CartProductSerializer(item['product'], context={'request': request}).data, 'price': str(item['price']), 'quantity': item['quantity'], 'price_changes': item['price_changes'], 'lach_quantity': item['lach_quantity'],'total_price': str(item['total_price'])})
             total_prices += item['total_price']
-        return Response({'sabad': serializers, 'products_count': cart.get_products_count(), 'total_prices': str(total_prices)})
+            total_weight += item['product'].weight * item['quantity']
+            dimensions, dimensions_fail = [*dimensions, item['product'].size], True if not item['product'].size else dimensions_fail
+        dimensions = dimensions if not dimensions_fail else None             #if one product has not size, dont need dimensions at all. (we compute carton size as default size) 
+        return Response({'sabad': serializers, 'products_count': cart.get_products_count(), 'total_prices': str(total_prices), 'total_weight': total_weight, 'dimensions': dimensions})
 
 
 

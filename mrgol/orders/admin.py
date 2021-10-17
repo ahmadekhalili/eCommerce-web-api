@@ -3,8 +3,12 @@ from django.contrib import messages
 from django.forms.models import BaseInlineFormSet
 from django.utils.translation import gettext_lazy as _
 
+import json
+
+from customed_files.states_towns import list_states_towns
 from users.mymethods import user_name_shown
-from .models import ProfileOrder, Order, OrderItem
+from .models import ProfileOrder, Order, OrderItem, Shipping, Dispatch
+from .forms import ProfileOrderCreateForm, ShippingForm, DispatchForm
 
 
 class OrderItemFormSet(BaseInlineFormSet):
@@ -12,6 +16,7 @@ class OrderItemFormSet(BaseInlineFormSet):
         if commit:
             obj.visible = False
             obj.save()
+
             
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
@@ -22,7 +27,11 @@ class OrderItemInline(admin.TabularInline):
     def delete_model(self, request, obj):                 #this dont work in inlines we must use delete_existing
         obj.visible = False
         obj.save()
-    '''        
+    '''
+
+
+
+    
 class OrderAdmin(admin.ModelAdmin):
     list_display = ['id', 'created', 'paid_type', 'paid', 'cd_peigiry']
     list_filter = ['profile_order', 'paid', 'created']
@@ -80,7 +89,7 @@ admin.site.register(Order, OrderAdmin)
 
 class ProfileOrderAdmin(admin.ModelAdmin):
     list_display = ['id', 'user', 'first_name', 'last_name', 'phone', 'email', 'address', 'postal_code']
-
+    form = ProfileOrderCreateForm
     def delete_model(self, request, obj):
         obj.visible = False
         obj.save()
@@ -91,4 +100,41 @@ admin.site.register(ProfileOrder, ProfileOrderAdmin)
 class OrderItemAdmin(admin.ModelAdmin):
     list_display = ['id', 'order', 'product', 'quantity']
 
-admin.site.register(OrderItem, OrderItemAdmin)
+#admin.site.register(OrderItem, OrderItemAdmin)
+
+ 
+
+
+class DispatchInline(admin.TabularInline):
+    model = Dispatch
+    form = DispatchForm
+    template = 'admin/edit_inline/dispatch_tabular.html'
+
+    
+class ShippingAdmin(admin.ModelAdmin):
+    form = ShippingForm
+    inlines = [DispatchInline]
+    fieldsets = (
+        (_('post Shipping'), {
+            'classes': ('collapse',),
+            'fields': ('fee',),
+        }),
+        (_('store location'), {
+            'classes': ('collapse',),
+            'fields': ('state', 'town', 'address'),
+        }),
+    )
+
+    def _changeform_view(self, request, object_id, form_url, extra_context):                                   #templates of inlines (like dispatch_tabular) render here so context of inlines(variables we want use in inlines templates) should initiate here.
+        town_select_ids = [[f'id_dispatch_set-{i}-state', f'id_dispatch_set-{i}-town'] for i in range(51)]                          #dict([(f'{i}', [f'id_dispatch_set-{i}-state', f'id_dispatch_set-{i}-town']) for i in range(51)])      #this is like: {'0': ['id_dispatch_set-0-state', 'id_dispatch_set-0-town']}    note: structure like d={'id_dispatch_set-0-state', 'id_dispatch_set-0-town'} is worse because in template using like d.id_dispatch_set-0-state  raise error because '-' dont accept in django template and changing auto_id that django generate for us, is worse too because it is hard and even when changed, in post and other methods django use its  own id and it is problem!!!
+        towns_states = [[L[0], json.dumps(L[1])] for L in list_states_towns]                    #[[('1', 'tehran'), json.dumps((('3', 'shahriar'), ('4', 'karaj')))], [('2', 'ardabil'), json.dumps((('5', 'khalkhal'), ('6', 'hir')))]]
+        extra_context = {'town_select_ids': town_select_ids, 'towns_states': towns_states}
+        return super()._changeform_view(request, object_id, form_url, extra_context)
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+    
+    def has_add_permission(self, request, obj=None):
+        return False
+
+admin.site.register(Shipping, ShippingAdmin)

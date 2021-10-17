@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-09-20 07:28+0000\n"
+"POT-Creation-Date: 2021-10-04 03:29+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -554,7 +554,7 @@ msgstr "پرداخت"
 msgid "cd peigiry"
 msgstr "کد پیگیری"
 
-#: orders/models.py:48
+#: orders/models.py:48 orders/models.py:102
 msgid "shipping price"
 msgstr "هزینه ارسال"
 
@@ -586,17 +586,17 @@ msgstr "آيتم سفارش"
 msgid "order items"
 msgstr "آيتم های سفارشات"
 
-#: orders/models.py:102
-msgid "default shipping price"
-msgstr "هزینه ارسال پیش فرض"
-
 #: orders/models.py:103
 msgid "delivery date delay"
 msgstr "مدت زمان تا تحویل"
 
-#: orders/models.py:106 orders/models.py:107 orders/models.py:110
-msgid "delivery date-shipping price"
-msgstr "زمان تحویل-هزینه ارسال"
+#: orders/models.py:104
+msgid "town"
+msgstr "شهر"
+
+#: orders/models.py:107 orders/models.py:108 orders/models.py:111
+msgid "shipping"
+msgstr "هزینه ارسال"
 
 #: payment/apps.py:8
 msgid "payment app"
@@ -645,6 +645,12 @@ msgstr "شماره تلفن و پسورد باید وارد شوند."
 #: users/myserializers.py:102
 msgid "admin"
 msgstr "ادمین"
+
+
+
+
+
+
 
 
 

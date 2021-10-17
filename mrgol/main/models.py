@@ -205,6 +205,7 @@ class Product(models.Model):                                     #.order_by('-av
     stock = models.PositiveIntegerField(_('stock'), default=0)
     brand = models.CharField(_('brand'), max_length=25, null=True, blank=True)
     weight = models.PositiveIntegerField(_('weight'), null=True, blank=True)
+    size = models.CharField(_('size'), max_length=25, null=True, blank=True)
     #image_set                                                    backward relation field
     #comment_set
     #product_filter_attributes_set

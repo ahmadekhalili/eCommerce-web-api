@@ -1,0 +1,33 @@
+<select name="town" required="" id="id_town">	
+	<option value="">---------</option>
+</select>
+
+
+<script>
+function set_shipping_town(){
+	var x = document.getElementById("id_state").value;
+		
+	if (x === "{{ towns_states.0.0.0 }}") {
+		items = {{ towns_states.0.1|safe }};
+	}	
+  
+{% for state, town in towns_states %} 
+  else if (x === "{{ state.0 }}") {
+    items = {{ town|safe }}    }
+{% endfor %}
+
+  else { 
+    items = [];
+  }
+  
+  var str = '<option value="">---------</option>';
+  var s;
+  for (var item of items) {
+    if (item[0] === "{{ value }}") {s = " selected";} else {s = "";}
+    str += "<option value="+item[0] + s +">"+item[1]+"</option>"}
+	
+    document.getElementById("id_town").innerHTML = str;	
+}             
+document.getElementById("id_state").addEventListener("change", set_shipping_town);	          
+set_shipping_town();
+</script> 	

@@ -29,6 +29,8 @@ from cart.models import SesKey
 from cart.myserializers import CartProductSerializer
 from cart.cart import Cart
 from orders.models import ProfileOrder
+from customed_files.states_towns import list_states_towns
+
 #Post_Category        Product_Category
 
 
@@ -389,5 +391,18 @@ class ProductCommentCreate(generics.RetrieveAPIView):
         else:
             return Response({'user': request.user})
 
+
+
+
+class States(views.APIView):
+    def get(self, request, *args, **kwargs):
+        return Response([L[0] for L in list_states_towns])
+
+           
+class TownsByState(views.APIView):
+    def post(self, request, *args, **kwargs):
+        for L in list_states_towns:
+            if L[0][0] == request.data.get('state_id'):
+                return Response(L[1])
 
 

@@ -24,5 +24,7 @@ urlpatterns = [
     path('products/detail/<pk>/<slug>/', views.ProductDetail.as_view(), name='product_detail'),
     path('supporter_datas/<datas_selector>/', views.SupporterDatasSerializer.as_view(), name='support_datas_serialized'),
     path('comments/products/create/', views.ProductCommentCreate.as_view(), name='comments_products_create'),
+    path('states/', views.States.as_view(), name='states'),
+    path('townsbystate/', views.TownsByState.as_view(), name='towns-by-state'),
 ]
 
