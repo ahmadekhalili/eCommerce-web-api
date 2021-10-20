@@ -28,14 +28,14 @@ class ListCreateProfileOrder(views.APIView):
         if user.is_authenticated:
             profileorders = user.profileorders.all()
             if profileorders:
-                if request.data.get('profileorder_id'):
-                    profileorder = profileorders.filter(id=request.data.get('profileorder_id'))[0]
-                    shipping = Shipping.objects.first()
-                    post_price = PostDispatchPrice.get_price(cart_menu['total_weight'],  cart_menu['dimensions'], shipping.state, shipping.town, profileorder.state, profileorder.town)
                 cart_menu = CartMenuView().get(request).data
+                if request.GET.get('profileorder_id'):
+                    profileorder = profileorders.filter(id=request.GET.get('profileorder_id'))[0]
+                    shipping = Shipping.objects.first()
+                    post_price = PostDispatchPrice(cart_menu['total_weight'],  cart_menu['dimensions']).get_price(shipping.state, shipping.town, profileorder.state, profileorder.town)                
+                    return Response({**cart_menu, 'profileorders': ProfileOrderSerializer(profileorders, many=True).data, 'post_price': post_price})
                 return Response({**cart_menu, 'profileorders': ProfileOrderSerializer(profileorders, many=True).data})   #here front side must create "checkbox like" element  refrencing to ListCreateOrderItem, also front should create price changes message if item['old_price'] vs item['price'] is different.
-            else:
-                
+            else:            
                 return Response({**CartMenuView().get(request).data, 'profileorders': None})     #here front side must create blank ProfileOrder Form with action refrenced to ListCreateProfileOrder.post. (you can create form and its html elements by django modelform and say to front html elements)
         else:                                     
             return Response({**CartMenuView().get(request).data})        #redirect to login page by front.
@@ -54,6 +54,7 @@ class ListCreateProfileOrder(views.APIView):
                 return Response(serializer.errors)
         else:                                     
             return Response({**CartMenuView().get(request, datas_selector='user_csrf').data})
+
 
 
 
