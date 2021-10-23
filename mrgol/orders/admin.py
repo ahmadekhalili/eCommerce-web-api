@@ -100,7 +100,7 @@ admin.site.register(ProfileOrder, ProfileOrderAdmin)
 class OrderItemAdmin(admin.ModelAdmin):
     list_display = ['id', 'order', 'product', 'quantity']
 
-#admin.site.register(OrderItem, OrderItemAdmin)
+admin.site.register(OrderItem, OrderItemAdmin)
 
  
 

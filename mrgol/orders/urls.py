@@ -8,4 +8,6 @@ app_name = 'orders'
 urlpatterns = [
     path('', views.ListCreateProfileOrder.as_view(), name='profileorder-list'),
     path('orderitems/', views.ListCreateOrderItem.as_view(), name='orderitem-list'),
+    path('<pk>/', views.ProfileOrderDetail.as_view(), name='profileorder-detail'),
+    
 ]

@@ -102,7 +102,7 @@ def set_levels_afterthis_all_childes_id(previous_father_queryset, root_queryset,
 
 
 
-def update_product_stock(self, product, saving):         #self is ShopFilterItem obj. this method update stock of product when its ShopFilterItem changes for example supose <shopfilteritem object(2)>.stock -= 2   now <shopfilteritem object(2)>.product.stock should decrease 2.
+def update_product_stock(self, product, saving):         #self is ShopFilterItem obj. this method update stock of product when its ShopFilterItem changes for example supose <shopfilteritem object(2)>.stock -= 2   now <shopfilteritem object(2)>.product.stock should decrease 2 and this method does that for us.
     diff = self.stock - self.previous_stock
     if not self.id:                    #creating new ShopFilterItem
         product.stock += self.stock
@@ -113,7 +113,7 @@ def update_product_stock(self, product, saving):         #self is ShopFilterItem
         if saving:
             product.save()
     elif diff < 0:
-        product.stock += diff
+        product.stock -= diff
         if saving:
             product.save()
     else:

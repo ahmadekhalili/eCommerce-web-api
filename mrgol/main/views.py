@@ -400,9 +400,9 @@ class States(views.APIView):
 
            
 class TownsByState(views.APIView):
-    def post(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         for L in list_states_towns:
-            if L[0][0] == request.data.get('state_id'):
+            if L[0][0] == kwargs.get('id'):
                 return Response(L[1])
 
 

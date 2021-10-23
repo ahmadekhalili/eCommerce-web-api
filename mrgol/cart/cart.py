@@ -77,7 +77,10 @@ class Cart(object):
 
     def clear(self):                                                    #important: cart.clear work after .add for example supose you have:  cart.clear()  next run cart.add(product_id=data['product_id'], ...)  cart.clear dont ward!!!
         self.session[settings.CART_SESSION_ID] = {}
+        self.session['shipping_price'] = ''
         self.session['profile_order_id'] = ''
+        cart.session['order_id'] = ''
+        cart.session['orderitem_ids'] = None
         self.session.save()
         
 

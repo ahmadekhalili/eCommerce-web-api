@@ -1,5 +1,6 @@
 from django.db.models import Max, Min
 
+from decimal import Decimal
 from bs4 import BeautifulSoup
 import requests
 from requests.adapters import HTTPAdapter
@@ -156,7 +157,8 @@ class PostDispatchPrice:                       #weight in gram, and length in cm
         soup = BeautifulSoup(form4.content.decode('UTF-8'), 'html.parser')
         
         price = soup.find('font', face="PostFont", color="Red", size="5").get_text()
-        return price
+        price = ''.join(price[:-1].split(','))     #price is like: '199,545', we conver rial to toman (price[:-1])
+        return Decimal(price)
 
 
 

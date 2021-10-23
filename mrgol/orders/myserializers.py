@@ -32,7 +32,7 @@ class ProfileOrderSerializer(serializers.ModelSerializer):
 class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
-        exclude = ['paid', 'visible']
+        exclude = ['visible']
 
     def to_representation(self, obj):
         self.fields['order_status'] = serializers.SerializerMethodField() 

@@ -7,7 +7,7 @@ from datetime import datetime
 from phonenumber_field.modelfields import PhoneNumberField
 
 from customed_files.date_convertor import MiladiToShamsi
-from main.models import Product
+from main.models import Product, ShopFilterItem
 from users.models import User
 
 
@@ -20,7 +20,7 @@ class ProfileOrder(models.Model):
     first_name = models.CharField(_('first name'), max_length=50)
     last_name = models.CharField(_('last name'), max_length=50)
     phone = PhoneNumberField(_('phone number'))    
-    email = models.EmailField(_('email address'))
+    email = models.EmailField(_('email address'), blank=True, null=True)
     state = models.CharField(_('state'), max_length=10)
     town = models.CharField(_('town'), max_length=10)
     address = models.CharField(_('address'), max_length=250)
@@ -41,14 +41,15 @@ class ProfileOrder(models.Model):
 
 
 paid_type_choices = [('online', _('online payment')), ('cod', _('cash on delivery'))]               #important:    dont traslate online and cod it must be static because they saved in db and we do specefic task based on its value!!!    cod == cash on delivery (pardakht dar mahal che ba kart che naghdi)
-order_status_choices = [('0', _('in processing')), ('1', _('delivered')), ('2', _('returned')), ('3', _('canceled'))]
+order_status_choices = [('0', _('in processing')), ('1', _('delivered to post/courier')), ('2', _('delivered')), ('3', _('returned')), ('4', _('canceled'))]
 class Order(models.Model):
     paid_type = models.CharField(_('paid type'), max_length=10, choices=paid_type_choices)
     paid = models.BooleanField(_('paid'), default=False)
     cd_peigiry = models.CharField(_('cd peigiry'), max_length=30, blank=True, null=True)
     price = models.DecimalField(_('price'), max_digits=10, decimal_places=0, blank=False, null=False)
     shipping_price = models.DecimalField(_('shipping price'), max_digits=10, decimal_places=0, blank=False, null=False)           #shipping_price(hazine hamlo naghl) = dispatch price(hazine ersal)  +  haqozzahme (hazine tahvil kala be post)
-    delivery_date = models.CharField(_('delivery date'), max_length=30)
+    shipping_type = models.CharField(_('shipping type'), max_length=10)                                                           #must be post or personal_dispatch
+    delivery_date = models.CharField(_('delivery date'), blank=True, max_length=30)                  #should be fill by admin after delivared good to customer.
     order_status = models.CharField(_('order status'), max_length=1, choices=order_status_choices)
     created = models.DateTimeField(_('created'), auto_now_add=True)
     visible = models.BooleanField(_('delete'), default=True, db_index=True)
@@ -65,13 +66,7 @@ class Order(models.Model):
 
     def get_total_cost(self):
         return sum(item.get_cost() for item in self.items.all())
-
-    def save(self, *args, **kwargs):
-        days, now = self.delivery_date.split(','), datetime.now()
-        y, m, d = MiladiToShamsi(now.year, now.month, now.day+days[0]).result()
-        y2, m2, d2 = MiladiToShamsi(now.year, now.month, now.day+days[1]).result() if len(days)>1 else (None,None,None)
-        super().save(*args, **kwargs)
-        
+    
 
 
     
@@ -80,7 +75,9 @@ class OrderItem(models.Model):
     price = models.DecimalField(_('price'), max_digits=10, decimal_places=0, blank=False, null=False)
     quantity = models.PositiveIntegerField(_('quantity'), blank=False, null=False)
     visible = models.BooleanField(_('delete'), default=True, db_index=True)
-    product = models.ForeignKey(Product, related_name='order_items', on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('product'))
+    shopfilteritem = models.ForeignKey(ShopFilterItem, related_name='order_items', on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('shopfilteritem'))  
+    product = models.ForeignKey(Product, related_name='order_items', on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('product')) #important: one of the shopfilteritem / product fields should fill. means if shopfilteritem exists fill that fill and if not fill product field.
+    
     class Meta:
         verbose_name = _('order item')
         verbose_name_plural = _('order items')
@@ -89,7 +86,11 @@ class OrderItem(models.Model):
         return _('order item') + str(self.id)  
 
     def get_cost(self):
-        return self.price * self.quantity   
+        return self.price * self.quantity
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        return self                                       #for default django in saving dont return instance but with this returned, like: OrderItem(order=order, product=p, price="44", quantity=1).save() now creted objects will return.
 
     '''
     def delete(self, using=None, keep_parents=False):

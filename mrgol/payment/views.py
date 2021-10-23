@@ -19,12 +19,12 @@ description = "توضیحات مربوط به تراکنش را در این قس
 email = 'email@example.com'                                                           
 mobile = '09123456789'                                           
 
-CallbackURL = 'http://127.0.0.1:8000/payment/verify/'#Important: need to edit for realy server.
+CallbackURL = 'http://192.168.114.21:8000/payment/verify/'#Important: need to edit for realy server.
 
 
 class PaymentStart(views.APIView):
     def post(self, request, *args, **kwargs):
-        total_prices = kwargs.get('total_prices')
+        total_prices = args[0]
         global amount                                       
         amount = total_prices if total_prices else 0                           #amount = None raise error and dont run program but amount = 0 make error_message=-1
         result = client.service.PaymentRequest(MERCHANT, amount, description, email, mobile, CallbackURL)
@@ -41,37 +41,31 @@ class PaymentStart(views.APIView):
 
 class paymentVerify(views.APIView): 
     def get(self, request, *args, **kwargs):
-        print('TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT')
         global amount
         cart = Cart(request)
 
         if request.GET.get('Status') == 'OK':
             global amount
-            orderitems, products, shopfilteritems, lists, total_prices = [], [], [], [], Decimal(0)
-            for item in cart:
-                total_prices += item['total_price']
-                lists.append([item['shopfilteritem'], item['product'], item['quantity']]) if item['shopfilteritem'] else lists.append([item['product'], item['quantity']])                    
-                orderitems.append(OrderItem(product=item['product'], price=item['total_price'], quantity=item['quantity']))
-            amount = total_prices
+            products, shopfilteritems = [], []
+            order = Order.objects.get(id=cart.session['order_id'])            
+            amount = order.price
             result = client.service.PaymentVerification(MERCHANT, request.GET['Authority'], amount)
             if result.Status == 100:
                 RefID = result.RefID
-                order = Order.objects.create(profile_order_id=cart.session['profile_order_id'], paid_type='online', paid=True, cd_peigiry=RefID, price=amount, order_status='0')
+                order.paid, order.cd_peigiry = True, RefID
+                order = order.save()
+                orderitems = OrderItem.objects.filter(id__in=cart.session['orderitem_ids'])
                 for orderitem in orderitems:
-                    orderitem.order = order
-                for L in lists:
-                    if isinstance(L[0], ShopFilterItem):
-                        L[0].stock -= L[2]
-                        L[0].available = False if L[0].stock < 1 else True
-                        product = update_product_stock(L[0], L[1], saving=False)
-                        L[0].previous_stock = L[0].stock
-                        shopfilteritems.append(L[0]), products.append(L[1])
+                    if orderitem.shopfilteritem:
+                        orderitem.shopfilteritem.stock -= orderitem.quantity                                         #important: .update is completly seperate method from .save and dont run .save so we need update availabe too. reference: https://stackoverflow.com/questions/33809060/django-update-doesnt-call-override-save
+                        orderitem.shopfilteritem.available = False if orderitem.shopfilteritem.stock < 1 else True
+                        product = update_product_stock(orderitem.shopfilteritem, orderitem.product, saving=False)
+                        orderitem.shopfilteritem.previous_stock = orderitem.shopfilteritem.stock
+                        shopfilteritems.append(orderitem.shopfilteritem), products.append(orderitem.product)                    
                     else:
-                        L[0].stock -= L[1]
-                        L[0].available = False if L[0].stock < 1 else True
-                        products.append(L[0])
-
-                OrderItem.objects.bulk_create(orderitems)                   #bulk_create create several objects at less than or equal 3 conecting to db.
+                        orderitem.product.stock -= orderitem.quantity
+                        orderitem.product.available = False if orderitem.product.stock < 1 else True
+                        products.append(orderitem.product)
                 Product.objects.bulk_update(products, ['stock', 'available'])
                 ShopFilterItem.objects.bulk_update(shopfilteritems, ['stock', 'available'])
                 
