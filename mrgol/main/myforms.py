@@ -78,8 +78,8 @@ class RootForm(forms.ModelForm):
 
 
 class ImageForm(forms.ModelForm):
-    image = forms.ImageField(widget=image_widget, required=True, label='تصوير' if settings.ERROR_LANGUAGE=='pr' else 'image')
-    alt = forms.CharField(max_length=55, label='توضيحات عکس' if settings.ERROR_LANGUAGE=='pr' else 'alt')
+    image = forms.ImageField(widget=image_widget, required=True, label=_('image'))
+    alt = forms.CharField(max_length=55, label=_('alt'))
     
     class Meta: 
         model = Image

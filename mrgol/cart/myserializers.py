@@ -12,7 +12,7 @@ class CartProductSerializer(serializers.ModelSerializer):
     url = serializers.SerializerMethodField()
     class Meta:
         model = Product
-        fields = ['id', 'name', 'slug', 'meta_title', 'price', 'available', 'created', 'updated', 'image_icon', 'rating', 'brand', 'weight', 'url']
+        fields = ['id', 'name', 'slug', 'meta_title', 'price', 'available', 'created', 'updated', 'image_icon', 'rating', 'stock', 'brand', 'weight', 'url']
 
     def get_rating(self, obj):
         rate = obj.rating.rate

@@ -145,8 +145,14 @@ class Image_icon(models.Model):
 
     def __str__(self):
         return _('Image icon') + ' ' + str(self.id)
-        
 
+    def save(self, *args, **kwargs):
+        image_icon = super().save(*args, **kwargs)       
+        image = image_icon.image if image_icon else self.image              #only in creating new Image_icon, image_icon is not None, in editing we must use self (image_icon is None).
+        if image:
+            file = PilImage.open(image.path)
+            resized = file.resize((200, 200))
+            resized.save(image.path)
 
 
    
