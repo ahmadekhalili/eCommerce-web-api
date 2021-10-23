@@ -1279,6 +1279,10 @@ msgstr "توکن احراز هويت"
 msgid "Created"
 msgstr "ایجاد‌شد"
 
+#: exceptions.py:173
+msgid "Authentication credentials were not provided."
+msgstr "اطلاعات احراز هویت ارائه نشده است."
+
 #: fields.py:317
 msgid "This field may not be null."
 msgstr "این مقدار نباید تهی باشد."
