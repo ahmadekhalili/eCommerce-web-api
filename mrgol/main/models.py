@@ -9,18 +9,18 @@ from django.core.files import File
 from django.db import models
 
 import os
+import ast
 from datetime import datetime
 from PIL import Image as PilImage
 
 from .model_methods import set_levels_afterthis_all_childes_id, update_product_stock
-from customed_files.django.django_customed_classes import custom_model_fields
+from customed_files.django.django_customed_classes import model_fields_custom
 from customed_files.date_convertor import MiladiToShamsi
 from users.models import User
 #note: changing classes places may raise error when creating tables(makemigrations), for example changing Content with Post will raise error(Content use Post in its field and shuld be definded after Post)
 
 
-
-        
+    
 class Root(models.Model):                                  #note: supose roor2 object,  root2.father_root determine father of root2 and root2.root_childs is list of root2's childer,  root with level=1 can has eny father!
     name = models.CharField(_('name'), unique=True, max_length=50)
     slug = models.SlugField(_('slug'), allow_unicode=True, db_index=False)
@@ -163,7 +163,7 @@ class Post(models.Model):
     meta_description = models.TextField(_('meta description'), validators=[MaxLengthValidator(160)], blank=True, default='')    
     brief_description = models.TextField(_('brief description'), validators=[MaxLengthValidator(1000)])
     visible = models.BooleanField(_('delete'), default=True)
-    published_date = custom_model_fields.ShamsiDateTimeField(_('published date'), auto_now_add=True)
+    published_date = model_fields_custom.DateTimeFieldShamsi(_('published date'), auto_now_add=True)
     image_icon = models.OneToOneField(Image_icon, on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('image icon'))
     root = models.ForeignKey(Root, on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('root'))
     author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('author'))
@@ -202,8 +202,8 @@ class Product(models.Model):                                     #.order_by('-av
     price = models.DecimalField(_('price'), max_digits=10, decimal_places=0, default=0)
     available = models.BooleanField(_('available'), default=False, db_index=True)
     visible = models.BooleanField(_('delete'), default=True, db_index=True)                #we use visible for deleting an object, for deleting visible=False, in fact we must dont delete any product.    
-    created = models.DateTimeField(_('created'), auto_now_add=True)
-    updated = models.DateTimeField(_('updated'), auto_now=True)
+    created = model_fields_custom.DateTimeFieldShamsi(_('created'), auto_now_add=True)
+    updated = model_fields_custom.DateTimeFieldShamsi(_('updated'), auto_now=True)
     filter_attributes = models.ManyToManyField(Filter_Attribute, through='Product_Filter_Attributes', blank=True, verbose_name=_('filter attributes'))
     root = models.ForeignKey(Root, on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('root'))
     image_icon = models.OneToOneField(Image_icon, on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('image icon'))     #in home page(page that list of product shown) dont query product.image_set.all()[0] for showing one image of product, instead query product.image_icon   (more fster)
@@ -253,7 +253,7 @@ class Product_Filter_Attributes(models.Model):
 
 
 class ShopFilterItem(models.Model):
-    filter_attributes = models.ManyToManyField(Filter_Attribute, blank=True, through='ShopFilterItem_Filter_Attributes', verbose_name=_('filter attributes'))
+    filter_attribute = models.ForeignKey(Filter_Attribute, on_delete=models.SET_NULL, null=True, verbose_name=_('filter attribute'))
     product =  models.ForeignKey(Product, on_delete=models.CASCADE, related_name='shopfilteritems', verbose_name=_('product'))         #why we dont use ShopFilterItem as manytomany field in Product? because we want one object of ShopFilterItem only point to one product (supose one  object of ShopFilterItem as shopfilteritem_1 if thos shopfilteritem_1 point to several product instead one product, so eny changes on shopfilteritem_1 like decreasing shopfilteritem_1.price will affect on other products!!!!
     previous_stock = models.PositiveIntegerField()
     stock = models.PositiveIntegerField(_('stock'))
@@ -270,19 +270,8 @@ class ShopFilterItem(models.Model):
         verbose_name = _('shopfilteritem')
         verbose_name_plural = _('shopfilteritems')
 
-    
-class ShopFilterItem_Filter_Attributes(models.Model):
-    shopfilteritem = models.ForeignKey(ShopFilterItem, on_delete=models.CASCADE,  blank=True, null=True, verbose_name=_('shopfilteritem'))
-    filter_attribute = models.ForeignKey(Filter_Attribute, on_delete=models.CASCADE, blank=True, null=True, verbose_name=_('Filter Attribute'))            #without blank=True and blank=True in admin panel cant save product with blank filter_attribute
-    
-    class Meta:
-        verbose_name = _('ShopFilterItem_Filter_Attribute')
-        verbose_name_plural = _('ShopFilterItem_Filter_Attributes')
-
     def __str__(self):
-        return _('ShopFilterItem_Filter_Attributes') + ' ' + str(self.id)
-
-ShopFilterItem_Filter_Attributes._meta.auto_created = True
+        return str(self.filter_attribute.name)
 
 
 
@@ -299,7 +288,6 @@ class Content(models.Model):
 
     def __str__(self):
         return _('Content') + ' ' + str(self.id)
-
 
 
 
@@ -347,13 +335,10 @@ post_save.connect(save_smallimage, sender=Image)
     
 
 
-
-
-
-statuses_en_pr = [[('1', 'not checked'), ('2', 'confirmed'), ('3', 'not confirmed'), ('4', 'deleted')],  [('1', 'بررسي نشده'), ('2', 'تاييد شده'), ('3', 'رد شده'), ('4', 'حذف شده')]]
+statuses = [('1', _('not checked')), ('2', _('confirmed')), ('3', _('not confirmed')), ('4', _('deleted'))]
 class Comment(models.Model):
-    confirm_status = models.CharField(_('confirm status'), default='1', max_length=1, choices=statuses_en_pr[1] if settings.ERROR_LANGUAGE=='pr' else statuses_en_pr[0])               #confirm site comments by admin and show comment in site if confirmed, '1' = confirmed     '2' = not checked(admin should check comment to confirm or not)      '3' = not confirmed(admin can confirm afters if want)    '4' = deleted
-    published_date = models.DateTimeField(_('published date'), auto_now_add=True)
+    confirm_status = models.CharField(_('confirm status'), default='1', max_length=1, choices=statuses)               #confirm site comments by admin and show comment in site if confirmed, '1' = confirmed     '2' = not checked(admin should check comment to confirm or not)      '3' = not confirmed(admin can confirm afters if want)    '4' = deleted
+    published_date = model_fields_custom.DateTimeFieldShamsi(_('published date'), auto_now_add=True)
     content = models.TextField(_('content'), validators=[MaxLengthValidator(500)])
     author = models.ForeignKey(User, related_name='comment_set_author', related_query_name='comments_author', on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('author'))
     confermer = models.ForeignKey(User, related_name='comment_set_confermer', related_query_name='comments_confermer', on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('confermer'))    
@@ -370,36 +355,10 @@ class Comment(models.Model):
         
 
 
+class State(models.Model):                            #these classes are internal usage and dont need verbose name and meta.
+    key = models.CharField(max_length=10)
+    name = models.CharField(max_length=30)
+    towns = model_fields_custom.TextFieldListed()
 
-from phonenumber_field.modelfields import PhoneNumberField
-class MyPhone(models.Model):
-    phone = PhoneNumberField(_('phone number'))
-
-    class Meta:
-        verbose_name = _('phone number')            #take traslation from users/locale
-        verbose_name_plural = _('phone numbers')
-
-
-
-
-
-
-choices = [('1', 'one'), ('2', 'two')]
-class Test1(models.Model):
-    filter_attributes = models.ManyToManyField(Filter_Attribute, blank=True, through='Test1_Filter_Attributes', verbose_name=_('filter attributes'))
-
-class Test1_Filter_Attributes(models.Model):
-    test1 = models.ForeignKey(Test1, on_delete=models.CASCADE,  blank=True, null=True, verbose_name=_('shopfilteritem'))
-    filter_attribute = models.ForeignKey(Filter_Attribute, on_delete=models.CASCADE, blank=True, null=True, verbose_name=_('Filter Attribute'))            #without blank=True and blank=True in admin panel cant save product with blank filter_attribute
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-Test1_Filter_Attributes._meta.auto_created = True
-
-
-
-class Test2(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-
-#notes for video: why product.filter_filter_attribute should has 2 number? why filter.name unique but fulter_attribute.name not unique?
-                 #wy post has not filter
-    
+    def __str__(self):
+        return 'State' + ' ' + self.name

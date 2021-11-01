@@ -8,8 +8,6 @@ from . import myserializers
 from .models import Product, Root, Filter, Filter_Attribute
 from .mymethods import make_next
 
-
-
     
 class filter_attributes_widget(forms.Select):
     template_name = 'main/widgets/filter_attributes_two_select.html'

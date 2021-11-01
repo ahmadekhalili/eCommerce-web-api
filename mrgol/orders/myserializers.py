@@ -16,6 +16,7 @@ class ProfileOrderSerializer(serializers.ModelSerializer):
         
     def to_representation(self, obj):
         self.fields['name'] = serializers.SerializerMethodField()
+        self.fields['phone'] = serializers.SerializerMethodField()
         self.fields['user'] = UserNameSerializer()
         fields =  super().to_representation(obj)
         fields.pop('first_name'), fields.pop('last_name')
@@ -24,7 +25,8 @@ class ProfileOrderSerializer(serializers.ModelSerializer):
     def get_name(self, obj):
         return f'{obj.first_name} {obj.last_name}'
 
-     
+    def get_phone(self, obj):
+        return f'{obj.phone.national_number}'     
 
 
 
@@ -47,7 +49,6 @@ class OrderSerializer(serializers.ModelSerializer):
     def get_created(self, obj):
         created = obj.created
         y, m, d= created.year, created.month, created.day
-        y, m, d = MiladiToShamsi(y, m, d).result()
         return f'{y}/{m}/{d}'
 
 

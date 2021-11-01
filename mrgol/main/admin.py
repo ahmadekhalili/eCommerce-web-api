@@ -31,24 +31,29 @@ admin.site.index_title = _('admin panel')
 
 class CommentInline(admin.TabularInline):
     model = Comment
-    fields = ('content', 'author', 'confermer', 'confirm_status', 'published_datee')
-    readonly_fields = ('content', 'author', 'confermer', 'confirm_status', 'published_datee')
+    fields = ('content', 'author', 'confermer', 'confirm_status', 'get_published_date')
+    readonly_fields = ('content', 'author', 'confermer', 'confirm_status', 'get_published_date')
     
-    def published_datee(self, instance):
-        miladi_datetime = instance.published_date
-        shamsi_date = MiladiToShamsi(miladi_datetime.year, miladi_datetime.month, miladi_datetime.day).result()
-        str = '{}, {}, {},&nbsp;&nbsp;{}:{}'.format(shamsi_date[0], shamsi_date[1], shamsi_date[2], miladi_datetime.hour, miladi_datetime.minute)
-        return format_html(str)
-    published_datee.short_description = _('published date')
-
+    def get_published_date(self, obj):                                       #auto_now_add and auto_now fields must be in read_only otherwise raise error (fill by django not user) and you cant control output of read_only fields with widget (from its form) so for this fiels you cant specify eny widget!!
+        date_str = MiladiToShamsi(obj.published_date.year, obj.published_date.month, obj.updated.day).result(str_month=True)
+        return format_html(f'{date_str[2]} {date_str[1]} {date_str[0]}، ساعت {obj.published_date.hour}:{obj.published_date.minute}')
+    get_published_date.short_description = _('published date')
 
 
 class PostAdmin(admin.ModelAdmin):
     #filter_horizontal = ('contents',)
     prepopulated_fields = {'slug':('title',)}
     inlines = [CommentInline]
-    readonly_fields = ('published_date',)
+    readonly_fields = ('get_published_date',)
+
+    def get_published_date(self, obj):                                       #auto_now_add and auto_now fields must be in read_only otherwise raise error (fill by django not user) and you cant control output of read_only fields with widget (from its form) so for this fiels you cant specify eny widget!!
+        date_str = MiladiToShamsi(obj.published_date.year, obj.published_date.month, obj.published_date.day).result(str_month=True)
+        return f'{date_str[2]} {date_str[1]} {date_str[0]}، ساعت {obj.published_date.hour}:{obj.published_date.minute}'
+    get_published_date.allow_tags = True
+    get_published_date.short_description = _('published date')
+    
 admin.site.register(Post, PostAdmin)
+
 
 
 
@@ -59,7 +64,9 @@ class ImageInline(admin.StackedInline):
 class Product_Filter_AttributesInline(admin.StackedInline):
     model = Product_Filter_Attributes
     template = 'admin/edit_inline/product_filter_attributes_stacked.html'
+
     
+
   
 class ProductAdmin(CustModelAdmin):
     list_display = ['id', 'name', 'stock', 'price']                 #this line is for testing mode!!!
@@ -67,11 +74,11 @@ class ProductAdmin(CustModelAdmin):
     prepopulated_fields = {'slug':('name',)}
     filter_horizontal = ('filter_attributes',)
     inlines = [Product_Filter_AttributesInline, ImageInline, CommentInline ]   
-    readonly_fields = ('rating',)
+    readonly_fields = ('rating', 'get_created', 'get_updated')
     form = myforms.ProductForm
     fieldsets = (
         (None, {
-            'fields': ('name', 'slug', 'brief_description', 'detailed_description', 'price', 'available', 'image', 'alt', 'root', 'rating', 'stock', 'brand', 'weight')
+            'fields': ('name', 'slug', 'brief_description', 'detailed_description', 'price', 'available', 'image', 'alt', 'root', 'rating', 'stock', 'brand', 'weight', 'get_created', 'get_updated')
         }),
         (_('size'), {
             'classes': ('collapse',),
@@ -83,6 +90,18 @@ class ProductAdmin(CustModelAdmin):
         }),
     )
 
+    def get_created(self, obj):
+        return 'asdasd'
+        date_str = MiladiToShamsi(obj.created.year, obj.created.month, obj.created.day).result(str_month=True)
+        return f'{date_str[2]} {date_str[1]} {date_str[0]}، ساعت {obj.created.hour}:{obj.created.minute}'
+    get_created.allow_tags = True
+    get_created.short_description = _('created')
+    def get_updated(self, obj):             
+        date_str = MiladiToShamsi(obj.updated.year, obj.updated.month, obj.updated.day).result(str_month=True)
+        return f'{date_str[2]} {date_str[1]} {date_str[0]}، ساعت {obj.updated.hour}:{obj.updated.minute}'
+    get_updated.allow_tags = True
+    get_updated.short_description = _('updated')
+    
     def save_form(self, request, form, change):
         instance = form.save(commit=False)       
         if not instance.image_icon:             #in new product adding
@@ -131,9 +150,7 @@ class ProductAdmin(CustModelAdmin):
             extra_context['selected_filter_attributes'] = make_next(selected_filter_attributes)  
             extra_context['selected_filters'] = make_next(selected_filters)
         return super().changeform_view(request, object_id, form_url, extra_context)       
-
-
-    
+   
     def add_vieww(self, request, form_url='', extra_context=None):
         if request.method == 'POST':
             filter_attributes_value = []
@@ -199,23 +216,22 @@ admin.site.register(Product, ProductAdmin)
 
 
 
+
 class CommentAdmin(admin.ModelAdmin):
-    list_display = ['id', 'author', 'published_datee', 'confirm_status']
+    list_display = ['id', 'author', 'get_published_date', 'confirm_status']
     #fields = ('confirm_status', 'content', 'author', 'confermer')
-    #readonly_fields = ('author', 'confermer', 'published_datee')
+    #readonly_fields = ('author', 'confermer', 'get_published_date')
     #form = myforms.CommentForm
     
     def get_queryset(self, request):
         queryset = Comment.objects.exclude(confirm_status='4')
         return queryset
     
-    def published_datee(self, instance):
-        miladi_datetime = instance.published_date
-        shamsi_date = MiladiToShamsi(miladi_datetime.year, miladi_datetime.month, miladi_datetime.day).result()
-        str = '{}, {}, {},&nbsp;&nbsp;{}:{}'.format(shamsi_date[0], shamsi_date[1], shamsi_date[2], miladi_datetime.hour, miladi_datetime.minute)
-        return format_html(str)
-    published_datee.short_description = _('published date')
-    published_datee.admin_order_field = 'published_date'
+    def get_published_date(self, obj):                                       #auto_now_add and auto_now fields must be in read_only otherwise raise error (fill by django not user) and you cant control output of read_only fields with widget (from its form) so for this fiels you cant specify eny widget!!
+        date_str = MiladiToShamsi(obj.published_date.year, obj.published_date.month, obj.updated.day).result(str_month=True)
+        return f'{date_str[2]} {date_str[1]} {date_str[0]}، ساعت {obj.published_date.hour}:{obj.published_date.minute}'
+    get_published_date.allow_tags = True
+    get_published_date.short_description = _('published date')
     '''
     def has_add_permission(self, request, obj=None):
         return False
@@ -338,41 +354,25 @@ class Filter_AttributeAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug':('name',)}
 admin.site.register(Filter_Attribute, Filter_AttributeAdmin)
 
-
+'''
 class ShopFilterItemAdmin(admin.ModelAdmin):
     filter_horizontal = ('filter_attributes',)
     form = myforms.ShopFilterItemForm
 admin.site.register(ShopFilterItem, ShopFilterItemAdmin)
+'''
+admin.site.register(ShopFilterItem)
 
-admin.site.register(ShopFilterItem_Filter_Attributes)
 
 admin.site.register(Content)
 
 admin.site.register(Image)
 admin.site.register(Image_icon)
-
-admin.site.register(MyPhone)
-
-
-
-
-
-class Test1Admin(admin.ModelAdmin):
-    filter_horizontal = ('filter_attributes',)
-    form = myforms.Test1Form
-admin.site.register(Test1, Test1Admin)
-
-class Test2Admin(admin.ModelAdmin):
-    form = myforms.Test2Form
-admin.site.register(Test2, Test2Admin)
-
     
-admin.site.register(Test1_Filter_Attributes)
 admin.site.register(SmallImage)
 
 
 
-
+admin.site.register(State)
 
 
 #admin.site.disable_action('delete_selected') 

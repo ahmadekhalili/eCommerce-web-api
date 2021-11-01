@@ -1,5 +1,9 @@
 #mabna dar in converotr tarikh: 1201/1/1 shamsi moadele : 1822/3/21 miladi mibashad. daghigh tar joloie esme har kelas convertor  ghofte shode ast.
-def shamsi_kabiseyears_list(years):                #list all kabise years between  1201/1/1 to ...    1201 is kabise but dont listed because one day reduced buy its first day.
+def month_name(m):                   #m is month number (shamsi), this method is public method(can be used out of this file)
+    return {1: 'فروردين', 2: 'ارديبهشت', 3: 'خرداد', 4: 'تير', 5: 'مرداد', 6: 'شهريور', 7: 'مهر', 8: 'آبان', 9: 'آذر', 10: 'دی', 11: 'بهمن', 12: 'اسفند'}[m]
+
+
+def _shamsi_kabiseyears_list(years):                #list all kabise years between  1201/1/1 to ...    1201 is kabise but dont listed because one day reduced buy its first day.
     if years >= 1210:
         kabise_years = [1205, 1210]
         i = 1210
@@ -24,7 +28,7 @@ def shamsi_kabiseyears_list(years):                #list all kabise years betwee
         return []
 
 
-def miladi_kabiseyear_finder(year):                
+def _miladi_kabiseyear_finder(year):                
     kabise_years = []
     if year%4 == 0:
         if year % 100 != 0 or year % 400 == 0:
@@ -33,7 +37,6 @@ def miladi_kabiseyear_finder(year):
             return False
     else:
         return False
-
 
 
 
@@ -49,7 +52,7 @@ class MiladiToShamsi:
         kabise_list = []
         if self.y-1 >= 1824:
             for y in range(1824, self.y):
-                if miladi_kabiseyear_finder(y):
+                if _miladi_kabiseyear_finder(y):
                     kabise_list += [y]
                 else:
                     pass
@@ -58,7 +61,7 @@ class MiladiToShamsi:
         kabise_years = len(kabise_list)
         normal_years = self.y - 1 - 1822 - kabise_years
         days_before_currentyear = normal_years*365 + kabise_years*366
-        days_currentyear = self.miladi_days_currentyear(miladi_kabiseyear_finder(self.y))
+        days_currentyear = self.miladi_days_currentyear(_miladi_kabiseyear_finder(self.y))
         return days_before_currentyear + days_currentyear + 285
 
     def miladi_days_currentyear(self, kabise):
@@ -84,26 +87,30 @@ class MiladiToShamsi:
             if days <= months_days+shamsi_months_days[i+1]:
                 return [int(i+2), int(days-months_days)]
   
-    def result(self):
-        miladi_days = self.miladi_days()                   #731782#727578
+    def result(self, str_month=False):
+        miladi_days = self.miladi_days()                   
         current_year = 1201
         miladi_days2 = 0
         miladi_days3 = 0
         if miladi_days <= 365:
-            return [1201, *self.shamsi_month_day(miladi_days+1, True)]  
+            date = [1201, *self.shamsi_month_day(miladi_days+1, True)]  
         else:
             while(True):
-                kabise = True if current_year in shamsi_kabiseyears_list(current_year) else False                
+                kabise = True if current_year in _shamsi_kabiseyears_list(current_year) else False                
                 miladi_days2 += 366 if kabise else 365
                 if miladi_days2 >= miladi_days:
                     miladi_days2 -= 366 if kabise else 365
                     miladi_days3 = miladi_days - miladi_days2
                     break
                 current_year += 1
-            kabise = True if current_year in shamsi_kabiseyears_list(current_year) else False   
+            kabise = True if current_year in _shamsi_kabiseyears_list(current_year) else False   
             real_year = current_year
-            return [real_year, *self.shamsi_month_day(miladi_days3, kabise)]
-
+            date = [real_year, *self.shamsi_month_day(miladi_days3, kabise)]
+        if not str_month:
+            return date                                                                  #this is like [1398, 6, 15]
+        else:
+            date[1] = month_name()[date[1]]
+            return date                                                                  #this is like [1398, 'mer', 15]     mer in persian!
 
 
 
@@ -116,7 +123,7 @@ class ShamsiToMiladi:
         self.d = d
 
     def shamsi_days(self):
-        kabise_list = shamsi_kabiseyears_list(self.y-1)
+        kabise_list = _shamsi_kabiseyears_list(self.y-1)
         kabise_years = len(kabise_list)
         normal_years = self.y - 1 - 1200 - kabise_years
         days_before_currentyear = normal_years*365 + kabise_years*366
@@ -150,7 +157,7 @@ class ShamsiToMiladi:
                 return [int(i+2), int(days-months_days)]
             
     def result(self):
-        shamsi_days = self.shamsi_days()                   #731782#727578
+        shamsi_days = self.shamsi_days()                   
         shamsi_days -= 285
         shamsi_days2 = 0
         shamsi_days3 = 0
@@ -159,7 +166,7 @@ class ShamsiToMiladi:
             return [1823, *self.miladi_month_day(shamsi_days, False)]
         else:
             while(True):
-                kabise = True if miladi_kabiseyear_finder(current_year) else False
+                kabise = True if _miladi_kabiseyear_finder(current_year) else False
                 shamsi_days2 += 366 if kabise else 365
                 if shamsi_days2 >= shamsi_days:
                     shamsi_days2 -= 366 if kabise else 365
@@ -167,6 +174,6 @@ class ShamsiToMiladi:
                     break
                 current_year += 1
             real_year = current_year 
-            return [real_year, *self.miladi_month_day(shamsi_days3, miladi_kabiseyear_finder(real_year))]
+            return [real_year, *self.miladi_month_day(shamsi_days3, _miladi_kabiseyear_finder(real_year))]
 
 

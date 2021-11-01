@@ -17,7 +17,6 @@ from cart.views import CartMenuView
 from cart.cart import Cart
 from payment.views import PaymentStart
 from .models import ProfileOrder, Order, OrderItem, Shipping, Dispatch
-from .forms import OrderCreateForm
 from .myserializers import ProfileOrderSerializer, OrderSerializer, OrderItemSerializer
 
 
@@ -30,7 +29,7 @@ class ListCreateProfileOrder(views.APIView):
             cart_menu = CartMenuView().get(request).data
             return Response({**cart_menu, 'profileorders': ProfileOrderSerializer(profileorders, many=True).data})   
         else:            
-            return Response({**CartMenuView().get(request).data, 'profileorders': None})     #after this front side must create blank ProfileOrder Form with action refrenced to ListCreateProfileOrder.post. (you can create form and its html elements by django modelform and say to front html elements)    
+            return Response({**cart_menu, 'profileorders': None})     #after this front side must create blank ProfileOrder Form with action refrenced to ListCreateProfileOrder.post. (you can create form and its html elements by django modelform and say to front html elements)    
 
     def post(self, request, *args, **kwargs):                             #here ProfileOrder cerated from Form datas sended by user.
         data = request.data                                               #data sended must be like {"first_name": "javad", "last_name":"haghi", "phone":"09127761277", "state": "1", "town": "1", "address":"tehran", "postal_code":"1111111111"} to save ProfileOrder object successfuly.

@@ -73,8 +73,8 @@
 		function set_inline_town(){
 			var x = document.getElementById("{{ state_town.0 }}").value;
 			items = [];			  
-			{% for state, town in towns_states %} 
-				if (x === "{{ state.0 }}")
+			{% for state, town in states_towns %} 
+				if (x === "{{ state }}")
 					items = {{ town|safe }}
 			{% endfor %}
 		  

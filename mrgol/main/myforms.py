@@ -10,7 +10,7 @@ from customed_files.django.django_customed_classes import custom_form_fields
 from users.models import User
 from . import myserializers
 from .mywidgets import image_icon_widget, image_widget, filter_attributes_widget, product_root_widget, level_widget, father_root_widget, confirm_status_widget, confermer_widget, published_date_widget
-from .models import Test1, Test2, Product, Root, Image, Comment, Filter_Attribute, ShopFilterItem, ShopFilterItem_Filter_Attributes
+from .models import Product, Root, Image, Comment, Filter_Attribute, ShopFilterItem
 
 
 
@@ -86,7 +86,7 @@ class ImageForm(forms.ModelForm):
         fields = ['image', 'alt']
 
 
-
+'''
 class ShopFilterItemForm(forms.ModelForm):
     #filter_attributes = forms.ModelMultipleChoiceField(queryset=Filter_Attribute.objects.all())
     class Meta: 
@@ -104,7 +104,7 @@ class ShopFilterItemForm(forms.ModelForm):
         all_tpl = ShopFilterItem_Filter_Attributes.objects.values_list('shopfilteritem', 'filter_attribute')    #all_tpl is like [(1, 2), (2, 4), (1, 3)]
         all_dct = dict([(key, []) for key in dict(all_tpl)])                             
         [all_dct[i].append(j) for key in all_dct for i,j in all_tpl if key == i]                                #all_dct is like {1: [2, 3], 2: [4]}  
-        all_dct[shopfilteritem_id] = current_filter_attributes_ids                                              #now all_dct is like {1: [2, 3], 2: [4, 7]}  7 is new filter_attribute we added that was not in db.  
+        all_dct[shopfilteritem_id] = current_filter_attributes_ids + all_dct[shopfilteritem_id] if all_dct[shopfilteritem_id] else current_filter_attributes_ids  #now all_dct is like {1: [2, 3], 2: [4, 7]}  7 is new filter_attribute we added that was not in db.  
                 
         current_dct = sorted(all_dct.pop(shopfilteritem_id))
         dublicated = False
@@ -113,28 +113,7 @@ class ShopFilterItemForm(forms.ModelForm):
                 dublicated = True
         if dublicated:              
             raise ValidationError(_("select unique sets of filter attributes."))
-    
+'''    
 
 
-
-my_choices2 = [('1','abi'), ('2', 'narenji')]
-class Test1Form(forms.ModelForm):
-    #filter_attributes = forms.ModelMultipleChoiceField(queryset=Filter_Attribute.objects.all())
-    #filter_attributes.choices = my_choices
-    class Meta: 
-        model = Test1
-        fields = '__all__'
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['filter_attributes'].choices = my_choices2
-        
-my_choices = [('', '---------'), ('2','asd'), ('3', 'akh')]
-class Test2Form(forms.ModelForm):
-    product = forms.ModelChoiceField(queryset=Product.objects.all())
-    product.choices = my_choices
-    class Meta: 
-        model = Test2
-        fields = '__all__'
-        
 

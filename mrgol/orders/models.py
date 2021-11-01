@@ -6,7 +6,8 @@ from django.utils.translation import gettext_lazy as _
 from datetime import datetime
 from phonenumber_field.modelfields import PhoneNumberField
 
-from customed_files.date_convertor import MiladiToShamsi
+from customed_files.django.django_customed_classes import model_fields_custom
+from customed_files.states_towns import list_states_towns
 from main.models import Product, ShopFilterItem
 from users.models import User
 
@@ -21,7 +22,7 @@ class ProfileOrder(models.Model):
     last_name = models.CharField(_('last name'), max_length=50)
     phone = PhoneNumberField(_('phone number'))    
     email = models.EmailField(_('email address'), blank=True, null=True)
-    state = models.CharField(_('state'), max_length=10)
+    state = models.CharField(_('state'), max_length=10)                                    #state & town works in admin panel manage by ProfileOrderCreateForm
     town = models.CharField(_('town'), max_length=10)
     address = models.CharField(_('address'), max_length=250)
     postal_code = models.CharField(_('postal code'), max_length=20, validators=[validate_postal_code], unique=True, db_index=False)
@@ -49,12 +50,15 @@ class Order(models.Model):
     price = models.DecimalField(_('price'), max_digits=10, decimal_places=0, blank=False, null=False)
     shipping_price = models.DecimalField(_('shipping price'), max_digits=10, decimal_places=0, blank=False, null=False)           #shipping_price(hazine hamlo naghl) = dispatch price(hazine ersal)  +  haqozzahme (hazine tahvil kala be post)
     shipping_type = models.CharField(_('shipping type'), max_length=10)                                                           #must be post or personal_dispatch
-    delivery_date = models.CharField(_('delivery date'), blank=True, max_length=30)                  #should be fill by admin after delivared good to customer.
     order_status = models.CharField(_('order status'), max_length=1, choices=order_status_choices)
-    created = models.DateTimeField(_('created'), auto_now_add=True)
+    delivery_date = model_fields_custom.DateTimeFieldShamsi(_('delivery date'), blank=True, null=True)                  #will fill auto to time order_status chenged to delivered.
+    created = model_fields_custom.DateTimeFieldShamsi(_('created'), auto_now_add=True)
     visible = models.BooleanField(_('delete'), default=True, db_index=True)
     profile_order = models.ForeignKey(ProfileOrder, on_delete=models.SET_NULL, null=True, verbose_name=_('profile order'))
     #items
+
+    def delivery_date_str(self):
+        return 'asasd'
     
     class Meta:
         ordering = ('-created',)
@@ -62,10 +66,17 @@ class Order(models.Model):
         verbose_name_plural = _('orders')
 
     def __str__(self):
-        return _('order') + str(self.id)                    #why i dont used like   
+        return _('order') + str(self.id)                     
 
     def get_total_cost(self):
         return sum(item.get_cost() for item in self.items.all())
+    
+    def save(self, *args, **kwargs):
+        if self.order_status == '2':
+            now = datetime.now()
+            self.delivery_date = now
+        super().save(*args, **kwargs)
+
     
 
 
@@ -102,7 +113,7 @@ class OrderItem(models.Model):
 
 
 class Shipping(models.Model):                                     #this is specefic model class(non create and del permission). we have two type Shipping, "personal" and "post" that is in one Shipping.
-    fee =  models.DecimalField(_('fee'), max_digits=10, decimal_places=0, blank=False, null=False)                #for only post shipping..        
+    fee =  models.DecimalField(_('personal fee'), max_digits=10, decimal_places=0, blank=False, null=False)                #for only post shipping..        
     state = models.CharField(_('state'), max_length=10)           #state,town,address is local of store(anbari)
     town = models.CharField(_('town'), max_length=10)
     address = models.CharField(_('address'), max_length=250)              
@@ -113,7 +124,7 @@ class Shipping(models.Model):                                     #this is spece
         verbose_name_plural = _('shipping')                       #dont need s.
     
     def __str__(self):
-        return _('shipping') + f' ({self.id})'
+        return str(_('shipping'))
 
 
 class Dispatch(models.Model):                                     
@@ -128,4 +139,5 @@ class Dispatch(models.Model):
         verbose_name_plural = _('Personal Dispatch')                       
     
     def __str__(self):
-        return _('Dispatch') + f' ({self.id})'
+        towns = dict([L[1] for L in list_states_towns if L[0][0]==self.state][0])                           #towns is like: {'39761': 'آبسرد', '39741': 'آبعلي', ...}
+        return _('Dispatch') + ' ' + towns[self.town]

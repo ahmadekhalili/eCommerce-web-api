@@ -42,13 +42,13 @@ from django.forms import formset_factory
 from orders.models import ProfileOrder, Order, paid_type_choices
 from decimal import Decimal
 from django.db.models import F, Q, Case, Value, When, Count
-from orders.forms import OrderCreateForm
 from orders.models import OrderItem, Order, ProfileOrder
 from orders.myserializers import OrderItemSerializer
 from rest_framework.routers import DefaultRouter
 from customed_files import date_convertor
 from orders.myserializers import ProfileOrderSerializer, OrderSerializer, OrderItemSerializer
 
+from customed_files.states_towns import list_states_towns
 
 def index(request):
     if request.method == 'GET':
@@ -61,6 +61,7 @@ def index(request):
         #Accept-Language
 
         posts = ''
+
 
         a = ''
         b = ''

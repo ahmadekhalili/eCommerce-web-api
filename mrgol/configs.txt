@@ -1,3 +1,5 @@
-﻿ERROR_LANGUAGE determind language of errors of fields/validators(in django forms/models and rest_framework). when is pr language is persian else is english original messages.
+﻿python manage.py createstates                               #create states and its towns(main/models/State)   (configured  here: main/management/commands/createstates)  (states used here: main.admin.ShippingAdmin._changeform_view)
+PROJECT_VERBOSE_NAME = 'MRGol'                      #set english project name here and run makemessages and input its traslation in django.po and run compilemessages comment.      we used this in places like:  main/templates/registration/log_out.html      main/admin.py/admin.site.site_header & admin.site.site_title       also note this can be used as context_processors in templates like {{ project_verbose_name }}  
 
-PROJECT_VERBOSE_NAME = 'ام ار گل'                      #we used this in places like:  main/templates/registration/log_out.html      main/admin.py/admin.site.site_header & admin.site.site_title       also note this can be used as context_processors in templates like {{ project_verbose_name }}  
+
+

@@ -1,6 +1,0 @@
-<select name="state" required="" id="id_state">	
-{% for state, town in towns_states %} 						
-	<option value="{{ state.0 }}" {% if selected_state == state %}selected{% endif %}> {{ state.1 }} </option>
-{% endfor %}
-</select>		
-<p style="display:inline">&nbsp;</p>

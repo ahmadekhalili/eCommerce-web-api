@@ -90,16 +90,14 @@ WSGI_APPLICATION = 'mrgol.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-        'OPTIONS': {
-            'timeout': 30,  # in seconds
-            # see also
-            # https://docs.python.org/3.7/library/sqlite3.html#sqlite3.connect
-        }        
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'akh_db',
+        'USER': 'akh_db',
+        'PASSWORD': 'a13431343',
+        'HOST': '127.0.0.1',
+        'PORT': '5432',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
@@ -145,9 +143,6 @@ USE_L10N = True
 USE_TZ = False
 
 
-
-ERROR_LANGUAGE = 'pr'
-TEMPLATE_LANGUAGE = 'pr'
 LANGUAGE_CODE = 'fa'
 
 PHONENUMBER_DEFAULT_REGION = 'IR'
