@@ -1,5 +1,6 @@
 from django.db.models import Max, Min
 
+import copy
 from decimal import Decimal
 from bs4 import BeautifulSoup
 import requests
@@ -81,8 +82,8 @@ def get_posts_products_by_root(root):
 
 
 class PostDispatchPrice:                       #weight in gram, and length in cm.
-    def __init__(self, weight, dimensions):    #weight str, dimensions is like ["20,20,15", "30,25,20"]
-        self.weight = weight
+    def __init__(self, weight, dimensions):    #weight must be int, dimensions is like ["20,20,15", "30,25,20"]
+        self.weight = int(weight)
         self.dimensions = dimensions
         post_cartons_dimensions = {'1': [15, 10, 10], '2': [20, 15, 10], '3': [20, 20, 15], '4': [30, 20, 20], '5': [35, 25, 20], '6': [45, 25, 20], '7': [40, 30, 25], '8': [45, 40, 30], '9': [55, 45, 35]}
 
@@ -91,7 +92,7 @@ class PostDispatchPrice:                       #weight in gram, and length in cm
         post_cartons_volumes = {'1': 1500, '2': 3000, '3': 6000, '4': 12000, '5': 17500, '6': 22500, '7': 30000, '8': 54000, '9': 86625}
         goods_volume = 0                 #in cm3(cm*cm*cm)
         for size_str in self.dimensions:
-            L = [int(i) for i in size_str.split(',')]
+            L = [float(i) for i in size_str.split(',')]
             goods_volume += L[0] * L[1] * L[2]
         for volume in post_cartons_volumes:
             if volume in ['4', '6', '7', '9']:                #we limited post cartons to only 4 size ('4', '6', '7', '9')
@@ -124,7 +125,7 @@ class PostDispatchPrice:                       #weight in gram, and length in cm
 
         #g3 can be: "rdoCity"(shahri) or "rdoBetweenCity"(beinshahri), but dont differrent in price at all, so we dont use "rdoCity".
         data2_2 = {"__EVENTTARGET": "cboFromState", "__EVENTARGUMENT": "", "__LASTFOCUS": "", "g3": "rdoBetweenCity", "tlsDropDown": "0",
-                   "__VIEWSTATE": str_viewstate, "__EVENTVALIDATION": str_eventvalidation, "cboFromState": "1", "cboToState": ""}
+                   "__VIEWSTATE": str_viewstate, "__EVENTVALIDATION": str_eventvalidation, "cboFromState": from_state, "cboToState": ""}
         form2 = session.post('https://parcelprice.post.ir/default.aspx', data=data2_2)
         soup = BeautifulSoup(form2.content.decode('UTF-8'), 'html.parser')
         str_viewstate = soup.find('input', id='__VIEWSTATE')['value']
@@ -157,7 +158,7 @@ class PostDispatchPrice:                       #weight in gram, and length in cm
         soup = BeautifulSoup(form4.content.decode('UTF-8'), 'html.parser')
         
         price = soup.find('font', face="PostFont", color="Red", size="5").get_text()
-        price = ''.join(price[:-1].split(','))     #price is like: '199,545', we conver rial to toman (price[:-1])
+        price = ''.join(price[:-1].split(','))     #price is like: '199,545', we conver rial to toman (price[:-1]) and remove all ',' from number
         return Decimal(price)
 
 
@@ -172,5 +173,4 @@ class make_next:                             #for adding next to list you shold 
         except:                            #if we input blank list in make_next like:   ob = make_next([])  now ob.next or ob.next()  dont raise error and return blank list instead or loop more than len(L) like: L=[1,2,3] ob=make_next(L) now [ob.next() for i in range(30}] doesnt raise error and return blank list instead.                           
             nex = []
         return nex
-
 

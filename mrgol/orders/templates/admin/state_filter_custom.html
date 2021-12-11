@@ -1,0 +1,46 @@
+{% load i18n %}
+<div collapsed="" id="state_filter" style="height: 165px; overflow: hidden;">
+<a id="3" href="#" onclick="dropdown_state_filter()" style="text-decoration: none;"> <h3 id="collapsortext">{% blocktranslate with filter_title=title %} By {{ filter_title }} {% endblocktranslate %} <span id="more">({% trans "more" %})</span> <span id="less" style="display: none;">({% trans "less" %})</span></h3> </a>
+<ul>
+{% for choice in choices %}
+    <li{% if choice.selected %} class="selected"{% endif %}>
+    <a href="{{ choice.query_string|iriencode }}" title="{{ choice.display }}">{{ choice.display }}</a></li>
+{% endfor %}
+</ul>
+</div>
+
+
+<script>                               //here we extend and collapse states we here click on link with id state_filter, and show text بیشتر and set its colors when collapsed and show کمتر and its colors when extended.
+x = document.getElementById("state_filter");
+more = document.getElementById("more");
+less = document.getElementById("less");
+collapsor_text = document.getElementById("collapsortext");
+collapsor_text.style.padding = "5px 15px 5px 0px";
+collapsor_text.style.margin = "0px 0px 0px 0px";
+function dropdown_state_filter() {
+	attrs = x.attributes;
+	collapsed = true;
+	for (var i = attrs.length - 1; i >= 0; i--) {
+		if (attrs[i].name == "collapsed") {
+			x.removeAttribute("collapsed", "");
+			x.style.height = "auto";
+			x.style.overflow = "hidden";
+			collapsor_text.style.background = "#d0ebf7";
+			collapsor_text.style.color = "#666";
+			more.style.display = "none";
+			less.style.display = "";
+			collapsor_text.style.color = "black";
+			collapsed = false;  }
+	}		
+	if (collapsed == true) {
+		x.setAttribute("collapsed", "");	
+		x.style.height = "165px";
+		x.style.overflow = "hidden";
+		collapsor_text.style.background = "#f8f8f8";
+		collapsor_text.style.color = "#666";  	
+		more.style.display = "";
+		less.style.display = "none";		
+		collapsor_text.style.fontcolor = "#666";  }	
+}		
+</script>
+

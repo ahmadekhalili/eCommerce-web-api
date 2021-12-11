@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 
 class CustModelAdmin(admin.ModelAdmin):
-    def _delete_view(self, request, object_id, extra_context):
+    def _delete_view(self, request, object_id, extra_context):                      #we want change delete page title (in deleting an object delete page shown)
         template_response = super()._delete_view(request, object_id, extra_context)
         opts = self.model._meta
         object_name = str(opts.verbose_name)

@@ -50,6 +50,17 @@ class CartAdd(views.APIView):       #user come from 'sabad'(in header) to this m
 
 
 
+class CartMinus(views.APIView):       #reduce selected quantity of proselect by 1.  
+    def post(self, request, *args, **kwargs):
+        #CustomSessionAuthentication().enforce_csrf(request)
+        data = request.data
+        cart = Cart(request)
+        cart.minus(product_id=data['product_id'], shopfilteritem_id=data.get('shopfilteritem_id'))
+        return Response({**CartMenuView().get(request).data})
+
+
+
+
 class CartRemove(views.APIView):       #user come from 'sabad'(in header) to this method.  add id in front, just front must car add current_item + cart_cookie in add. #set_fingers and remove  is in front 
     def post(self, request, *args, **kwargs):
         #CustomSessionAuthentication().enforce_csrf(request)

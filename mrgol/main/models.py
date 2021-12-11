@@ -14,7 +14,7 @@ from datetime import datetime
 from PIL import Image as PilImage
 
 from .model_methods import set_levels_afterthis_all_childes_id, update_product_stock
-from customed_files.django.django_customed_classes import model_fields_custom
+from customed_files.django.classes import model_fields_custom
 from customed_files.date_convertor import MiladiToShamsi
 from users.models import User
 #note: changing classes places may raise error when creating tables(makemigrations), for example changing Content with Post will raise error(Content use Post in its field and shuld be definded after Post)
@@ -70,7 +70,8 @@ class Root(models.Model):                                  #note: supose roor2 o
 
    
 class Filter(models.Model):
-    name = models.CharField(_('name'), unique=True, max_length=25)
+    name = models.CharField(_('name'), unique=True, max_length=25)        #this field use for quering. for displaying verbose_name used. 
+    verbose_name = models.CharField(_('verbose name'), max_length=25)     #for example you have two filter with names: sistem amel goshi, system amele mobil but both of them have 'system amel' as verbose name.
     selling = models.BooleanField(_('selling filter'), default=False)
     roots = models.ManyToManyField(Root, through='Filter_Roots', verbose_name=_('roots'))
     #filter_attributes
@@ -92,7 +93,7 @@ class Filter_Roots(models.Model):
         
     def __str__(self):
         return _('Filter Roots') + str(self.id)
-
+    
 Filter_Roots._meta.auto_created = True                        #if you dont put this you cant use filter_horizontal in admin.py for  Filter.roots or other manytomany fields that use Filter_Roots.
 
     
@@ -106,6 +107,7 @@ class Filter_Attribute(models.Model):
     #product_filter_attributes_set
     #shopfilteritems
     class Meta:
+        ordering = ('filterr',)
         verbose_name = _('Filter Attribute')
         verbose_name_plural = _('Filter Attributes')
         
@@ -163,7 +165,7 @@ class Post(models.Model):
     meta_description = models.TextField(_('meta description'), validators=[MaxLengthValidator(160)], blank=True, default='')    
     brief_description = models.TextField(_('brief description'), validators=[MaxLengthValidator(1000)])
     visible = models.BooleanField(_('delete'), default=True)
-    published_date = model_fields_custom.DateTimeFieldShamsi(_('published date'), auto_now_add=True)
+    published_date = models.DateTimeField(_('published date'), auto_now_add=True)
     image_icon = models.OneToOneField(Image_icon, on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('image icon'))
     root = models.ForeignKey(Root, on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('root'))
     author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('author'))
@@ -193,7 +195,7 @@ class ProductManager(models.Manager):                             #we have two s
         return product
 
 class Product(models.Model):                                     #.order_by('-available') shoud be done in views and in admin hasndy
-    name = models.CharField(_('name'), max_length=25)
+    name = models.CharField(_('name'), max_length=60)
     slug = models.SlugField(_('slug'), allow_unicode=True, db_index=False)             #default db_index of slug is True
     meta_title = models.CharField(_('meta title'), max_length=60, blank=True, default='')
     meta_description = models.TextField(_('meta description'), validators=[MaxLengthValidator(160)], blank=True, default='')
@@ -202,16 +204,16 @@ class Product(models.Model):                                     #.order_by('-av
     price = models.DecimalField(_('price'), max_digits=10, decimal_places=0, default=0)
     available = models.BooleanField(_('available'), default=False, db_index=True)
     visible = models.BooleanField(_('delete'), default=True, db_index=True)                #we use visible for deleting an object, for deleting visible=False, in fact we must dont delete any product.    
-    created = model_fields_custom.DateTimeFieldShamsi(_('created'), auto_now_add=True)
-    updated = model_fields_custom.DateTimeFieldShamsi(_('updated'), auto_now=True)
+    created = models.DateTimeField(_('created date'), auto_now_add=True)
+    updated = models.DateTimeField(_('updated date'), auto_now=True)
     filter_attributes = models.ManyToManyField(Filter_Attribute, through='Product_Filter_Attributes', blank=True, verbose_name=_('filter attributes'))
     root = models.ForeignKey(Root, on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('root'))
     image_icon = models.OneToOneField(Image_icon, on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('image icon'))     #in home page(page that list of product shown) dont query product.image_set.all()[0] for showing one image of product, instead query product.image_icon   (more fster)
     rating = models.OneToOneField(Rating, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('rating'))
     stock = models.PositiveIntegerField(_('stock'), default=0)
     brand = models.CharField(_('brand'), max_length=25, null=True, blank=True)
-    weight = models.PositiveIntegerField(_('weight'), null=True, blank=True)
-    size = models.CharField(_('size'), max_length=25, null=True, blank=True)
+    weight = models.FloatField(_('weight'), null=True, blank=True)
+    size = models.CharField(_('size'), max_length=25, null=True, blank=True)          #value should be in cm  and like '10,15,15'  this field seperate to 3 field in ProductForm in __init__ and save func).
     #image_set                                                    backward relation field
     #comment_set
     #product_filter_attributes_set
@@ -249,6 +251,7 @@ class Product_Filter_Attributes(models.Model):
     def __str__(self):
         return _('Product_Filter_Attribute') + ' ' + str(self.id)
 
+Product_Filter_Attributes._meta.auto_created = True
 
 
 
@@ -338,7 +341,7 @@ post_save.connect(save_smallimage, sender=Image)
 statuses = [('1', _('not checked')), ('2', _('confirmed')), ('3', _('not confirmed')), ('4', _('deleted'))]
 class Comment(models.Model):
     confirm_status = models.CharField(_('confirm status'), default='1', max_length=1, choices=statuses)               #confirm site comments by admin and show comment in site if confirmed, '1' = confirmed     '2' = not checked(admin should check comment to confirm or not)      '3' = not confirmed(admin can confirm afters if want)    '4' = deleted
-    published_date = model_fields_custom.DateTimeFieldShamsi(_('published date'), auto_now_add=True)
+    published_date = models.DateTimeField(_('published date'), auto_now_add=True)
     content = models.TextField(_('content'), validators=[MaxLengthValidator(500)])
     author = models.ForeignKey(User, related_name='comment_set_author', related_query_name='comments_author', on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('author'))
     confermer = models.ForeignKey(User, related_name='comment_set_confermer', related_query_name='comments_confermer', on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('confermer'))    
@@ -355,10 +358,27 @@ class Comment(models.Model):
         
 
 
-class State(models.Model):                            #these classes are internal usage and dont need verbose name and meta.
-    key = models.CharField(max_length=10)
-    name = models.CharField(max_length=30)
-    towns = model_fields_custom.TextFieldListed()
+class State(models.Model):
+    key = models.CharField(max_length=10, unique=True, verbose_name=_('key'))
+    name = models.CharField(max_length=30, verbose_name=_('name'))
+    #towns
 
+    class Meta:
+        verbose_name = _('State')
+        verbose_name_plural = _('States')
+        
     def __str__(self):
         return 'State' + ' ' + self.name
+
+
+class Town(models.Model):
+    key = models.CharField(max_length=10, unique=True, verbose_name=_('key'))
+    name = models.CharField(max_length=30, verbose_name=_('name'))
+    state = models.ForeignKey(State, to_field='key', related_name='towns', on_delete=models.SET_NULL, null=True, verbose_name=_('state'))
+
+    class Meta:
+        verbose_name = _('Town')
+        verbose_name_plural = _('Towns')
+        
+    def __str__(self):
+        return 'Town' + ' ' + self.name

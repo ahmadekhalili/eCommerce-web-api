@@ -1,0 +1,52 @@
+{% load i18n %}
+{% get_current_language_bidi as LANGUAGE_BIDI %}
+<div collapsed="" id="{{ spec.state_filter_id }}" style="height: 20px; overflow: hidden;">
+	<a id="{{ spec.state_filter_link_id }}" href="#" style="text-decoration: none;"> 
+		<h3 id="{{ spec.state_filter_h3_id }}" style="display: inline;">{% blocktranslate with filter_title=title %} By {{ filter_title }} {% endblocktranslate %} 
+			<span id="{{ spec.state_filter_more_id }}">({% trans "more" %})</span> 
+			<span id="{{ spec.state_filter_less_id }}" style="display: none;">({% trans "less" %})</span> 
+		</h3>
+		<span id="{{ state_filter_icon_id }}" style={% if LANGUAGE_BIDI %}"float: left;"{% else %}"float: right;"{% endif %} class="material-icons">expand_more</span>
+	</a>
+<ul>
+{% for choice in choices %}
+    <li{% if choice.selected %} class="selected"{% endif %}>
+    <a href="{{ choice.query_string|iriencode }}" title="{{ choice.display }}">{{ choice.display }}</a></li>
+{% endfor %}
+</ul>
+</div>
+
+
+<script>                               //here we extend and collapse states when clicked on link with id state_filter, and set color and text more less
+	function dropdown_state_filter(event) {
+		div = document.getElementById("{{ spec.state_filter_id }}");
+		collapsor_text = document.getElementById("{{ spec.state_filter_link_id }}");
+		more = document.getElementById("{{ spec.state_filter_more_id }}");
+		less = document.getElementById("{{ spec.state_filter_less_id }}");
+		attrs = div.attributes;
+		collapsed = true;
+		for (var i = attrs.length - 1; i >= 0; i--) {
+			if (attrs[i].name == "collapsed") {                       //extended mode
+				div.removeAttribute("collapsed", "");
+				div.style.height = "auto";
+				div.style.overflow = "hidden";
+				collapsor_text.style.background = "#d0ebf7";
+				collapsor_text.style.color = "#666";
+				more.style.display = "none";
+				less.style.display = "";
+				collapsor_text.style.color = "black";
+				collapsed = false;  }
+			}		
+		if (collapsed == true) {                                     //collapsed mode
+			div.setAttribute("collapsed", "");	
+			div.style.height = "20px";
+			div.style.overflow = "hidden";
+			collapsor_text.style.background = "#f8f8f8";
+			collapsor_text.style.color = "#666";  	
+			more.style.display = "";
+			less.style.display = "none";		
+			collapsor_text.style.fontcolor = "#666";  }	
+	}
+	document.getElementById("{{ spec.state_filter_link_id }}").addEventListener("click", dropdown_state_filter);		
+</script>
+			

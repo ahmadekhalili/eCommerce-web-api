@@ -3,6 +3,7 @@
 <html lang="{{ LANGUAGE_CODE|default:"en-us" }}" {% if LANGUAGE_BIDI %}dir="rtl"{% endif %}>
 <head>
 <title>{% block title %}{% endblock %}</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">                     <!-- this is for loading googles icons, you can see list of icons load here: https://fonts.google.com/icons?selected=Material+Icons+Outlined:assignment_returned&icon.query=down -->
 <link rel="stylesheet" type="text/css" href="{% block stylesheet %}{% static "admin/css/base.css" %}{% endblock %}">
 {% if not is_popup and is_nav_sidebar_enabled %}
   <link rel="stylesheet" type="text/css" href="{% static "admin/css/nav_sidebar.css" %}">

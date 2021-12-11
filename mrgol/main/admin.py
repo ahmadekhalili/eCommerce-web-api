@@ -12,7 +12,7 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.admin.utils import unquote
 import json
 
-from customed_files.django.django_customed_classes.custom_ModelAdmin import CustModelAdmin
+from customed_files.django.classes.custom_ModelAdmin import CustModelAdmin
 from customed_files.date_convertor import MiladiToShamsi
 from . import myserializers
 from . import myforms
@@ -35,8 +35,8 @@ class CommentInline(admin.TabularInline):
     readonly_fields = ('content', 'author', 'confermer', 'confirm_status', 'get_published_date')
     
     def get_published_date(self, obj):                                       #auto_now_add and auto_now fields must be in read_only otherwise raise error (fill by django not user) and you cant control output of read_only fields with widget (from its form) so for this fiels you cant specify eny widget!!
-        date_str = MiladiToShamsi(obj.published_date.year, obj.published_date.month, obj.updated.day).result(str_month=True)
-        return format_html(f'{date_str[2]} {date_str[1]} {date_str[0]}، ساعت {obj.published_date.hour}:{obj.published_date.minute}')
+        date = MiladiToShamsi(obj.published_date.year, obj.published_date.month, obj.published_date.day).result(month_name=True)
+        return format_html(f'{date[2]} {date[1]} {date[0]}، ساعت {obj.published_date.hour}:{obj.published_date.minute}')
     get_published_date.short_description = _('published date')
 
 
@@ -47,38 +47,59 @@ class PostAdmin(admin.ModelAdmin):
     readonly_fields = ('get_published_date',)
 
     def get_published_date(self, obj):                                       #auto_now_add and auto_now fields must be in read_only otherwise raise error (fill by django not user) and you cant control output of read_only fields with widget (from its form) so for this fiels you cant specify eny widget!!
-        date_str = MiladiToShamsi(obj.published_date.year, obj.published_date.month, obj.published_date.day).result(str_month=True)
-        return f'{date_str[2]} {date_str[1]} {date_str[0]}، ساعت {obj.published_date.hour}:{obj.published_date.minute}'
+        date = MiladiToShamsi(obj.published_date.year, obj.published_date.month, obj.published_date.day).result(str_month=True)
+        return f'{date[2]} {date[1]} {date[0]}، ساعت {obj.published_date.hour}:{obj.published_date.minute}'
     get_published_date.allow_tags = True
     get_published_date.short_description = _('published date')
     
 admin.site.register(Post, PostAdmin)
 
 
+filters_list_filter = []
+try:                               #in first creating db,  we have not eny table so raise error in for filter in Filter.objects.prefetch_related ...
+    i = -1
+    for filter in Filter.objects.prefetch_related('filter_attributes'):
+        i += 1
+        def lookups(self, request, model_admin, filter=filter):                    #should return list of tuples like [('1', 'one'), ('2', 'two'), ..]
+            return filter.filter_attributes.values_list('id', 'name')
+
+        def queryset(self, request, queryset):
+            if self.value():                                                #if dont put this, list_display will be blank always (even when you want all objects like when you go to url: "http://192.168.114.21:8000/admin/orders/profileorder" program come here and self.value() is None in that case and queryset.filter(state=None) make our queryset clear!
+                return queryset.filter(filter_attributes=self.value())
+
+        def choices(self, changelist): 
+            for lookup, title in self.lookup_choices:
+                yield {
+                    'selected': self.value() == str(lookup),
+                    'query_string': changelist.get_query_string({self.parameter_name: lookup}),
+                    'display': title,
+                }
+        filters_list_filter.append(type('Filter_AttributeListFilter', (admin.SimpleListFilter,),
+                 {'title': filter.name, 'parameter_name': 'filter_attribute', 'template': 'admin/filter_attribute_filter_custom.html',
+                  'state_filter_id': f'state_filter-{i}', 'state_filter_link_id': f'state_filter-link-{i}', 'state_filter_h3_id': f'state_filter-h3-{i}', 'state_filter_more_id': f'state_filter-more-{i}', 'state_filter_less_id': f'state_filter-less-{i}', 'state_filter_icon_id': f'state_filter-icon-{i}',
+                  'lookups': lookups, 'queryset': queryset, 'choices': choices}))
+except:
+    pass
 
 
 class ImageInline(admin.StackedInline):
     model = Image
     form = myforms.ImageForm
 
-class Product_Filter_AttributesInline(admin.StackedInline):
-    model = Product_Filter_Attributes
-    template = 'admin/edit_inline/product_filter_attributes_stacked.html'
 
-    
-
-  
 class ProductAdmin(CustModelAdmin):
-    list_display = ['id', 'name', 'stock', 'price']                 #this line is for testing mode!!!
-    exclude = ('filter_attributes', 'visible')
+    search_fields = ['id', 'name__contains', 'slug', 'brand']                            #important: update manualy js file searchbar_help_text_product in class media.
+    list_display = ['get_id', 'name', 'price', 'stock', 'rating', 'get_created_brief', 'get_updated_brief']                 #this line is for testing mode!!!
+    list_filter = [*filters_list_filter, 'available', 'created', 'updated']
+    exclude = ('visible',)
     prepopulated_fields = {'slug':('name',)}
     filter_horizontal = ('filter_attributes',)
-    inlines = [Product_Filter_AttributesInline, ImageInline, CommentInline ]   
+    inlines = [ImageInline, CommentInline ]   
     readonly_fields = ('rating', 'get_created', 'get_updated')
     form = myforms.ProductForm
     fieldsets = (
         (None, {
-            'fields': ('name', 'slug', 'brief_description', 'detailed_description', 'price', 'available', 'image', 'alt', 'root', 'rating', 'stock', 'brand', 'weight', 'get_created', 'get_updated')
+            'fields': ('name', 'slug', 'brief_description', 'detailed_description', 'price', 'available', 'image', 'alt', 'root', 'filter_attributes', 'rating', 'stock', 'brand', 'weight', 'get_created', 'get_updated')
         }),
         (_('size'), {
             'classes': ('collapse',),
@@ -89,18 +110,35 @@ class ProductAdmin(CustModelAdmin):
             'fields': ('meta_title', 'meta_description'),
         }),
     )
-
+    
+    class Media:
+        js = ('js/admin/searchbar_help_text_product.js',)                   #addres is in static folder
+        
+    def get_id(self, obj):
+        return obj.id
+    get_id.short_description = _('id')
+    get_id.admin_order_field = 'id'
+    def get_created_brief(self, obj):
+        date = MiladiToShamsi(obj.created.year, obj.created.month, obj.created.day).result()
+        return f'{date[0]}/{date[1]}/{date[2]}'
+    get_created_brief.allow_tags = True
+    get_created_brief.short_description = _('created date')
+    def get_updated_brief(self, obj):             
+        date = MiladiToShamsi(obj.updated.year, obj.updated.month, obj.updated.day).result()
+        return f'{date[0]}/{date[1]}/{date[2]}'
+    get_updated_brief.allow_tags = True
+    get_updated_brief.short_description = _('updated date')
+    
     def get_created(self, obj):
-        return 'asdasd'
-        date_str = MiladiToShamsi(obj.created.year, obj.created.month, obj.created.day).result(str_month=True)
-        return f'{date_str[2]} {date_str[1]} {date_str[0]}، ساعت {obj.created.hour}:{obj.created.minute}'
+        date = MiladiToShamsi(obj.created.year, obj.created.month, obj.created.day).result(month_name=True)
+        return f'{date[2]} {date[1]} {date[0]}، ساعت {obj.created.hour}:{obj.created.minute}'
     get_created.allow_tags = True
-    get_created.short_description = _('created')
+    get_created.short_description = _('created date')
     def get_updated(self, obj):             
-        date_str = MiladiToShamsi(obj.updated.year, obj.updated.month, obj.updated.day).result(str_month=True)
-        return f'{date_str[2]} {date_str[1]} {date_str[0]}، ساعت {obj.updated.hour}:{obj.updated.minute}'
+        date = MiladiToShamsi(obj.updated.year, obj.updated.month, obj.updated.day).result(month_name=True)
+        return f'{date[2]} {date[1]} {date[0]}، ساعت {obj.updated.hour}:{obj.updated.minute}'
     get_updated.allow_tags = True
-    get_updated.short_description = _('updated')
+    get_updated.short_description = _('updated date')
     
     def save_form(self, request, form, change):
         instance = form.save(commit=False)       
@@ -118,7 +156,7 @@ class ProductAdmin(CustModelAdmin):
     def get_queryset(self, request):
         queryset = Product.objects.exclude(visible=False)
         return queryset
-
+    
     @csrf_protect_m
     def changeform_view(self, request, object_id=None, form_url='', extra_context=None):        
         to_field = request.POST.get(TO_FIELD_VAR, request.GET.get(TO_FIELD_VAR))
@@ -178,58 +216,35 @@ class ProductAdmin(CustModelAdmin):
             request.POST = post
         return super().change_view(request, object_id, form_url, extra_context)
 
-    '''
     def delete_model(self, request, obj):
         obj.visible = False
         obj.save()
 
-
-        
-    def get_form(self, request, obj=None, change=False, **kwargs):
-        form = super().get_form(request, obj=None, change=False, **kwargs)
-        return form
-    def change_view(self, request, object_id, form_url='', extra_context=None):
-        if request.method == 'POST':
-            return super().change_view(request, object_id, form_url, extra_context)
-        
-        else:
-            current_product = Product.objects.get(id=object_id)
-            roots_id_str = [(root.id, root.__str__()) for root in Root.objects.filter(post_product='product')]
-            filters = Filter.objects.all()
-            filters_attributes = []
-            for filter in filters:                 #in this part we want create dynamicly options inside <select ..> </select>  for field root.level depend on validators we define in PositiveSmallIntegerField(validators=[here]) for example if we have MinValueValidator(1) MaxValueValidator(3) we have 3 options: <option value="1"> 1 </option>   <option value="2"> 2 </option>   <option value="3"> 3 </option>                   
-                filters_attributes += [json.dumps([serializer for serializer in myserializers.Filter_AttributeListSerializer(filter.filter_attributes.all(), many=True).data])]
-
-            selected_filters_attributes = current_product.filter_attributes.all()
-            selected_filters_attributes_ids = [filter_attribute.id for filter_attribute in selected_filters_attributes]
-            selected_filters_ids = [filter_attribute.filterr.id for filter_attribute in selected_filters_attributes]
-            return render(request, 'admin/change_product_template.html', {
-                'current_product': current_product,
-                'selected_filters_attributes': selected_filters_attributes,
-                'selected_filters_attributes_ids': selected_filters_attributes_ids,
-                'selected_filters_ids': selected_filters_ids,
-                'filters_filters_attributes': list(zip(filters, filters_attributes)),
-                'range_1': '1:{}'.format(len(filters)),
-                'roots_id_str': roots_id_str})
-    '''
+class ProductAdminn(CustModelAdmin):
+    filter_horizontal = ('filter_attributes',)
 admin.site.register(Product, ProductAdmin)
 
 
 
 
 class CommentAdmin(admin.ModelAdmin):
-    list_display = ['id', 'author', 'get_published_date', 'confirm_status']
+    list_display = ['get_id', 'author', 'get_published_date', 'confirm_status']
     #fields = ('confirm_status', 'content', 'author', 'confermer')
     #readonly_fields = ('author', 'confermer', 'get_published_date')
     #form = myforms.CommentForm
+
+    def get_id(self, obj):
+        return obj.id
+    get_id.short_description = _('id')
+    get_id.admin_order_field = 'id'
     
     def get_queryset(self, request):
         queryset = Comment.objects.exclude(confirm_status='4')
         return queryset
     
     def get_published_date(self, obj):                                       #auto_now_add and auto_now fields must be in read_only otherwise raise error (fill by django not user) and you cant control output of read_only fields with widget (from its form) so for this fiels you cant specify eny widget!!
-        date_str = MiladiToShamsi(obj.published_date.year, obj.published_date.month, obj.updated.day).result(str_month=True)
-        return f'{date_str[2]} {date_str[1]} {date_str[0]}، ساعت {obj.published_date.hour}:{obj.published_date.minute}'
+        date = MiladiToShamsi(obj.published_date.year, obj.published_date.month, obj.published_date.day).result(month_name=True)
+        return format_html(f'{date[2]} {date[1]} {date[0]}، ساعت {obj.published_date.hour}:{obj.published_date.minute}')
     get_published_date.allow_tags = True
     get_published_date.short_description = _('published date')
     '''
@@ -260,12 +275,18 @@ class RootAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug':('name',)}
     #exclude = ('post_product',)
     form = myforms.RootForm
-    list_display = ['str_ob', 'id']
+    list_display = ['str_ob', 'get_id']
     ordering = ['id']
     
     def str_ob(self, obj):
         return obj.__str__()
-
+    str_ob.short_description = _('name')
+    str_ob.admin_order_field = 'level'
+    def get_id(self, obj):
+        return obj.id
+    get_id.short_description = _('id')
+    get_id.admin_order_field = 'id'
+    
     def delete_queryset(self, request, queryset):
         roots = list(queryset)
         dict_ids = [root.id for root in roots]

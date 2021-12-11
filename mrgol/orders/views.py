@@ -24,15 +24,17 @@ from .myserializers import ProfileOrderSerializer, OrderSerializer, OrderItemSer
 class ListCreateProfileOrder(views.APIView):
     permission_classes = [IsAuthenticated]                               #redirect to login page by front if user is not loged in.
     def get(self, request, *args, **kwargs):                             #here listed ProfileOrders of a user.  come here from url /cart/.  here front side must create "checkbox like" element  refrencing to ListCreateOrderItem, and when click on checkbox auto submit to ProfileOrderDetail.get for optaining shiping price.  
-        profileorders = request.user.profileorders.all()
+        profileorders = request.user.profileorders.select_related('town__state')
         if profileorders:
+            for profileorder in profileorders:
+                profileorder.state = profileorder.town.state             #profileorder.state needed in ProfileOrderSerializer
             cart_menu = CartMenuView().get(request).data
             return Response({**cart_menu, 'profileorders': ProfileOrderSerializer(profileorders, many=True).data})   
         else:            
-            return Response({**cart_menu, 'profileorders': None})     #after this front side must create blank ProfileOrder Form with action refrenced to ListCreateProfileOrder.post. (you can create form and its html elements by django modelform and say to front html elements)    
+            return Response({**cart_menu, 'profileorders': None})         #after this front side must create blank ProfileOrder Form with action refrenced to ListCreateProfileOrder.post. (you can create form and its html elements by django modelform and say to front html elements)    
 
     def post(self, request, *args, **kwargs):                             #here ProfileOrder cerated from Form datas sended by user.
-        data = request.data                                               #data sended must be like {"first_name": "javad", "last_name":"haghi", "phone":"09127761277", "state": "1", "town": "1", "address":"tehran", "postal_code":"1111111111"} to save ProfileOrder object successfuly.
+        data = request.data                                               #data sended must be like {"first_name": "javad", "last_name":"haghi", "phone":"09127761277", "town":"1", "address":"tehran", "postal_code":"1111111111"} to save ProfileOrder object successfuly.
         main_profileorder = ProfileOrder.objects.filter(user=request.user, main=True)
         data['main'] = True if not main_profileorder else False           #first profileorder must be main profileorder.
         data['user'] = request.user.id
@@ -51,19 +53,21 @@ class ListCreateProfileOrder(views.APIView):
 
 class ProfileOrderDetail(views.APIView):                                  
     permission_classes = [IsAuthenticated]
-    def get(self, request, *args, **kwargs):                                       #here shipping price compute and sended to front. (based on profileorder)
-        profileorder = get_object_or_404(ProfileOrder, id=kwargs.get('pk'))
+    def get(self, request, *args, **kwargs):                                       #here shipping price compute and sended to front. (depende whitch profileorder choisen)
+        profileorder = ProfileOrder.objects.filter(id=kwargs.get('pk')).select_related('town__state')[0]
         cart_menu = CartMenuView().get(request).data
+        if not cart_menu['sabad']:
+            return Response(_('your cart is empty, add a product to order.'))
         cart = Cart(request)
         shipping = Shipping.objects.first()
-        post_price = PostDispatchPrice(cart_menu['total_weight'],  cart_menu['dimensions']).get_price(shipping.state, shipping.town, profileorder.state, profileorder.town) + shipping.fee
+        post_price = PostDispatchPrice(cart_menu['total_weight'],  cart_menu['dimensions']).get_price(shipping.town.state.key, shipping.town.key, profileorder.town.state.key, profileorder.town.key) + shipping.fee
         for dispatch in shipping.dispatch_set.all():
             if dispatch.town == profileorder.town:
-                cart.session['shipping_price'] = str(dispatch.shipping_price)              #shipping_price uses in ListCreateOrderItem.post for creating order
+                cart.session['personal_shipping_price'], cart.session['post_shipping_price'] = str(dispatch.shipping_price), str(post_price)               #personal_shipping_price and post_shipping_price uses in ListCreateOrderItem.post for creating order
                 cart.save()
-                return Response({'profileorder_selected': profileorder.id, 'personal_dispatch': {'id': dispatch.id, 'price': dispatch.shipping_price, 'delivery_date': dispatch.delivery_date_delay}, 'post_price': post_price})
+                return Response({'profileorder_selected': profileorder.id, 'personal_dispatch': {'price': dispatch.shipping_price, 'delivery_date': dispatch.delivery_date_delay}, 'post_price': post_price})
             
-        cart.session['shipping_price'] = str(post_price)
+        cart.session['personal_shipping_price'], cart.session['post_shipping_price'] = None, str(post_price)
         cart.save()                
         return Response({'profileorder_selected': profileorder.id, 'post_price': post_price})        #profileorder_selected is for what? answer: front know whitch checkbox should be selected after profileorder creation(after coming from ListCreateProfileOrder.post to .get) 
             
@@ -91,7 +95,7 @@ class ListCreateOrderItem(views.APIView):
         orders = Order.objects.filter(profile_order__user=request.user).select_related('profile_order').prefetch_related('items__product__image_icon', 'items__product__rating').order_by('-created')#OrderItem.objects.filter(order__profile_order__user=request.user, order__paid=True).select_related('order__profile_order').order_by('-order__created')
         return Response({'orders': OrderSerializer(orders, many=True, context={'request': request}).data})
     
-    def post(self, request, *args, **kwargs):                           #here created orderitems.  come here from class ListCreateProfileOrder.get    connect here with utl: http http://192.168.114.21:8000/orders/orderitems/ cookie:"sessionid=..." profile_order_id=1 paid_type=cod shipping_type=personal_dispatch  or post     also cart.session['shipping_price'] should be initited in ListCreateProfileOrder.get
+    def post(self, request, *args, **kwargs):                           #here created orderitems.  come here from class ProfileOrderDetail (cart.session['shipping_price'] initialized in this class)     connect here with utl: http http://192.168.114.21:8000/orders/orderitems/ cookie:"sessionid=..." profile_order_id=1 paid_type=cod shipping_type=personal_dispatch  or post     also cart.session['shipping_price'] should be initited in ListCreateProfileOrder.get
         cart, data, total_prices, price_changed, quantity_ended = Cart(request), request.data, Decimal(0), False, False
         paid_type, shipping_type = data.get('paid_type', 'online'), data.get('shipping_type')              #important: if website have cod and online front should create 2 chekbox for thats.
         orderitems, products, shopfilteritems, lists = [], [], [], []
@@ -103,7 +107,9 @@ class ListCreateOrderItem(views.APIView):
             orderitems.append(OrderItem(shopfilteritem=item['shopfilteritem'], price=item['total_price'], quantity=item['quantity'])) if item['shopfilteritem'] else orderitems.append(OrderItem(product=item['product'], price=item['total_price'], quantity=item['quantity']))      #here this line will saved just for cod (for online after payment)
        
         if not price_changed and not quantity_ended and paid_type in ['cod', 'online'] and shipping_type in ['personal_dispatch', 'post']:
-            order = Order.objects.create(profile_order_id=data['profile_order_id'], paid_type=paid_type, paid=False, price=total_prices, shipping_price=cart.session['shipping_price'], shipping_type=shipping_type, order_status='0')
+            shipping_price = Decimal(cart.session['personal_shipping_price']) if shipping_type == 'personal_dispatch' else Decimal(cart.session['post_shipping_price'])
+            total_prices += shipping_price
+            order = Order.objects.create(profile_order_id=data['profile_order_id'], paid_type=paid_type, paid=False, price=total_prices, shipping_price=shipping_price, shipping_type=shipping_type, order_status='0')
             for orderitem in orderitems:
                 orderitem.order = order
             if paid_type == 'cod':

@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from customed_files.date_convertor import MiladiToShamsi
+from main.myserializers import StateSerializer, TownSerializer
 from cart.myserializers import CartProductSerializer
 from users.myserializers import UserNameSerializer
 from .models import ProfileOrder, Order, OrderItem
@@ -15,15 +16,12 @@ class ProfileOrderSerializer(serializers.ModelSerializer):
         exclude = ['visible']
         
     def to_representation(self, obj):
-        self.fields['name'] = serializers.SerializerMethodField()
         self.fields['phone'] = serializers.SerializerMethodField()
-        self.fields['user'] = UserNameSerializer()
+        self.fields['state'] = StateSerializer(read_only=True)
+        self.fields['town'] = TownSerializer(read_only=True)
+        self.fields['user'] = UserNameSerializer(read_only=True)
         fields =  super().to_representation(obj)
-        fields.pop('first_name'), fields.pop('last_name')
         return fields
-    
-    def get_name(self, obj):
-        return f'{obj.first_name} {obj.last_name}'
 
     def get_phone(self, obj):
         return f'{obj.phone.national_number}'     
@@ -37,19 +35,28 @@ class OrderSerializer(serializers.ModelSerializer):
         exclude = ['visible']
 
     def to_representation(self, obj):
-        self.fields['order_status'] = serializers.SerializerMethodField() 
+        self.fields['order_status'] = serializers.SerializerMethodField()
+        self.fields['delivery_date'] = serializers.SerializerMethodField()
         self.fields['created'] = serializers.SerializerMethodField()
-        self.fields['profile_order'] = ProfileOrderSerializer()
-        self.fields['items'] = OrderItemSerializer(many=True)
+        self.fields['profile_order'] = ProfileOrderSerializer(read_only=True)
+        self.fields['items'] = OrderItemSerializer(many=True, read_only=True)
         return super().to_representation(obj)
 
     def get_order_status(self, obj):
         return obj.get_order_status_display()
     
+    def get_delivery_date(self, obj):
+        d_t = obj.delivery_date
+        shamsi_date = MiladiToShamsi(d_t.year, d_t.month, d_t.day).result(month_name=True) if d_t else None
+        return f'{shamsi_date[2]} {shamsi_date[1]} {shamsi_date[0]}، ساعت {d_t.hour}:{d_t.minute}' if d_t else None
+
     def get_created(self, obj):
-        created = obj.created
-        y, m, d= created.year, created.month, created.day
-        return f'{y}/{m}/{d}'
+        d_t = obj.created
+        shamsi_date = MiladiToShamsi(d_t.year, d_t.month, d_t.day).result(month_name=True)
+        return f'{shamsi_date[2]} {shamsi_date[1]} {shamsi_date[0]}، ساعت {d_t.hour}:{d_t.minute}'
+
+        
+        
 
 
 
@@ -59,7 +66,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
         exclude = ['visible']
 
     def to_representation(self, obj):
-        self.fields['product'] = CartProductSerializer()
+        self.fields['product'] = CartProductSerializer(read_only=True)
         fields =  super().to_representation(obj)
         fields.pop('order')
         return fields

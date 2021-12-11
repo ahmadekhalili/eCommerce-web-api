@@ -1,54 +1,25 @@
-from django.db.models import Sum
+from django.db.models import Sum, F, Case, When
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
-from django.core.files.storage import FileSystemStorage
-from django.core.cache import cache
 #from django.template.defaultfilters import slugify
 from django.utils.text import slugify
-from django.core.mail import send_mail
 from django.middleware.csrf import get_token
-from django.contrib.sessions.backends.db import SessionStore
-from django.core.validators import MinValueValidator, MaxValueValidator
 
 from rest_framework import viewsets
-from rest_framework import generics, mixins
+from rest_framework import generics
 from rest_framework import permissions, authentication
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
-from rest_framework import status
 from rest_framework import views
 
 from . import myserializers, myforms
 from .mymethods import get_products, get_posts, get_posts_products_by_root, make_next
 from .models import *
 from users.myserializers import UserSerializer, UserChangeSerializer
-from users.models import User
-from cart.models import SesKey
 from cart.myserializers import CartProductSerializer
-from cart.cart import Cart
-from orders.models import ProfileOrder
 from customed_files.states_towns import list_states_towns
 
-#Post_Category        Product_Category
-
-
-from django.utils.html import format_html
-from django.utils import translation
-from django.contrib import messages
-from django.forms.models import inlineformset_factory
-from django.forms import formset_factory
-from orders.models import ProfileOrder, Order, paid_type_choices
-from decimal import Decimal
-from django.db.models import F, Q, Case, Value, When, Count
-from orders.models import OrderItem, Order, ProfileOrder
-from orders.myserializers import OrderItemSerializer
-from rest_framework.routers import DefaultRouter
-from customed_files import date_convertor
-from orders.myserializers import ProfileOrderSerializer, OrderSerializer, OrderItemSerializer
-
-from customed_files.states_towns import list_states_towns
 
 def index(request):
     if request.method == 'GET':
@@ -380,8 +351,6 @@ class ProductRootDetail(generics.RetrieveAPIView):
 
 class ProductCommentCreate(generics.RetrieveAPIView):
     def post(self, request, *args, **kwargs):                
-        '''
-        '''    
         if request.user.is_authenticated:
             try:
                 data = request.data
@@ -397,13 +366,15 @@ class ProductCommentCreate(generics.RetrieveAPIView):
 
 class States(views.APIView):
     def get(self, request, *args, **kwargs):
-        return Response([L[0] for L in list_states_towns])
+        return Response(myserializers.StateSerializer(State.objects.all(), many=True).data)#Response([L[0] for L in list_states_towns])
 
            
 class TownsByState(views.APIView):
     def get(self, request, *args, **kwargs):
+        return Response(myserializers.TownSerializer(State.objects.get(key=kwargs.get('key')).towns.all() , many=True).data)
+    '''
         for L in list_states_towns:
             if L[0][0] == kwargs.get('id'):
                 return Response(L[1])
-
+    '''
 

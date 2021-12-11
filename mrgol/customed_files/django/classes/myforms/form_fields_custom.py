@@ -1,7 +1,7 @@
 from django import forms
 
-from .custom_BoundField import CustomBoundField
-from main.models import Root
+from .BoundField_custom import CustomBoundField
+from main.models import Root, Town
 
 
 
@@ -50,4 +50,12 @@ class CustomField(forms.Field):
         field in a template.
         """
         return CustomBoundField(form, self, field_name)
+
+
+
+
+
+class CharFieldForForeignKey(forms.CharField):
+    def clean(self, value):
+        return Town.objects.get(key=value)
 

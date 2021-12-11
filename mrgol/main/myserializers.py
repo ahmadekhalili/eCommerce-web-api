@@ -6,8 +6,8 @@ from rest_framework import serializers
 
 from datetime import datetime
 
-from customed_files import date_convertor
-from .models import Comment, Content, Post, Rating, Product, Image_icon, Image, SmallImage, Root, Filter, Filter_Attribute, ShopFilterItem
+from customed_files.date_convertor import MiladiToShamsi 
+from .models import *
 from .mymethods import get_root_and_fathers
 from users.models import User
 from users.myserializers import UserNameSerializer
@@ -28,7 +28,7 @@ class CommentSerializer(serializers.ModelSerializer):
         fields = '__all__'
         
     def to_representation(self, obj):
-        self.fields['author'] = UserNameSerializer()                
+        self.fields['author'] = UserNameSerializer(read_only=True)                
         return super().to_representation(obj)
     
 class RatingSerializer(serializers.ModelSerializer):
@@ -225,9 +225,8 @@ class PostListSerializer(serializers.ModelSerializer):
 
     def get_published_date(self, obj):
         d_t = obj.published_date
-        y, m, d, h, minute, s = d_t.year, d_t.month, d_t.day, d_t.hour, d_t.minute, d_t.second
-        y, m, d = date_convertor.MiladiToShamsi(y, m, d).result()
-        return '{}-{}-{} {}:{}:{}'.format(y, m, d, h, minute, s)#datetime(y, m, d, h, minute, s)
+        shamsi_date = date_convertor.MiladiToShamsi(d_t.year, d_t.month, d_t.day).result(month_name=True)
+        return f'{shamsi_date[2]} {shamsi_date[1]} {shamsi_date[0]}، ساعت {d_t.hour}:{d_t.minute}'
     
     def get_root(self, obj):                                        #we must create form like: <form method="get" action="/posts/?obj.root.slug"> .  note form must shown as link.
         pk, slug = obj.id, obj.slug
@@ -278,9 +277,8 @@ class PostDetailSerializer(serializers.ModelSerializer):
 
     def get_published_date(self, obj):
         d_t = obj.published_date
-        y, m, d, h, minute, s = d_t.year, d_t.month, d_t.day, d_t.hour, d_t.minute, d_t.second
-        y, m, d = date_convertor.MiladiToShamsi(y, m, d).result()
-        return '{}/{}/{} {}:{}:{}'.format(y, m, d, h, minute, s)
+        shamsi_date = date_convertor.MiladiToShamsi(d_t.year, d_t.month, d_t.day).result(month_name=True)
+        return f'{shamsi_date[2]} {shamsi_date[1]} {shamsi_date[0]}، ساعت {d_t.hour}:{d_t.minute}'
     
     def get_root(self, obj):                                     #we must create form like: <form method="get" action="/posts/?obj.root.slug"> .  note form must shown as link. you can put that form in above of that post.
         pk, slug = obj.id, obj.slug
@@ -336,6 +334,13 @@ class ProductDetailSerializer(serializers.ModelSerializer):       #comment_set w
 
 
 
-class TestSerializer(serializers.Serializer):
-    t1 = serializers.FloatField()
+class StateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = State
+        fields = ['key', 'name']                            #we use key instead id for saving of states and towns. (id can be change in next db but key is more stable)
+
     
+class TownSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Town
+        fields = ['key', 'name']                            #key is unique so dont need to state or other fields for saving ProfileOrder or ...

@@ -25,7 +25,7 @@ class Cart(object):
             self.session.modified = False 
         self.cart = cart
 
-    def add(self, product_id, quantity=1, shopfilteritem_id=None):             #product_id is str
+    def add(self, product_id, quantity=1, shopfilteritem_id=None):             #product_id should be str(it can be int if for example in django rest api clint send like {"prodict_id":1} instead  {"prodict_id":"1"}
         quantity = int(quantity)
         item = get_object_or_404(ShopFilterItem, id=shopfilteritem_id) if shopfilteritem_id else get_object_or_404(Product, id=product_id) #selected_ShopFilterItems_ids = [request.POST.get('name') for name in Filter.objects.filter(selling=True).values_list('name', flat=True) if name in request.POST and request.POST.get('name')]     
         quantity = self.cart.get(product_id, {}).get('quantity', 0) + quantity
@@ -35,12 +35,21 @@ class Cart(object):
             else:
                 self.cart[product_id] = {'quantity': quantity, 'price': str(item.price), 'old_price': self.cart[product_id]['old_price'], 'shopfilteritem_id': shopfilteritem_id}     #important: we must not update old_price to current price "chon hata ba ezafe kardane kalaii ba qeimat taqir yafte moshkeli nist chon beharhal baraie namaiesh kalahaie sabad baiad be __ietr__ beravad barname var dar anja error taqir qeimat tolid va old_price be qeimat jadid update mishvad. ta dobare error namaiesh nadahad!"        
             self.save()
-    
+
+    def minus(self, product_id, shopfilteritem_id=None):             #product_id should be str
+        item = get_object_or_404(ShopFilterItem, id=shopfilteritem_id) if shopfilteritem_id else get_object_or_404(Product, id=product_id)
+        if product_id in self.cart:
+            if self.cart[product_id]['quantity'] >= 1:
+                self.cart[product_id]['quantity'] -= 1
+                self.save()
+            else:
+                self.remove(product_id)
+                
     def save(self):
         self.session[settings.CART_SESSION_ID] = self.cart                      #if self.session is authentication session, modify-save will done here.                                         
-        self.session.save()                                                 #in removing for unauthenticated user dont remove that product from request.session without self.session.save()!   and also for authenticated_user self.session is cart session and need .save for saving
+        self.session.save()                                                     #in removing for unauthenticated user dont remove that product from request.session without self.session.save()!   and also for authenticated_user self.session is cart session and need .save for saving
         
-    def remove(self, product_id):
+    def remove(self, product_id):                                               #product_id should be str
         product_id = str(product_id)
         if product_id in self.cart:
             del self.cart[product_id]
@@ -77,10 +86,11 @@ class Cart(object):
 
     def clear(self):                                                    #important: cart.clear work after .add for example supose you have:  cart.clear()  next run cart.add(product_id=data['product_id'], ...)  cart.clear dont ward!!!
         self.session[settings.CART_SESSION_ID] = {}
-        self.session['shipping_price'] = ''
+        self.session['personal_shipping_price'] = ''
+        self.session['post_shipping_price'] = ''
         self.session['profile_order_id'] = ''
-        cart.session['order_id'] = ''
-        cart.session['orderitem_ids'] = None
+        self.session['order_id'] = ''
+        self.session['orderitem_ids'] = None
         self.session.save()
         
 

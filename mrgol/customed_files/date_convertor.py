@@ -1,5 +1,5 @@
 #mabna dar in converotr tarikh: 1201/1/1 shamsi moadele : 1822/3/21 miladi mibashad. daghigh tar joloie esme har kelas convertor  ghofte shode ast.
-def month_name(m):                   #m is month number (shamsi), this method is public method(can be used out of this file)
+def get_month_name(m):                   #m is month number (shamsi), this method is public method(can be used out of this file)
     return {1: 'فروردين', 2: 'ارديبهشت', 3: 'خرداد', 4: 'تير', 5: 'مرداد', 6: 'شهريور', 7: 'مهر', 8: 'آبان', 9: 'آذر', 10: 'دی', 11: 'بهمن', 12: 'اسفند'}[m]
 
 
@@ -87,7 +87,7 @@ class MiladiToShamsi:
             if days <= months_days+shamsi_months_days[i+1]:
                 return [int(i+2), int(days-months_days)]
   
-    def result(self, str_month=False):
+    def result(self, month_name=False):
         miladi_days = self.miladi_days()                   
         current_year = 1201
         miladi_days2 = 0
@@ -106,10 +106,10 @@ class MiladiToShamsi:
             kabise = True if current_year in _shamsi_kabiseyears_list(current_year) else False   
             real_year = current_year
             date = [real_year, *self.shamsi_month_day(miladi_days3, kabise)]
-        if not str_month:
+        if not month_name:
             return date                                                                  #this is like [1398, 6, 15]
         else:
-            date[1] = month_name()[date[1]]
+            date[1] = get_month_name(date[1])
             return date                                                                  #this is like [1398, 'mer', 15]     mer in persian!
 
 

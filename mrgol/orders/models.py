@@ -6,9 +6,9 @@ from django.utils.translation import gettext_lazy as _
 from datetime import datetime
 from phonenumber_field.modelfields import PhoneNumberField
 
-from customed_files.django.django_customed_classes import model_fields_custom
+from customed_files.django.classes import model_fields_custom
 from customed_files.states_towns import list_states_towns
-from main.models import Product, ShopFilterItem
+from main.models import Product, ShopFilterItem, State, Town
 from users.models import User
 
 
@@ -21,11 +21,10 @@ class ProfileOrder(models.Model):
     first_name = models.CharField(_('first name'), max_length=50)
     last_name = models.CharField(_('last name'), max_length=50)
     phone = PhoneNumberField(_('phone number'))    
-    email = models.EmailField(_('email address'), blank=True, null=True)
-    state = models.CharField(_('state'), max_length=10)                                    #state & town works in admin panel manage by ProfileOrderCreateForm
-    town = models.CharField(_('town'), max_length=10)
+    town = models.ForeignKey(Town, to_field='key', on_delete=models.SET_NULL, null=True, verbose_name=_('town')) 
     address = models.CharField(_('address'), max_length=250)
-    postal_code = models.CharField(_('postal code'), max_length=20, validators=[validate_postal_code], unique=True, db_index=False)
+    postal_code = models.CharField(_('postal code'), max_length=10, validators=[validate_postal_code])          #profile.postal_code should not be unique supose one 'motager' in its home add profile, when he change its home another 'mostager' come to this home and want add profile to this home so if postale_code was unique he cant.
+    email = models.EmailField(_('email address'), blank=True, null=True)
     main = models.BooleanField(_('main profileorder'), default=False)      #car conflict with verbose_name app main.
     visible = models.BooleanField(_('delete'), default=True, db_index=True)
     #profileorder_set
@@ -49,10 +48,10 @@ class Order(models.Model):
     cd_peigiry = models.CharField(_('cd peigiry'), max_length=30, blank=True, null=True)
     price = models.DecimalField(_('price'), max_digits=10, decimal_places=0, blank=False, null=False)
     shipping_price = models.DecimalField(_('shipping price'), max_digits=10, decimal_places=0, blank=False, null=False)           #shipping_price(hazine hamlo naghl) = dispatch price(hazine ersal)  +  haqozzahme (hazine tahvil kala be post)
-    shipping_type = models.CharField(_('shipping type'), max_length=10)                                                           #must be post or personal_dispatch
+    shipping_type = models.CharField(_('shipping type'), max_length=20)                                                           #must be post or personal_dispatch
     order_status = models.CharField(_('order status'), max_length=1, choices=order_status_choices)
-    delivery_date = model_fields_custom.DateTimeFieldShamsi(_('delivery date'), blank=True, null=True)                  #will fill auto to time order_status chenged to delivered.
-    created = model_fields_custom.DateTimeFieldShamsi(_('created'), auto_now_add=True)
+    delivery_date = models.DateTimeField(_('delivery date'), blank=True, null=True)                  #will fill auto to time order_status chenged to delivered. care about datetime field without auto_now or auto_now_add in serializing or other proccesig because this fields can be None after object creation so for example in myserializer.py should put condition like 'if delivery_date==None do_other_somthing..' or other condition for managing none value and prevent error raising.
+    created = models.DateTimeField(_('created date'), auto_now_add=True)
     visible = models.BooleanField(_('delete'), default=True, db_index=True)
     profile_order = models.ForeignKey(ProfileOrder, on_delete=models.SET_NULL, null=True, verbose_name=_('profile order'))
     #items
@@ -113,9 +112,8 @@ class OrderItem(models.Model):
 
 
 class Shipping(models.Model):                                     #this is specefic model class(non create and del permission). we have two type Shipping, "personal" and "post" that is in one Shipping.
-    fee =  models.DecimalField(_('personal fee'), max_digits=10, decimal_places=0, blank=False, null=False)                #for only post shipping..        
-    state = models.CharField(_('state'), max_length=10)           #state,town,address is local of store(anbari)
-    town = models.CharField(_('town'), max_length=10)
+    fee =  models.DecimalField(_('personal fee'), max_digits=10, decimal_places=0, default=0, blank=True)                #for only post shipping..        
+    town = models.ForeignKey(Town, to_field='key', on_delete=models.SET_NULL, null=True, verbose_name=_('town'))         #this is adderes mabda
     address = models.CharField(_('address'), max_length=250)              
     #dispatch_set
     
@@ -130,8 +128,7 @@ class Shipping(models.Model):                                     #this is spece
 class Dispatch(models.Model):                                     
     shipping_price = models.DecimalField(_('shipping price'), max_digits=10, decimal_places=0, blank=False, null=False)
     delivery_date_delay = models.CharField(_('delivery date delay'), max_length=30)
-    state = models.CharField(_('state'), max_length=10)
-    town = models.CharField(_('town'), max_length=10)
+    town = models.ForeignKey(Town, to_field='key', on_delete=models.SET_NULL, null=True, verbose_name=_('town'))     #this is adress maghsad that admin can send to that.
     shipping = models.ForeignKey(Shipping, on_delete=models.CASCADE, verbose_name=_('shipping'))
     
     class Meta:
@@ -139,5 +136,4 @@ class Dispatch(models.Model):
         verbose_name_plural = _('Personal Dispatch')                       
     
     def __str__(self):
-        towns = dict([L[1] for L in list_states_towns if L[0][0]==self.state][0])                           #towns is like: {'39761': 'آبسرد', '39741': 'آبعلي', ...}
-        return _('Dispatch') + ' ' + towns[self.town]
+        return _('Dispatch') + ' ' + self.town.name

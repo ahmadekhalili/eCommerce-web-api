@@ -5,8 +5,7 @@ from django import forms
 from django.conf import settings
 import json
 
-from customed_files.django.django_customed_classes.custom_ModelForm import ProductModelForm
-from customed_files.django.django_customed_classes import custom_form_fields
+from customed_files.django.classes import myforms
 from users.models import User
 from . import myserializers
 from .mywidgets import image_icon_widget, image_widget, filter_attributes_widget, product_root_widget, level_widget, father_root_widget, confirm_status_widget, confermer_widget, published_date_widget
@@ -15,13 +14,10 @@ from .models import Product, Root, Image, Comment, Filter_Attribute, ShopFilterI
 
 
 from itertools import chain           
-class ProductForm(ProductModelForm):
-    def __init__(self, data=None, files=None, auto_id='id_%s', prefix=None,
-                 initial=None, error_class=ErrorList, label_suffix=None,
-                 empty_permitted=False, instance=None, use_required_attribute=None,
-                 renderer=None):
+class ProductForm(myforms.ProductModelForm):
+    def __init__(self, data=None, files=None, auto_id='id_%s', prefix=None, initial=None, error_class=ErrorList, label_suffix=None, empty_permitted=False, instance=None, use_required_attribute=None, renderer=None):
         initial = initial if initial else {}
-        length, width, height = [int(i) for i in instance.size.split(',')] if instance else (None,None,None)
+        length, width, height = [float(i) for i in instance.size.split(',')] if instance else (None,None,None)
         initial = {**initial, 'length': length, 'width': width, 'height': height} if length else initial
         try:
             image_icon = instance.image_icon
@@ -30,20 +26,17 @@ class ProductForm(ProductModelForm):
             image = None
         if image:
             initial = {**initial, 'image': image, 'alt': alt} 
-        super(). __init__(data, files, auto_id, prefix,
-                 initial, error_class, label_suffix,
-                 empty_permitted, instance, use_required_attribute,
-                 renderer)
+        super(). __init__(data, files, auto_id, prefix, initial, error_class, label_suffix, empty_permitted, instance, use_required_attribute, renderer)
         
-    #root = custom_form_fields.CustomChoiceField(choices=(), widget=product_root_widget, required=True, label=_('menu'))
-    root = custom_form_fields.CustomModelChoiceField(queryset=Root.objects.all(), widget=product_root_widget, required=True, label=_('menu'))
+    #root = myforms.CustomChoiceField(choices=(), widget=product_root_widget, required=True, label=_('menu'))
+    root = myforms.CustomModelChoiceField(queryset=Root.objects.all(), widget=product_root_widget, required=True, label=_('menu'))
     image = forms.ImageField(widget=image_icon_widget, required=True, label=_('image icon'))
     alt = forms.CharField(max_length=55, label=_('alt'))
-    length = forms.IntegerField(label=_('length'))
-    width = forms.IntegerField(label=_('width'))
-    height = forms.IntegerField(label=_('height'))
+    length = forms.FloatField(label=_('length'))
+    width = forms.FloatField(label=_('width'))
+    height = forms.FloatField(label=_('height'))
     
-    class Meta:                                          #take fields from admin.fiedset but this is needed to for validation.
+    class Meta:                                          #take fields from admin.fiedset but this is needed for validation.
         model = Product
         fields = ['name', 'slug', 'meta_title', 'meta_description', 'brief_description', 'price', 'available', 'visible', 'filter_attributes', 'root', 'rating', 'image', 'alt', 'length', 'width', 'height']
                 
@@ -53,11 +46,11 @@ class ProductForm(ProductModelForm):
         self.instance.size = self.cleaned_data['size']
         return super().save(commit)
         
-#statuses_en_pr = [[('1', 'confirmed'), ('2', 'not checked'), ('3', 'not confirmed')],  [('1', 'تاييد'), ('2', 'بررسي نشده'), ('3', 'رد')]]
+
 class CommentForm(forms.ModelForm):
-    confirm_status = custom_form_fields.CustomField(widget=confirm_status_widget, required=True, label=_('confirm status'))
+    confirm_status = myforms.CustomField(widget=confirm_status_widget, required=True, label=_('confirm status'))
     #published_date = CustomField(disabled=True, widget=published_date_widget, label=_('published date'))
-    confermer = custom_form_fields.CustomField(widget=confermer_widget, label='confermer')           #can user choicefield, problem in saving that.
+    confermer = myforms.CustomField(widget=confermer_widget, label='confermer')           #can user choicefield, problem in saving that.
     
     class Meta:
         model = Comment
@@ -67,8 +60,8 @@ class CommentForm(forms.ModelForm):
 
 
 class RootForm(forms.ModelForm):
-    level = custom_form_fields.CustomIntegerField(widget=level_widget, label=_('level'))
-    father_root = custom_form_fields.CustomModelChoiceField(queryset=Root.objects.all(), widget=father_root_widget, required=False, label=_('father root'))       #puting CustomModelChoiceField will cease: when creating new root with level 1, father root will feel auto after saving!
+    level = myforms.CustomIntegerField(widget=level_widget, label=_('level'))
+    father_root = myforms.CustomModelChoiceField(queryset=Root.objects.all(), widget=father_root_widget, required=False, label=_('father root'))       #puting CustomModelChoiceField will cease: when creating new root with level 1, father root will feel auto after saving!
         
     class Meta:
         model = Root
@@ -95,8 +88,9 @@ class ShopFilterItemForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        filter_attributes_choices, product_choices = Filter_Attribute.objects.values_list('id', 'name'), Product.objects.values_list('id', 'name')
-        self.fields['filter_attributes'].choices, self.fields['product'].choices = filter_attributes_choices, product_choices
+
+
+    filter_attributes'].choices, self.fields['product'].choices = filter_attributes_choices, product_choices
       
     def clean(self):
         current_filter_attributes_ids = [filter_attribute.id for filter_attribute in self.cleaned_data.get('filter_attributes')]
