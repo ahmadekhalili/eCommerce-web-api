@@ -1,4 +1,5 @@
 from django.db.models import Sum, F, Case, When
+from django.db.models.functions import Coalesce
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.conf import settings
@@ -101,7 +102,8 @@ class HomePage(views.APIView):
         output 6 last created product and 4 last created post(visible=True, and select products with available=True in first).
         '''
         products = get_products(0, 6)
-        posts = get_posts(0, 4).select_related('root') if get_posts(0, 4) else []
+        posts = get_posts(0, 4).select_related('root')
+        posts = posts if posts else []
         #supporter_datas = supporter_datas_serializer(request, mode='read')
         products_serialized = {'products': myserializers.ProductListSerializer(products, many=True, context={'request': request}).data}       #myserializers.ProductListSerializer(posts, many=True).data  is list not dict so cant use ** before it (like {**serialized})
         posts_serialized = {'posts': myserializers.PostListSerializer(posts, many=True, context={'request': request}).data}
@@ -201,24 +203,26 @@ class ProductList(views.APIView):
             filters_serialized = myserializers.FilterSerializer(Filter.objects.filter(id__in=filter_ids).prefetch_related('filter_attributes'), many=True).data       #in FilterSerializer has field 'filter_attributes' so if we dont put this prefetch, program will run 1+len(filters) queries (for example supose we have this filters:  <object(1) Filter>, <object(2) Filter> queries number was run for serializing filters: our program run one query for this two object and second for: <object(1) Filter>.filter_attributes.all() and third for <object(2) Filter>.filter_attributes.all() so run 3 query for this 2 filter object! but now just run 2 for eny filter objects.
             
         else:                                      #none category.   url example:  /products/
-            products = get_products(0, 24)
+            products = Product.objects.filter()
             sidebarmenu_checkbox = None
             sidebarmenu_link = Root.objects.filter(level=1)
             filters_serialized = myserializers.FilterSerializer(Filter.objects.all().prefetch_related('filter_attributes'), many=True).data    
 
-        ## 2 sidebar filter.   url example: /products?meshki_1=1/      filter_attributes_slugid_id_list is like: [{'meshki_1': '1'}, {'sefid_2': '2'}, ..]. why we choiced  slug+_+id?  answer: in below line we use requet.GET['key'] that is like request.GET['meshki_1'] so str "meshki_1' must be uniqe and with slung+_+id it is unique
-        filter_attributes_slugid_id_list = [{f"{filter_attribute['slug']}_{filter_attribute['id']}": str(filter_attribute['id'])} for filter in filters_serialized for filter_attribute in filter['filter_attributes']]    
-        selected_filter_attributes_ids = [int(request.GET[key]) for key in request.GET if {key: request.GET[key]} in filter_attributes_slugid_id_list]
-        products = products.filter(filter_attributes__in=selected_filter_attributes_ids) if selected_filter_attributes_ids else products
+        ## 2 sidebar filter.   url example: /products?meshki_1=1/      filter_attributeslugid_id_list is like: [{'meshki_1': '1'}, {'sefid_2': '2'}, ..]. why we choiced  slug+_+id?  answer: in below line we use requet.GET['key'] that is like request.GET['meshki_1'] so str "meshki_1' must be uniqe and with slung+_+id it is unique
+        filter_attributeslugid_id_list = [{f"{filter_attribute['slug']}_{filter_attribute['id']}": str(filter_attribute['id'])} for filter in filters_serialized for filter_attribute in filter['filter_attributes']]    
+        selected_filter_attributes_ids = [int(request.GET[key]) for key in request.GET if {key: request.GET[key]} in filter_attributeslugid_id_list]
+        if selected_filter_attributes_ids:
+            products = products.filter(filter_attributes__in=selected_filter_attributes_ids)
         if request.GET.get('mx'):                                                                         #sidebar filder price
             products = products.filter(price__gte=request.GET.get('mn'), price__lte=request.GET.get('mx'))           #request.GET.get('mn') and request.GET.get('mx') can be int or str dont raise eny problem.
             
         ## 3 select category  url example:  /products/کالای-دیجیتال/?select=bestselling
-        Dict = {'expensivest': products.order_by('-price'), 'cheapest': products.order_by('price'), 'bestselling': products.annotate(ordered_quantity=Sum(Case(When(order_items__order__paid=True, then=F('order_items__quantity'))))).order_by('-ordered_quantity'), 'newest': products.order_by('-id')}
-        if request.GET.get('select') in Dict:
-            products = Dict[request.GET.get('select')]
-            
-        products = get_products(0, 24, products)                                         #note(just for remembering): in nested order_by like: products.order_by('-ordered_quantity').order_by('-available')   ordering start from last order_by here: -available but in one order_by start from first element like:  products..order_by('-available', '-id')  ordering start from "-available" 
+        select, orders = request.GET.get('select'), None
+        if select:
+            orders = ['-price'] if select == 'expensivest' else ['price'] if select == 'cheapest' else ['-ordered_quantity'] if select == 'bestselling' else ['-id'] if select == 'newest' else None
+            products = products.annotate(ordered_quantity=Coalesce(Sum(Case(When(order_items__order__paid=True, then=F('order_items__quantity')))), 0)) if 'bestselling' in select else products    #Coalesce duty? answer: when Sum has not resualt, return None(and it makes raise problem in ordering), now return 0 instead None if dont find eny quantity for specefic product.
+
+        products = get_products(0, 24, products, orders)                                         #note(just for remembering): in nested order_by like: products.order_by('-ordered_quantity').order_by('-available')   ordering start from last order_by here: -available but in one order_by start from first element like:  products..order_by('-available', '-id')  ordering start from "-available" 
         products_serialized = {'products': myserializers.ProductListSerializer(products, many=True, context={'request': request}).data}
         sidebarmenu_checkbox_serialized = myserializers.RootChainedSerializer(sidebarmenu_checkbox, many=True).data
         sidebarmenu_link_serialized = myserializers.RootChainedSerializer(sidebarmenu_link, many=True).data

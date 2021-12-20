@@ -11,39 +11,29 @@ from .models import Product, Post, Root
 
 
 
-                           
-def get_products(first_index=None, last_index=None, queryset=None):
-    if queryset:
-        return queryset.filter(visible=True).order_by('-available', '-id') 
-    try:
-        all_products_count = Product.objects.values_list('id').last()[0] - Product.objects.values_list('id').first()[0] + 1 #Product.objects.aggregate(product_counts=Max('id') - Min('id'))['product_counts'] + 1  #                    #.last run query like: SELECT "app1_product"."id"  FROM "app1_product"  ORDER BY "app1_product"."id" DESC  LIMIT 1               .first is like that but ASC instead of DESC       
-        #instead up commend we have 2 way:  1- Product.objects.count()  that is heavy in running in huge amount of objects (tested in sqlite with 1.5m record)   2- #Product.objects.aggregate(product_counts=Max('id') - Min('id'))['product_counts']  this way  in performance is a bit more heavy than .last() and .first()  but use one query(.first .last use 2 query means connect 2 time to database), and also use MIN and MAX fun of database but .last .first use ORDER BY func of database (in sqlite ORDER BY is so fast maybe in another db be diffrent)  so .last .first is a bit faster but Max Min can be more logical.
-        #we must havent eny id deleting in this project (and we havent)
-        if all_products_count < last_index:
-            return Product.objects.filter(visible=True).order_by('-available', '-id')
-        else:                                                                                  #we have enough product in our db
-            return Product.objects.filter(visible=True).order_by('-available', '-id')[first_index:last_index]        #dont have different beetwen Product.objects.filter(visible=True).order_by('-available', '-id')[first_index:last_index]   or    Product.objects.filter(id__in=list(range(first_index:last_index)), visible=True).order_by('-available', '-id')   they run same query in db.
-        #we can use Product.objects.filter(id__in=ips, visible=True) but reverse is a bit faster(tested in sqlite with 1.5m record for retrive 100 object) it is more clear and breaf (dont need  list(range(min_ip, max_ip))) .....   and most important reason: reverse automaticly retrieve other objects if first objects havent our conditions(visible=True)  means if in Product.objects.filter(visible=True).reverse().order_by('id')[:5] we have two object with visible=False  in last 5 objects,  this commend will automaticly will go and retrive two other objects from next objects availabe. and if isnt find at all dont raise error and return founded objects,    query by indexed field(id) with an unindexed field (visible) dont affect speed significant(describe complete in:django/database.py/index)
+
+def get_products(first_index, last_index, queryset=None, orderings=None):    #orderings should be list like: ['slug']
+    orderings = orderings if orderings else []
+    if queryset != None:                                                     #this dont evaluate queryset and if queryset was blank queryset like <queryset ()> condition 'queryset!=None' will be true and this is what we want.
+        return queryset.filter(visible=True).order_by('-available', *orderings, '-id')[first_index: last_index]      #[first: last]is flexible means if we have not enogh product, return fewer product.      we can count by: 1: Product.objects.count()  2: Product.objects.aggregate(product_counts=Max('id') - Min('id'))['product_counts']
+
+    try:                                                                                 
+        return Product.objects.filter(visible=True).order_by('-available', *orderings, '-id')[first_index: last_index]        #dont have different beetwen Product.objects.filter(visible=True).order_by('-available', '-id')[first_index:last_index]   or    Product.objects.filter(id__in=list(range(first_index:last_index)), visible=True).order_by('-available', '-id')   they run same query in db.
     except:                                                #when we have no eny products.
         return []
 
 
             
 def get_posts(first_index=None, last_index=None, queryset=None):
-    if queryset:
-        return queryset.filter(visible=True).order_by('-id')
+    if queryset != None:                                                     #this dont evaluate queryset
+        return queryset.filter(visible=True).order_by('-id')[first_index: last_index]
+    
     try:
-        all_products_count = Post.objects.values_list('id').last()[0] - Post.objects.values_list('id').first()[0] + 1                    #.last run query like: #this line run this query: SELECT "app1_product"."id"  FROM "app1_product"  ORDER BY "app1_product"."id" DESC  LIMIT 1               .first is like that but ASC instead of DESC       
-        #instead up commend we have 2 way:  1- Product.objects.count()  that is heave in huge amount of objects (tested in sqlite with 1.5m record)   2- #Product.objects.aggregate(product_counts=Max('id') - Min('id'))['product_counts']  this way  in performance is a bit more haveavy than .last() and .first()  but use one query(.first .last use 2 query means connect 2 time to database), and also use MIN and MAX fun of database but .last .first use ORDER BY func of database (in sqlite ORDER BY is so fast maybe in another db be diffrent)  so .last .first is a bit faster but Max Min can be more logical.
-        if all_products_count < last_index:
-            return Post.objects.filter(visible=True).order_by('-id')
-        else:                                                                                  #we have enough product in our db
-            return Post.objects.filter(visible=True).order_by('-id')[first_index:last_index] #we can use Product.objects.filter(id__in=ips, visible=True) but reverse is a bit faster(tested in sqlite with 1.5m record for retrive 100 object) is is more clear and breaf (dont need  list(range(min_ip, max_ip))) .....   and most important reason: reverse automaticly retrieve other objects if first objects havnt our conditions(visible=True)  means if in Product.objects.filter(visible=True).reverse().order_by('id')[:5] we have two object with visible=False  in last 5 objects,  this commend will automaticly will go and retrive two other objects from next objects availabe. and if isnt find at all dont raise error and return founded objects,    query by indexed field(id) with an unindexed field (visible) dont affect speed significant(describe complete in:django/database.py/index)
+        return Post.objects.filter(visible=True).order_by('-id')[first_index:last_index] #we can use Product.objects.filter(id__in=ips, visible=True) but reverse is a bit faster(tested in sqlite with 1.5m record for retrive 100 object) is is more clear and breaf (dont need  list(range(min_ip, max_ip))) .....   and most important reason: reverse automaticly retrieve other objects if first objects havnt our conditions(visible=True)  means if in Product.objects.filter(visible=True).reverse().order_by('id')[:5] we have two object with visible=False  in last 5 objects,  this commend will automaticly will go and retrive two other objects from next objects availabe. and if isnt find at all dont raise error and return founded objects,    query by indexed field(id) with an unindexed field (visible) dont affect speed significant(describe complete in:django/database.py/index)
     except:
         return []     
 
-
-
+        
 '''
 def childest_root(root, childs=[]):                 
     for child_root in root.root_childs.all():
@@ -74,7 +64,7 @@ def get_posts_products_by_root(root):
     else:
         children_root_ids = [root.id]
     if root.post_product == 'product':
-        return get_products(queryset=Product.objects.filter(root__id__in=children_root_ids))
+        return Product.objects.filter(root__id__in=children_root_ids)
     else:
         return get_posts(queryset=Post.objects.filter(root__id__in=children_root_ids) )       
 
