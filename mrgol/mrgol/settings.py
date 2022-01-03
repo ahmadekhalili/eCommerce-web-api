@@ -165,3 +165,5 @@ AUTH_USER_MODEL = 'users.User'
 #CORS_ALLOWED_ORIGINS = ['http://192.168.114.102:3000', 'http://127.0.0.1:3000', 'http://localhost:3000']
 
 CART_SESSION_ID = 'cart'
+
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
