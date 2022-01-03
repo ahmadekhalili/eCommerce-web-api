@@ -12,18 +12,18 @@ from customed_files.date_convertor import MiladiToShamsi
 from customed_files.states_towns import list_states_towns
 from main.models import Product, ShopFilterItem
 from main.model_methods import update_product_stock
-from main.mymethods import PostDispatchPrice
 from cart.views import CartMenuView
 from cart.cart import Cart
 from payment.views import PaymentStart
-from .models import ProfileOrder, Order, OrderItem, Shipping, Dispatch
+from .models import ProfileOrder, Order, OrderItem, Dispatch
 from .myserializers import ProfileOrderSerializer, OrderSerializer, OrderItemSerializer
+from .mymethods import profile_order_detail
 
 
 
 class ListCreateProfileOrder(views.APIView):
     permission_classes = [IsAuthenticated]                               #redirect to login page by front if user is not loged in.
-    def get(self, request, *args, **kwargs):                             #here listed ProfileOrders of a user.  come here from url /cart/.  here front side must create "checkbox like" element  refrencing to ListCreateOrderItem, and when click on checkbox auto submit to ProfileOrderDetail.get for optaining shiping price.  
+    def get(self, request, *args, **kwargs):                             #here listed ProfileOrders of a user.  come here from url /cart/.  here front side must create form refrencing to ListCreateOrderItem, and when click on checkbox auto submit to ProfileOrderDetail.get for optaining shiping price.  
         profileorders = request.user.profileorders.select_related('town__state')
         if profileorders:
             for profileorder in profileorders:
@@ -54,22 +54,10 @@ class ListCreateProfileOrder(views.APIView):
 class ProfileOrderDetail(views.APIView):                                  
     permission_classes = [IsAuthenticated]
     def get(self, request, *args, **kwargs):                                       #here shipping price compute and sended to front. (depende whitch profileorder choisen)
-        profileorder = ProfileOrder.objects.filter(id=kwargs.get('pk')).select_related('town__state')[0]
-        cart_menu = CartMenuView().get(request).data
-        if not cart_menu['sabad']:
-            return Response(_('your cart is empty, add a product to order.'))
-        cart = Cart(request)
-        shipping = Shipping.objects.first()
-        post_price = PostDispatchPrice(cart_menu['total_weight'],  cart_menu['dimensions']).get_price(shipping.town.state.key, shipping.town.key, profileorder.town.state.key, profileorder.town.key) + shipping.fee
-        for dispatch in shipping.dispatch_set.all():
-            if dispatch.town == profileorder.town:
-                cart.session['personal_shipping_price'], cart.session['post_shipping_price'] = str(dispatch.shipping_price), str(post_price)               #personal_shipping_price and post_shipping_price uses in ListCreateOrderItem.post for creating order
-                cart.save()
-                return Response({'profileorder_selected': profileorder.id, 'personal_dispatch': {'price': dispatch.shipping_price, 'delivery_date': dispatch.delivery_date_delay}, 'post_price': post_price})
-            
-        cart.session['personal_shipping_price'], cart.session['post_shipping_price'] = None, str(post_price)
-        cart.save()                
-        return Response({'profileorder_selected': profileorder.id, 'post_price': post_price})        #profileorder_selected is for what? answer: front know whitch checkbox should be selected after profileorder creation(after coming from ListCreateProfileOrder.post to .get) 
+        dic = profile_order_detail(request, kwargs['pk'])                          #profile_order_detail set in cart vars: personal_shipping_price and personal_shipping_price 
+        if not dic:
+            return Response(_('your cart is empty, add a product to order.'))             
+        return Response(dic)        #profileorder_selected is for what? answer: front know whitch checkbox should be selected after profileorder creation(after coming from ListCreateProfileOrder.post to .get) 
             
     def put(self, request, *args, **kwargs):                                           #here ProfileOrder updated.
         profileorder = ProfileOrder.objects.get(id=kwargs.get('pk'))
