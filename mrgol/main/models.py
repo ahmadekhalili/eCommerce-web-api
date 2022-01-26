@@ -212,7 +212,7 @@ class Product(models.Model):                                     #.order_by('-av
     rating = models.OneToOneField(Rating, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('rating'))
     stock = models.PositiveIntegerField(_('stock'), default=0)
     brand = models.CharField(_('brand'), max_length=25, null=True, blank=True)
-    weight = models.FloatField(_('weight'), null=True, blank=True)
+    weight = models.FloatField(_('weight'), null=True, blank=False)                   # weight used in orders/mymethods/profile_order_detail/PostDispatchPrice  but if you dont specify weight in saving a product, it will be None and will ignore in PostDispatchPrice. its better null=True easier in creating products in tests.
     size = models.CharField(_('size'), max_length=25, null=True, blank=True)          #value should be in cm  and like '10,15,15'  this field seperate to 3 field in ProductForm in __init__ and save func).
     #image_set                                                    backward relation field
     #comment_set
