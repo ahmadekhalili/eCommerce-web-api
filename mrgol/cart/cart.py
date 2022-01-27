@@ -14,9 +14,11 @@ class Cart(object):
     def __init__(self, request):
         self.request = request
         self.cart_page = False
+        unauth_cart = {}
         if self.request.user.is_authenticated:
+            unauth_cart, request.session[settings.CART_SESSION_ID] = (request.session[settings.CART_SESSION_ID], {}) if request.session.get(settings.CART_SESSION_ID) else ({}, {})               # cart value of unauthenticate user should assing to authenticate user session, but for next calls of Cart (like cart = Cart(request)) request.session[settings.CART_SESSION_ID] shoud clear
             ob = SesKey.objects.get(user=self.request.user)     #SesKey created with post_save signal.
-            self.session = SessionStore(session_key=ob.ses_key)      
+            self.session = SessionStore(session_key=ob.ses_key)       
         else:
             self.session = request.session
         cart = self.session._get_session(no_load=False).get(settings.CART_SESSION_ID, {})   #if our cart is blank (self.session['cart'] was blank) dont return None because it will raise error in self.cart.get(...) error: None type has not get method!!!!
@@ -24,7 +26,9 @@ class Cart(object):
             cart = self.session[settings.CART_SESSION_ID] = {}  #eny changing self.session will affect request.sessio(mutable)
             self.session.modified = False 
         self.cart = cart
-
+        if unauth_cart.keys():
+            [self.add(key, unauth_cart[key]['quantity']) for key in unauth_cart]
+            
     def add(self, product_id, quantity=1, shopfilteritem_id=None):             #product_id should be str(it can be int if for example in django rest api clint send like {"prodict_id":1} instead  {"prodict_id":"1"}
         quantity = int(quantity)
         item = get_object_or_404(ShopFilterItem, id=shopfilteritem_id) if shopfilteritem_id else get_object_or_404(Product, id=product_id) #selected_ShopFilterItems_ids = [request.POST.get('name') for name in Filter.objects.filter(selling=True).values_list('name', flat=True) if name in request.POST and request.POST.get('name')]     

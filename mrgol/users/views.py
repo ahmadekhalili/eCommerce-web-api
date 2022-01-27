@@ -39,13 +39,10 @@ class LogIn(views.APIView):
                 return Response({'phone_found': True})
             else:
                 return Response({'phone_found': False})
-        cart_1 = request.session.get(settings.CART_SESSION_ID, [])
         user = login_validate(request)        
         CustomSessionAuthentication().enforce_csrf(request)          #if you dont put this here, we will havent csrf check (meants without puting csrf codes we can login easily)(because in djangorest, csrf system based on runing class SessionAuthentication(here)CustomSessionAuthentication and class CustomSessionAuthentication runs when you are loged in, because of that we use handy method enforce_csrf(we arent here loged in), just in here(in other places, all critical tasks that need csrf checks have permissions.IsAuthenticated require(baese csrf check mishavad)).        
         login(request, user)        
         cart = Cart(request)
-        if cart_1:
-            [cart.add(key, cart_1[key]['quantity']) for key in cart_1]
         supporter_datas = CartMenuView().get(request, datas_selector='products_user').data                              
         return Response({'sessionid': request.session.session_key, **supporter_datas})  
 
