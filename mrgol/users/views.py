@@ -33,12 +33,6 @@ class LogIn(views.APIView):
         input in header cookie "csrftoken=..." or "csrftoken=...; favorite_products_ids=1,2,3;" if favorite_products_ids provides(in user cookie)
         output  {"sessionid": "...",  "user": "...", "favorite_products_ids": "..."}     "favorite_products_ids=1,2,3"
         '''
-        if request.data.get('phone') and not request.data.get('password'):
-            CustomSessionAuthentication().enforce_csrf(request)  
-            if User.objects.filter(phone=request.data.get('phone')).exists():
-                return Response({'phone_found': True})
-            else:
-                return Response({'phone_found': False})
         user = login_validate(request)        
         CustomSessionAuthentication().enforce_csrf(request)          #if you dont put this here, we will havent csrf check (meants without puting csrf codes we can login easily)(because in djangorest, csrf system based on runing class SessionAuthentication(here)CustomSessionAuthentication and class CustomSessionAuthentication runs when you are loged in, because of that we use handy method enforce_csrf(we arent here loged in), just in here(in other places, all critical tasks that need csrf checks have permissions.IsAuthenticated require(baese csrf check mishavad)).        
         login(request, user)        

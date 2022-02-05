@@ -65,5 +65,5 @@ class CartRemove(views.APIView):       #user come from 'sabad'(in header) to thi
     def post(self, request, *args, **kwargs):
         #CustomSessionAuthentication().enforce_csrf(request)
         cart = Cart(request)
-        cart.remove(request.data.get('product_id'))
+        cart.remove(request.data.get('product_id'), request.data.get('shopfilteritem_id'))
         return Response({**CartMenuView().get(request).data})

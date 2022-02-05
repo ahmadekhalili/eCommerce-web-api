@@ -210,7 +210,7 @@ class Product(models.Model):                                     #.order_by('-av
     root = models.ForeignKey(Root, on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('root'))
     image_icon = models.OneToOneField(Image_icon, on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('image icon'))     #in home page(page that list of product shown) dont query product.image_set.all()[0] for showing one image of product, instead query product.image_icon   (more fster)
     rating = models.OneToOneField(Rating, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('rating'))
-    stock = models.PositiveIntegerField(_('stock'), default=0)
+    stock = models.PositiveIntegerField(_('stock'), default=0)              # important: stock before creating first shopfilteritem of product shoud be 0 otherwise it will sum with shopfilteritem.stock, example: supose we have product1.stock = 10  now after creating shopfilteritem1 with stock=12 product1.stock will be 10+12   (address: in ShopFilterItem.save and model_methods.py/update_product_stock
     brand = models.CharField(_('brand'), max_length=25, null=True, blank=True)
     weight = models.FloatField(_('weight'), null=True, blank=False)                   # weight used in orders/mymethods/profile_order_detail/PostDispatchPrice  but if you dont specify weight in saving a product, it will be None and will ignore in PostDispatchPrice. its better null=True easier in creating products in tests.
     size = models.CharField(_('size'), max_length=25, null=True, blank=True)          #value should be in cm  and like '10,15,15'  this field seperate to 3 field in ProductForm in __init__ and save func).
@@ -274,7 +274,7 @@ class ShopFilterItem(models.Model):
         verbose_name_plural = _('shopfilteritems')
 
     def __str__(self):
-        return str(self.filter_attribute.name)
+        return str(self.filter_attribute.name) if self.filter_attribute else super().__str__()         # in testing (like in cart.tests.ShopFilterItemCartTestCase) we create ShopFilterItem with least fields (without filter_attribute)
 
 
 
