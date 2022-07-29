@@ -1,0 +1,2 @@
+change_list.html:                   # this file is exatly django 4.0.3 change_list.html  except addition <br> in a loop and load template tag admin.main.filter.admin_list
+change_list_results.html       # this file is exatly django 4.0.3 change_list.html  except change "results" to "results_list"   and add {% for results in results_list %}   and   <tr><td colspan="100%"></td></tr>

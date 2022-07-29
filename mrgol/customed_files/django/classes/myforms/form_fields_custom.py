@@ -6,7 +6,6 @@ from main.models import Root, Town
 
 
 
-    
 class CustomModelChoiceField(forms.ModelChoiceField):
     def get_bound_field(self, form, field_name):
         """
@@ -18,7 +17,6 @@ class CustomModelChoiceField(forms.ModelChoiceField):
 
 
 
-    
 class CustomChoiceField(forms.ChoiceField):
     def get_bound_field(self, form, field_name):
         """
@@ -27,7 +25,6 @@ class CustomChoiceField(forms.ChoiceField):
         """
         return CustomBoundField(form, self, field_name)
     
-
 
 
 
@@ -42,8 +39,7 @@ class CustomIntegerField(forms.IntegerField):
 
 
 
-    
-class CustomField(forms.Field):
+class CustomCharField(forms.CharField):
     def get_bound_field(self, form, field_name):
         """
         Return a BoundField instance that will be used when accessing the form
@@ -54,8 +50,18 @@ class CustomField(forms.Field):
 
 
 
-
 class CharFieldForForeignKey(forms.CharField):
     def clean(self, value):
         return Town.objects.get(key=value)
+
+
+
+
+class CustomField(forms.Field):
+    def get_bound_field(self, form, field_name):
+        """
+        Return a BoundField instance that will be used when accessing the form
+        field in a template.
+        """
+        return CustomBoundField(form, self, field_name)
 

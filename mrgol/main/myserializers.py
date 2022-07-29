@@ -6,7 +6,7 @@ from rest_framework import serializers
 
 from datetime import datetime
 
-from customed_files.date_convertor import MiladiToShamsi 
+from customed_files.date_convertor import MiladiToShamsi
 from .models import *
 from .mymethods import get_root_and_fathers
 from users.models import User
@@ -16,11 +16,7 @@ from users.mymethods import user_name_shown
 
 
 
-class ContentSerializer(serializers.ModelSerializer):     
-    class Meta:
-        model = Content
-        fields = '__all__'
-       
+
 class CommentSerializer(serializers.ModelSerializer):
     #author = UserNameSerializer()                                #puting author here we cant write comment like this: c=CommentSerializer(data={'content': 'aaaaa', 'author': 1, 'confermer': 1, 'product_id': 1}) c.is_valid() c.save()    so we put this field only in reading show by puting that in method to_representation
     class Meta:
@@ -66,7 +62,7 @@ class SmallImageSerializer(serializers.ModelSerializer):
             url = ''
         return url
 
-            
+
 class Image_iconSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()  
     class Meta:
@@ -84,7 +80,6 @@ class Image_iconSerializer(serializers.ModelSerializer):
 
 
 
-
 class RootChainedSerializer(serializers.ModelSerializer):         #this is used for chane roost like: 'digital' > 'phone' > 'sumsung'    
     class Meta:
         model = Root
@@ -93,12 +88,12 @@ class RootChainedSerializer(serializers.ModelSerializer):         #this is used 
 
 
 
-    
+
 class Sub2RootListSerializer(serializers.ModelSerializer):         #serialize roots with level=3
     str = serializers.SerializerMethodField()
     url = serializers.SerializerMethodField()
     #root_childs = 'self'                                             #list just ids of childs.
-    
+
     class Meta:
         model = Root
         fields = ['id', 'name', 'slug', 'level', 'post_product', 'father_root', 'str', 'url']
@@ -113,7 +108,6 @@ class Sub2RootListSerializer(serializers.ModelSerializer):         #serialize ro
             return f'/posts/{obj.slug}/'
 
 
-    
 class Sub1RootListSerializer(serializers.ModelSerializer):         #serialize roots with level=2
     str = serializers.SerializerMethodField()
     url = serializers.SerializerMethodField()
@@ -132,7 +126,6 @@ class Sub1RootListSerializer(serializers.ModelSerializer):         #serialize ro
         else:
             return f'/posts/{obj.slug}/'
 
-    
 
 class RootListSerializer(serializers.ModelSerializer):         #urs for products should be like: /products/?slug  and for post should be likst /posts/?slug   note RootListSerializer should be before PostListSerializer
     str = serializers.SerializerMethodField()
@@ -176,23 +169,20 @@ class ShopFilterItemSerializer(serializers.ModelSerializer):
 
 
 
-    
+
 class Filter_AttributeListSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Filter_Attribute
         fields = '__all__'
         
     def to_representation(self, obj):
-        self.fields['slugid'] = serializers.SerializerMethodField()         #used for checkbox name
         fields = super().to_representation(obj)
         del fields['filterr']
         return fields
 
-    def get_slugid(self, obj):
-        return f'{obj.slug}_{obj.id}'
 
 
-    
 
 class FilterSerializer(serializers.ModelSerializer):
     filter_attributes = Filter_AttributeListSerializer(many=True)
@@ -202,7 +192,7 @@ class FilterSerializer(serializers.ModelSerializer):
 
 
 
-        
+
 class PostListSerializer(serializers.ModelSerializer):
     published_date = serializers.SerializerMethodField() 
     root = serializers.SerializerMethodField()
@@ -241,7 +231,7 @@ class PostListSerializer(serializers.ModelSerializer):
         pk, slug = obj.id, obj.slug
         return f'/posts/detail/{pk}/{slug}/'
 
-    
+
 
 
 class ProductListSerializer(serializers.ModelSerializer):
@@ -264,13 +254,12 @@ class ProductListSerializer(serializers.ModelSerializer):
 
 
 
-    
 class PostDetailSerializer(serializers.ModelSerializer):
     published_date = serializers.SerializerMethodField() 
     author = UserNameSerializer()
     root = serializers.SerializerMethodField() 
-    content_set = ContentSerializer(many=True)
     comment_set = CommentSerializer(read_only=True, many=True)
+
     class Meta:
         model = Post
         fields = '__all__'
@@ -284,7 +273,8 @@ class PostDetailSerializer(serializers.ModelSerializer):
         pk, slug = obj.id, obj.slug
         name, url = (obj.root.name, f'/posts/{obj.root.slug}/') if obj.root else ('', '')       #post.root has null=True so this field can be blank like when you remove and root.
         return {'name': name, 'url': url}
-    
+
+
 
 
 class ProductDetailSerializer(serializers.ModelSerializer):       #comment_set will optained by front in other place so we deleted from here.
@@ -298,6 +288,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):       #comment_set w
     smallimages = SmallImageSerializer(many=True)
     comment_count = serializers.SerializerMethodField()
     related_products = serializers.SerializerMethodField()
+
     class Meta:
         model = Product
         fields = ['id', 'name', 'slug', 'meta_title', 'meta_description', 'brief_description', 'detailed_description', 'price', 'available', 'roots', 'rating', 'stock', 'brand', 'weight', 'smallimages', 'comment_count', 'related_products']
@@ -334,12 +325,31 @@ class ProductDetailSerializer(serializers.ModelSerializer):       #comment_set w
 
 
 
+
+class ProductMongoSerializer(ProductDetailSerializer):
+    filters = serializers.SerializerMethodField()  
+    comment_set = CommentSerializer(read_only=True, many=True)
+
+    def get_filters(self, obj):
+        filter_filter_attribute = {}                                              # is like: {'rang': 'abi', 'rang': germez', 'size': 'large', ...}
+        for filter_attribute in obj.filter_attributes.all():
+            if filter_filter_attribute.get(filter_attribute.filterr.name):        # this line make prevent overiding filter_attribute of a product that have same filter for example if product1.filter_attributes = ['abi', 'narenji', ..],  abi narenji ave same filter 'color'    if we dont want saving filter_attributes of same filter in a product we should prevent it in saving product but now i don't feel any needs to that.
+                filter_filter_attribute[filter_attribute.filterr.name] += [filter_attribute.name]
+            else:
+                filter_filter_attribute[filter_attribute.filterr.name] = [filter_attribute.name]
+        return filter_filter_attribute
+
+    class Meta:
+        model = Product
+        fields = ProductDetailSerializer.Meta.fields + ['filters', 'comment_set']
+
+
 class StateSerializer(serializers.ModelSerializer):
     class Meta:
         model = State
         fields = ['key', 'name']                            #we use key instead id for saving of states and towns. (id can be change in next db but key is more stable)
 
-    
+
 class TownSerializer(serializers.ModelSerializer):
     class Meta:
         model = Town

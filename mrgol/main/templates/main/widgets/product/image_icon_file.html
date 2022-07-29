@@ -1,0 +1,31 @@
+{% if value %}<a href="{{ value.url }}"><img id="image_icon_image" src="{{ value.url }}" width="50" height="50"></a> {% else %} <img id="image_icon_image" src=""> {% endif %}
+<input type="{{ widget.type }}" id="image_icon_input" style="margin-left: 15px;" onchange="document.getElementById('image_icon_image').src = window.URL.createObjectURL(this.files[0])" name="{{ widget.name }}"{% if widget.value != None %} value="{{ widget.value|stringformat:'s' }}"{% endif %}{% include "django/forms/widgets/attrs.html" %}>
+
+
+<script>                             //if we define width and height for secend tag  <img ...> directly in tag <img ..>  instead of defining by javascript, when creating new image_icone, befor uploding image an imageless area will shown to user but now it is fixed and dont shown eny image area befor uploding image by user.
+function image_icon_img_wh() {
+  var x = document.getElementById('image_icon_image');
+  x.width = "50";
+  x.height = "50";
+}
+document.getElementById("image_icon_input").addEventListener("change", image_icon_img_wh)
+</script>
+
+<script>
+function question_mark_image_icon() {
+	const labels = document.getElementsByTagName('LABEL');
+	for (var i = 0; i < labels.length; i++) {
+		console.log(labels[i]);
+		if (labels[i].htmlFor === 'id_image') {
+		    labels[i].textContent += " ";            // its more beautiful space before ? mark. like: "field_1: ?"
+			labels[i].classList.add('selector');     // class "selector" must be in parent element for working class "help help-tooltip help-icon"
+            quickElement(
+                'span', labels[i], '',
+                'class', 'help help-tooltip help-icon',
+                'title', gettext("Image rate should be 1:1")
+            );
+		}
+	}
+}
+window.addEventListener('load', question_mark_image_icon);
+</script>

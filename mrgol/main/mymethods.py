@@ -71,16 +71,16 @@ def get_posts_products_by_root(root):
 
 
 
-class PostDispatchPrice:                       #weight in gram, and length in cm.
-    def __init__(self, weight, dimensions):    #weight must be int, dimensions is like ["20,20,15", "30,25,20"]
+class PostDispatchPrice:                       # weight in gram, and length in mm.
+    def __init__(self, weight, dimensions):    # weight must be int, dimensions is like ["200,200,150", "300,250,200"]
         self.weight = int(weight)
         self.dimensions = dimensions
-        post_cartons_dimensions = {'1': [15, 10, 10], '2': [20, 15, 10], '3': [20, 20, 15], '4': [30, 20, 20], '5': [35, 25, 20], '6': [45, 25, 20], '7': [40, 30, 25], '8': [45, 40, 30], '9': [55, 45, 35]}
+        post_cartons_dimensions = {'1': [150, 100, 100], '2': [200, 150, 100], '3': [200, 200, 150], '4': [300, 200, 200], '5': [350, 250, 200], '6': [450, 250, 200], '7': [400, 300, 250], '8': [450, 400, 300], '9': [550, 450, 350]}
 
     @property
     def carton_size(self):
-        post_cartons_volumes = {'1': 1500, '2': 3000, '3': 6000, '4': 12000, '5': 17500, '6': 22500, '7': 30000, '8': 54000, '9': 86625}
-        goods_volume = 0                 #in cm3(cm*cm*cm)
+        post_cartons_volumes = {'1': 1500000, '2': 3000000, '3': 6000000, '4': 12000000, '5': 17500000, '6': 22500000, '7': 30000000, '8': 54000000, '9': 86625000}
+        goods_volume = 0                 #in mm3(mm*mm*mm)
         for size_str in self.dimensions:
             L = [float(i) for i in size_str.split(',')]
             goods_volume += L[0] * L[1] * L[2]

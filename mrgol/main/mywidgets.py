@@ -43,7 +43,7 @@ class filter_attributes_widget(forms.Select):
 
 
 class product_root_widget(forms.Select):
-    template_name = 'main/widgets/root_two_select.html'
+    template_name = 'main/widgets/product/root_two_select.html'
     
     def get_context(self, name, value, attrs):
         two_select_context = super().get_context(name, value, attrs)
@@ -73,6 +73,62 @@ class product_root_widget(forms.Select):
         return two_select_context
 
 
+class image_icon_widget(forms.widgets.FileInput):
+    template_name = 'main/widgets/product/image_icon_file.html'
+    
+    def get_context(self, name, value, attrs):
+        context = super().get_context(name, value, attrs)
+        context['value'] = value
+        return context
+
+
+class weight_widget(forms.widgets.NumberInput):
+    template_name = 'main/widgets/product/weight_file.html'
+    
+    def get_context(self, name, value, attrs):
+        context = super().get_context(name, value, attrs)
+        context['value'] = value
+        return context
+
+
+class length_widget(forms.widgets.NumberInput):
+    template_name = 'main/widgets/product/length_file.html'
+    
+    def get_context(self, name, value, attrs):
+        context = super().get_context(name, value, attrs)
+        context['value'] = value
+        return context
+
+
+
+
+class confirm_status_widget(forms.Select):
+    template_name = 'main/widgets/comment_confirm_status.html'
+    
+    def get_context(self, name, value, attrs):
+        context = super().get_context(name, value, attrs)
+        context['obj'] = value
+        return context
+
+
+class published_date_widget(forms.widgets.Input):
+    template_name = 'main/widgets/comment_published_date.html'
+    
+    def get_context(self, name, value, attrs):
+        context = super().get_context(name, value, attrs)
+        context['obj'] = value
+        return context
+
+
+class confermer_widget(forms.widgets.Input):
+    template_name = 'main/widgets/comment_confermer.html'
+    
+    def get_context(self, name, value, attrs):
+        context = super().get_context(name, value, attrs)
+        context['obj'] = value
+        return context
+
+
 
 
 class level_widget(forms.Select):
@@ -99,8 +155,6 @@ class level_widget(forms.Select):
         return context
 
 
-
-        
 class father_root_widget(forms.Select):
     template_name = 'main/widgets/root_father_root.html'
 
@@ -129,44 +183,15 @@ class father_root_widget(forms.Select):
         return two_select_context
 
 
-            
-    
-class confirm_status_widget(forms.Select):
-    template_name = 'main/widgets/comment_confirm_status.html'
-    
-    def get_context(self, name, value, attrs):
-        context = super().get_context(name, value, attrs)
-        context['obj'] = value
-        return context
 
 
-class confermer_widget(forms.widgets.Input):
-    template_name = 'main/widgets/comment_confermer.html'
-    
-    def get_context(self, name, value, attrs):
-        context = super().get_context(name, value, attrs)
-        context['obj'] = value
-        return context
+class filter_name_widget(forms.widgets.TextInput):
+    template_name = 'main/widgets/filter_name.html'
+
+class filter_verbose_name_widget(forms.widgets.TextInput):
+    template_name = 'main/widgets/filter_verbose_name.html'
 
 
-class published_date_widget(forms.widgets.Input):
-    template_name = 'main/widgets/comment_published_date.html'
-    
-    def get_context(self, name, value, attrs):
-        context = super().get_context(name, value, attrs)
-        context['obj'] = value
-        return context
-
-
-#image_set-1-image
-
-class image_icon_widget(forms.widgets.FileInput):
-    template_name = 'main/widgets/image_icon_file.html'
-    
-    def get_context(self, name, value, attrs):
-        context = super().get_context(name, value, attrs)
-        context['value'] = value
-        return context    
 
 
 class image_widget(forms.widgets.FileInput):
@@ -184,4 +209,4 @@ class image_widget(forms.widgets.FileInput):
         context['images_ids'] = make_next(images_ids)
         context['inputs_ids'] = make_next(inputs_ids)
         a = context['inputs_ids']
-        return context   
+        return context

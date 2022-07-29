@@ -1,4 +1,4 @@
-from django.db.models import Sum, F, Case, When
+from django.db.models import Sum, F, Case, When, Q
 from django.db.models.functions import Coalesce
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
@@ -33,7 +33,6 @@ def index(request):
         #Accept-Language
 
         posts = ''
-
 
         a = ''
         b = ''
@@ -197,8 +196,8 @@ class ProductList(views.APIView):
             root = get_object_or_404(Root, slug=menu_slug)
             products = get_posts_products_by_root(root)
             root_and_allitschiles = Root.objects.filter(id__in=list(filter(None, root.all_childes_id.split(',')))+[root.id])   #why we used filter? root.all_childes_id.split(',') may return: [''] that raise error in statements like  filter(in__in=['']) so we ez remove blank str of list by filter.
-            sidebarmenu_checkbox =  root_and_allitschiles.filter(level__in=[root.id, root.id+1]) if root.levels_afterthis == 1 else None
-            sidebarmenu_link = root_and_allitschiles.filter(level__in=[root.id, root.id+1]) if root.levels_afterthis > 1 else None
+            sidebarmenu_checkbox =  root_and_allitschiles.filter(level__in=[root.level, root.level+1]) if root.levels_afterthis == 1 else None
+            sidebarmenu_link = root_and_allitschiles.filter(level__in=[root.level, root.level+1]) if root.levels_afterthis > 1 else None
             filter_ids = root_and_allitschiles.values_list('filter', flat=True)
             filters_serialized = myserializers.FilterSerializer(Filter.objects.filter(id__in=filter_ids).prefetch_related('filter_attributes'), many=True).data       #in FilterSerializer has field 'filter_attributes' so if we dont put this prefetch, program will run 1+len(filters) queries (for example supose we have this filters:  <object(1) Filter>, <object(2) Filter> queries number was run for serializing filters: our program run one query for this two object and second for: <object(1) Filter>.filter_attributes.all() and third for <object(2) Filter>.filter_attributes.all() so run 3 query for this 2 filter object! but now just run 2 for eny filter objects.
             
@@ -208,14 +207,14 @@ class ProductList(views.APIView):
             sidebarmenu_link = Root.objects.filter(level=1)
             filters_serialized = myserializers.FilterSerializer(Filter.objects.all().prefetch_related('filter_attributes'), many=True).data    
 
-        ## 2 sidebar filter.   url example: /products?meshki_1=1/      filter_attributeslugid_id_list is like: [{'meshki_1': '1'}, {'sefid_2': '2'}, ..]. why we choiced  slug+_+id?  answer: in below line we use requet.GET['key'] that is like request.GET['meshki_1'] so str "meshki_1' must be uniqe and with slung+_+id it is unique
-        filter_attributeslugid_id_list = [{f"{filter_attribute['slug']}_{filter_attribute['id']}": str(filter_attribute['id'])} for filter in filters_serialized for filter_attribute in filter['filter_attributes']]    
-        selected_filter_attributes_ids = [int(request.GET[key]) for key in request.GET if {key: request.GET[key]} in filter_attributeslugid_id_list]
+        ## 2 sidebar filter.   url example: /products?meshki_1=1/      filter_attributeslug_id_list is like: [{'meshki_1': '1'}, {'sefid_2': '2'}, ..]. why we choiced  slug+_+id?  answer: in below line we use requet.GET['key'] that is like request.GET['meshki_1'] so str "meshki_1' must be unique and with slung+_+id it is unique
+        filter_attributeslug_id_list = [{filter_attribute['slug']: str(filter_attribute['id'])} for filter in filters_serialized for filter_attribute in filter['filter_attributes']]
+        selected_filter_attributes_ids = [int(request.GET[key]) for key in request.GET if {key: request.GET[key]} in filter_attributeslug_id_list]
         if selected_filter_attributes_ids:
-            products = products.filter(filter_attributes__in=selected_filter_attributes_ids)
+            products = products.filter(Q(filter_attributes__in=selected_filter_attributes_ids) | Q(shopfilteritems__filter_attribute__in=selected_filter_attributes_ids))
         if request.GET.get('mx'):                                                                         #sidebar filder price
             products = products.filter(price__gte=request.GET.get('mn'), price__lte=request.GET.get('mx'))           #request.GET.get('mn') and request.GET.get('mx') can be int or str dont raise eny problem.
-            
+
         ## 3 select category  url example:  /products/کالای-دیجیتال/?select=bestselling
         select, orders = request.GET.get('select'), None
         if select:

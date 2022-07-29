@@ -1,5 +1,6 @@
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
+from  django.core.validators import MaxLengthValidator
 from django.forms.utils import ErrorList
 from django import forms
 from django.conf import settings
@@ -8,12 +9,22 @@ import json
 from customed_files.django.classes import myforms
 from users.models import User
 from . import myserializers
-from .mywidgets import image_icon_widget, image_widget, filter_attributes_widget, product_root_widget, level_widget, father_root_widget, confirm_status_widget, confermer_widget, published_date_widget
-from .models import Product, Root, Image, Comment, Filter_Attribute, ShopFilterItem
+from .mywidgets import *
+from .models import Post, Product, Root, Filter, Image, Comment, Filter_Attribute, ShopFilterItem
 
 
 
-from itertools import chain           
+
+class PostForm(forms.ModelForm):
+    root = forms.ModelChoiceField(queryset=Root.objects.filter(post_product='post'), label=_('root'))
+
+    class Meta:
+        model = Post
+        fields = '__all__'
+
+
+
+
 class ProductForm(myforms.ProductModelForm):
     def __init__(self, data=None, files=None, auto_id='id_%s', prefix=None, initial=None, error_class=ErrorList, label_suffix=None, empty_permitted=False, instance=None, use_required_attribute=None, renderer=None):
         initial = initial if initial else {}
@@ -27,30 +38,31 @@ class ProductForm(myforms.ProductModelForm):
         if image:
             initial = {**initial, 'image': image, 'alt': alt} 
         super(). __init__(data, files, auto_id, prefix, initial, error_class, label_suffix, empty_permitted, instance, use_required_attribute, renderer)
-        
+
     #root = myforms.CustomChoiceField(choices=(), widget=product_root_widget, required=True, label=_('menu'))
     root = myforms.CustomModelChoiceField(queryset=Root.objects.all(), widget=product_root_widget, required=True, label=_('menu'))
     image = forms.ImageField(widget=image_icon_widget, required=True, label=_('image icon'))
     alt = forms.CharField(max_length=55, label=_('alt'))
-    length = forms.FloatField(label=_('length'))
+    weight = forms.FloatField(widget=weight_widget, required=True, label=_('weight'))
+    length = forms.FloatField(widget=length_widget, label=_('length'))
     width = forms.FloatField(label=_('width'))
     height = forms.FloatField(label=_('height'))
-    
+
     class Meta:                                          #take fields from admin.fiedset but this is needed for validation.
         model = Product
-        fields = ['name', 'slug', 'meta_title', 'meta_description', 'brief_description', 'price', 'available', 'visible', 'filter_attributes', 'root', 'rating', 'image', 'alt', 'length', 'width', 'height']
-                
+        fields = ['name', 'slug', 'meta_title', 'meta_description', 'brief_description', 'detailed_description', 'price', 'available', 'visible', 'filter_attributes', 'root', 'rating', 'image', 'alt', 'weight', 'length', 'width', 'height']
+
     def save(self, commit=True):
         length, width, height = self.cleaned_data.get('length'), self.cleaned_data.get('width'), self.cleaned_data.get('height')
         self.cleaned_data['size'] = str(length) + ',' + str(width) + ',' + str(height) if length and width and height else ''
         self.instance.size = self.cleaned_data['size']
         return super().save(commit)
-        
+
 
 class CommentForm(forms.ModelForm):
     confirm_status = myforms.CustomField(widget=confirm_status_widget, required=True, label=_('confirm status'))
     #published_date = CustomField(disabled=True, widget=published_date_widget, label=_('published date'))
-    confermer = myforms.CustomField(widget=confermer_widget, label='confermer')           #can user choicefield, problem in saving that.
+    confermer = myforms.CustomField(widget=confermer_widget, label='confermer')           # can use choicefield, problem in saving that.
     
     class Meta:
         model = Comment
@@ -62,10 +74,21 @@ class CommentForm(forms.ModelForm):
 class RootForm(forms.ModelForm):
     level = myforms.CustomIntegerField(widget=level_widget, label=_('level'))
     father_root = myforms.CustomModelChoiceField(queryset=Root.objects.all(), widget=father_root_widget, required=False, label=_('father root'))       #puting CustomModelChoiceField will cease: when creating new root with level 1, father root will feel auto after saving!
-        
+
     class Meta:
         model = Root
         fields = '__all__'
+
+
+
+
+class FilterForm(forms.ModelForm):
+    name = forms.CharField(required=True, validators=[MaxLengthValidator(limit_value=25)], widget=filter_name_widget, label=_('name'))
+    verbose_name = forms.CharField(required=False, validators=[MaxLengthValidator(limit_value=25)], widget=filter_verbose_name_widget, label=_('verbose_name'))
+
+    class Meta:
+        model = Filter
+        fields = ['group', 'name', 'verbose_name', 'roots']
 
 
 
@@ -79,10 +102,16 @@ class ImageForm(forms.ModelForm):
         fields = ['image', 'alt']
 
 
+class ShopFilterItemForm(forms.ModelForm):
+
+    class Meta: 
+        model = ShopFilterItem
+        exclude = ['previous_stock']
+
 '''
 class ShopFilterItemForm(forms.ModelForm):
-    #filter_attributes = forms.ModelMultipleChoiceField(queryset=Filter_Attribute.objects.all())
-    class Meta: 
+    #filter_attribute = forms.ModelChoiceField(queryset=Filter_Attribute.objects.filter(filterr__selling=True), label=_('filter_attribute'))
+    class Meta:
         model = ShopFilterItem
         fields = '__all__'
 
@@ -108,6 +137,4 @@ class ShopFilterItemForm(forms.ModelForm):
         if dublicated:              
             raise ValidationError(_("select unique sets of filter attributes."))
 '''    
-
-
 

@@ -84,6 +84,14 @@ msgstr "تاریخ ویرایش"
 msgid "name"
 msgstr "نام"
 
+#: main/admin.py:284
+msgid "Sub menu"
+msgstr "زیر منو"
+
+#: main/admin.py:285
+msgid "Sub menus"
+msgstr "زیر منوها"
+
 #: main/apps.py:6
 msgid "MRGol"
 msgstr "ام آر گل"
@@ -123,10 +131,6 @@ msgstr "برای سطح بالاتر از 1 اين قسمت ضروري است."
 #: main/models.py:74
 msgid "verbose name"
 msgstr "نام جهت نمایش"
-
-#: main/models.py:75
-msgid "selling filter"
-msgstr "فیلتر فروش"
 
 #: main/models.py:76
 msgid "roots"
@@ -184,6 +188,10 @@ msgstr "رتبه بندي ها"
 #: main/myforms.py:74
 msgid "image"
 msgstr "تصویر"
+
+#: main/myforms.py:86
+msgid "verbose_name"
+msgstr "نام جهت نمایش"
 
 #: main/models.py:141 main/models.py:300 main/models.py:315 main/myforms.py:34
 #: main/myforms.py:75
@@ -263,6 +271,9 @@ msgstr "موجودی انبار"
 msgid "brand"
 msgstr "برند"
 
+msgid "brands"
+msgstr "برندها"
+
 #: main/models.py:215
 msgid "weight"
 msgstr "وزن"
@@ -299,22 +310,6 @@ msgstr "آیتم فیلتر فروش"
 #: main/models.py:274
 msgid "shopfilteritems"
 msgstr "آیتم های فیلتر فروش"
-
-#: main/models.py:283
-msgid "text"
-msgstr "متن"
-
-#: main/models.py:285
-msgid "video"
-msgstr "ویدیو"
-
-#: main/models.py:289 main/models.py:293
-msgid "Content"
-msgstr "محتوا"
-
-#: main/models.py:290
-msgid "Contents"
-msgstr "محتوا"
 
 #: main/models.py:304
 msgid "Image"
@@ -448,8 +443,6 @@ msgid "Please correct the errors below."
 msgstr ""
 
 #: main/templates/admin/change_list.html:78
-#, fuzzy
-#| msgid "selling filter"
 msgid "Clear all filters"
 msgstr "فیلتر فروش"
 
@@ -1344,6 +1337,14 @@ msgstr "یک JSON معتبر وارد کنید"
 
 
 
+
+
+
+
+
+
+
+
 #rest framework backup. source: rest_framework/locale/fa/LC_MESSAGES/django.po    traslation of rest_framework fields and validators.     contain files like(regarding the order): rest_framework/fields.py   rest_framework/validators.py
 
 msgid "Auth Token"
@@ -1712,3 +1713,108 @@ msgstr "این فیلد باید برای ماه \"{date_field}\" یکتا با�
 #, python-brace-format
 msgid "This field must be unique for the \"{date_field}\" year."
 msgstr "این فیلد باید برای سال \"{date_field}\" یکتا باشد."
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# roots (menus)
+msgid "digital"
+msgstr "دیجیتال"
+
+msgid "car"
+msgstr "ماشین"
+
+msgid "clothing"
+msgstr "پوشاک"
+
+msgid "books"
+msgstr "کتاب"
+
+msgid "phone"
+msgstr "گوشی"
+
+msgid "laptop"
+msgstr "لپتاپ"
+
+msgid "smart phone"
+msgstr "گوشی هوشمند"
+
+msgid "cell phone"
+msgstr "گوشی تماس"
+
+msgid "women"
+msgstr "زنانه"
+
+msgid "men"
+msgstr "مردانه"
+
+msgid "plant training"
+msgstr "آموزش کاشت گیاهان"
+
+msgid "Workout"
+msgstr "ورزش"
+
+msgid "Palm tree planting training"
+msgstr "آموزش کاشت درخت نخل"
+
+
+# filters  
+msgid "Color"
+msgstr "رنگ"
+
+msgid "SIM cart counts"
+msgstr "تعداد سیم کارت"
+
+# filter_attributes
+
+msgid "The history of palm tree cultivation in the world has reached more than 5000 years ago and its planting has been common in Iran since the beginning of the Achaemenid dynasty. This tree is propagated by palm kernels or by moving the shoots (date buds)."
+msgstr "سابقه کشت درخت خرما(نخل) در دنیا به بیش از 5000 سال پیش رسیده و کاشت آن در ایران از بدو تاریخ و تشکیل سلسله هخامنشی معمول بوده است. تکثیر این درخت بوسیله هسته خرما یا بوسیله جابجا کردن پاجوشها (جوانه های خرما) صورت می گیرد."
+
+msgid "The TANK is a user friendly bar phone that will stand out among all competitors. With its large and easy to read keypad, it is a hit sensation with seniors. With a 1.8 inch screen, FM Radio, Camera, and Social Networks this phone has all the fixing for a brilliant and simple phone that will sure to impress the user."
+msgstr "تانک یک گوشی کاربر پسند است که در بین رقبا متمایز خواهد شد. با صفحه ‌کلید بزرگ و آسان برای خواندن، برای سالمندان بسیار جذاب است. این گوشی با صفحه نمایش 1.8 اینچی، رادیو FM، دوربین و شبکه های اجتماعی تمام امکانات را برای یک گوشی ساده و براق دارد که مطمئناً استفاده کننده آن را تحت تأثیر قرار می دهد."
+
+msgid "This affordable dual-band GSM phone packs in a good number of features for a low-end model, including GPRS high-speed data, Java, MMS, SyncML, and voice dialing."
+msgstr "این تلفن مقرون به صرفه دو بانده GSM دارای تعداد زیادی ویژگی برای یک مدل ارزان قیمت است، از جمله داده‌های پرسرعت GPRS، جاوا، MMS، SyncML و شماره‌گیری صوتی."
+
+# brief_description of samsung note 20
+msgid "It’s easy to forget about the Samsung Galaxy Note 20. Oh, sure — the $1,299 Galaxy Note 20 Ultra is impossible to overlook, with its 6.9-inch adaptive 120Hz display, meticulous glass-and-metal design and absurd triple-camera bump. But the regular Note 20 has none of those things, leading some to dismiss it — perhaps unfairly — as a cut-rate afterthought in Samsung’s roster of premium handsets."
+msgstr "به راحتی می توان گلکسی نوت 20 سامسونگ را فراموش کرد. اوه، مطمئناً نمی توان گلکسی نوت 20 اولترا 1299 دلاری را نادیده گرفت، با صفحه نمایش 6.9 اینچی تطبیقی 120 هرتزی، طراحی دقیق شیشه ای و فلزی و برآمدگی نامعقول دوربین سه گانه. اما نوت 20 معمولی هیچ یک از این چیزها را ندارد، و باعث شد که برخی آن را - شاید به طور غیرمنصفانه - به عنوان یک مدل پایین‌تر در فهرست گوشی‌های ممتاز سامسونگ رد کنند."
+
+# brief_description of Galaxy S20 FE
+msgid "Don't dismiss the Samsung Galaxy S20 FE as an also-ran. This solid value delivers on the all-important basics such as screen quality and performance. With a 120Hz display and the Snapdragon 865 processor on board, you have all the beauty and speed in the world. Weighing the rest of the features against the reduced $600 price point leaves things in good balance."
+msgstr "سامسونگ گلکسی اس 20 FE را نیز به عنوان یک نسخه قابل اتکا نادیده نگیرید. این گوشی به شدت ارزش، اصول اولیه مهمی مانند کیفیت و عملکرد صفحه نمایش را ارائه می دهد. با صفحه نمایش 120 هرتزی و پردازنده اسنپدراگون 865 روی آن، تمام زیبایی و سرعت دنیا را در اختیار دارید. سنجیدن بقیه ویژگی ها در مقابل قیمت کاهش یافته 600 دلاری، تعادل خوبی را ایجاد می کند."
+
+# brief_description of LG Velvet LM-G910EMW
+msgid "first and foremost. With the LG Velvet, the company is attempting to redefine itself in the smartphone space. LG is shedding the G series and V series, instead creating unique product designs with their own identities. But can LG’s first swing at a new style be a home run?"
+msgstr "LG Velvet یک حرکت جدید جسورانه برای LG است که در درجه اول بر استایل تمرکز دارد. با LG Velvet، این شرکت در تلاش است تا خود را در فضای گوشی های هوشمند بازتعریف کند. ال‌جی سری‌های G و سری V را کنار می‌گذارد، در عوض طرح‌های منحصربه‌فردی را با هویت خود ایجاد می‌کند. اما آیا اولین حرکت ال‌جی در سبک جدید می‌تواند جدی باشد؟"
+
+# brief_description of Samsung galaxy s20 plus
+msgid "The Samsung Galaxy S20 Plus is one of the most well-rounded smartphones I've used in years. It has versatile cameras that compete with the best, customizable software, and a display that's so good it will ruin other smartphone displays for you. $1,200 is a lot of money though, and Samsung is really pushing it with this high price tag."
+msgstr "گوشی های سامسونگ گلکسی اس 20 پلاس یکی از قوی‌ترین گوشی‌های هوشمندی است که در سال‌های اخیر استفاده کرده‌ام. دوربین های همه کاره ای دارد که با بهترین نرم افزارهای قابل تنظیم رقابت می کنند و صفحه نمایش آنقدر خوب است که نمایشگرهای دیگر گوشی های هوشمند را با اختلاف شکست می دهند. با این حال، 1200 دلار پول زیادی است، و سامسونگ واقعاً آن را با این قیمت بالا ارائه داده است."
+
+# brief_description of iPhone 12 Pro Max
+msgid "The iPhone 12 Pro is a fantastic addition to Apple's ecosystem of devices. While the iPhone 12 Mini and iPhone 12 Pro Max will also likely tempt buyers at either end of the price spectrum, the iPhone 12 Pro is a great default device for fans of iOS."
+msgstr "آیفون 12 پرو یک گوشی دیگر از اکوسیستم دستگاه های اپل است. در حالی که آیفون 12 مینی و آیفون 12 پرو مکس نیز احتمالا خریداران را در هر دو انتهای طیف قیمت وسوسه خواهند کرد، آیفون 12 پرو یک دستگاه پیش فرض عالی برای طرفداران iOS است."
+
+# brief_description of Macbook m1
+msgid "The MacBook Pro 13-inch (M1, 2020) wasn’t just a welcome refresh. It was a sign that Apple had turned over a new leaf. That’s thanks to Apple’s own SoC, the M1 chip, being introduced with the refresh, which also came with the MacBook Air (M1, 2020) and Mac mini (M1, 2020) that launched at the same time. This new chip replaces the Intel processors that had powered Apple computers up to this point, marking a new era for Apple as well as breathing fresh air into its laptops and reminding everyone what’s made Apple products so special."
+msgstr "مک بوک پرو 13 اینچی (M1، 2020) فقط یک محصول جدید نبود. این نشانه این بود که اپل برگ جدیدی رو کرده است. این به لطف SoC خود اپل، تراشه M1 است که همراه با به‌روزرسانی معرفی شد، که همزمان با (MacBook Air (M1, 2020) and Mac mini (M1, 2020 عرضه شد. این تراشه جدید جایگزین پردازنده‌های اینتل می‌شود که تا این لحظه به رایانه‌های اپل نیرو می‌دادند و عصر جدیدی را برای اپل و همچنین تنفس تازه ای در لپ‌تاپ‌هایش به حساب می آمد و به همه یادآوری کرد که چه چیزی محصولات اپل را بسیار خاص کرده است."

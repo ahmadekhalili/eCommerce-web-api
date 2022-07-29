@@ -1,0 +1,115 @@
+[1mdiff --git a/mrgol/main/admin.py b/mrgol/main/admin.py[m
+[1mindex b69c7be..2b1575a 100644[m
+[1m--- a/mrgol/main/admin.py[m
+[1m+++ b/mrgol/main/admin.py[m
+[36m@@ -12,8 +12,9 @@[m [mfrom django.utils.translation import gettext_lazy as _[m
+ from django.contrib.admin.utils import unquote[m
+ import json[m
+ [m
+[32m+[m[32mimport jdatetime[m
+[32m+[m
+ from customed_files.django.classes.custom_ModelAdmin import CustModelAdmin[m
+[31m-from customed_files.date_convertor import MiladiToShamsi[m
+ from . import myserializers[m
+ from . import myforms[m
+ from .models import *[m
+[36m@@ -35,8 +36,8 @@[m [mclass CommentInline(admin.TabularInline):[m
+     readonly_fields = ('content', 'author', 'confermer', 'confirm_status', 'get_published_date')[m
+     [m
+     def get_published_date(self, obj):                                       #auto_now_add and auto_now fields must be in read_only otherwise raise error (fill by django not user) and you cant control output of read_only fields with widget (from its form) so for this fiels you cant specify eny widget!![m
+[31m-        date = MiladiToShamsi(obj.published_date.year, obj.published_date.month, obj.published_date.day).result(month_name=True)[m
+[31m-        return format_html(f'{date[2]} {date[1]} {date[0]}، ساعت {obj.published_date.hour}:{obj.published_date.minute}')[m
+[32m+[m[32m        ymd = jdatetime.datetime.fromgregorian(datetime=obj.published_date).strftime('%Y %B %-d').split()         # this is like ['1388', 'Esfand', '1'][m
+[32m+[m[32m        return format_html('{} {}&rlm; {}، ساعت {}:{}'.format(ymd[2], _(ymd[1]), ymd[0], obj.published_date.minute, obj.published_date.hour))[m
+     get_published_date.short_description = _('published date')[m
+ [m
+ [m
+[36m@@ -47,11 +48,11 @@[m [mclass PostAdmin(admin.ModelAdmin):[m
+     readonly_fields = ('get_published_date',)[m
+ [m
+     def get_published_date(self, obj):                                       #auto_now_add and auto_now fields must be in read_only otherwise raise error (fill by django not user) and you cant control output of read_only fields with widget (from its form) so for this fiels you cant specify eny widget!![m
+[31m-        date = MiladiToShamsi(obj.published_date.year, obj.published_date.month, obj.published_date.day).result(str_month=True)[m
+[31m-        return f'{date[2]} {date[1]} {date[0]}، ساعت {obj.published_date.hour}:{obj.published_date.minute}'[m
+[32m+[m[32m        date = jdatetime.datetime.fromgregorian(datetime=obj.published_date).strftime('%Y %B %-d').split()[m
+[32m+[m[32m        return format_html('{} {}&rlm; {}، ساعت {}:{}'.format(date[2], _(date[1]), date[0], obj.published_date.minute, obj.published_date.hour))[m
+     get_published_date.allow_tags = True[m
+     get_published_date.short_description = _('published date')[m
+[31m-    [m
+[32m+[m
+ admin.site.register(Post, PostAdmin)[m
+ [m
+ [m
+[36m@@ -67,7 +68,7 @@[m [mtry:                               #in first creating db,  we have not eny table[m
+             if self.value():                                                #if dont put this, list_display will be blank always (even when you want all objects like when you go to url: "http://192.168.114.21:8000/admin/orders/profileorder" program come here and self.value() is None in that case and queryset.filter(state=None) make our queryset clear![m
+                 return queryset.filter(filter_attributes=self.value())[m
+ [m
+[31m-        def choices(self, changelist): [m
+[32m+[m[32m        def choices(self, changelist):[m
+             for lookup, title in self.lookup_choices:[m
+                 yield {[m
+                     'selected': self.value() == str(lookup),[m
+[36m@@ -119,24 +120,24 @@[m [mclass ProductAdmin(CustModelAdmin):[m
+     get_id.short_description = _('id')[m
+     get_id.admin_order_field = 'id'[m
+     def get_created_brief(self, obj):[m
+[31m-        date = MiladiToShamsi(obj.created.year, obj.created.month, obj.created.day).result()[m
+[32m+[m[32m        date = jdatetime.datetime.fromgregorian(date=obj.created).strftime('%Y %-m %-d').split()       # -m -d month date in one|two digit,  but m d is month day in two digit[m
+         return f'{date[0]}/{date[1]}/{date[2]}'[m
+     get_created_brief.allow_tags = True[m
+     get_created_brief.short_description = _('created date')[m
+     def get_updated_brief(self, obj):             [m
+[31m-        date = MiladiToShamsi(obj.updated.year, obj.updated.month, obj.updated.day).result()[m
+[32m+[m[32m        date = jdatetime.datetime.fromgregorian(date=obj.created).strftime('%Y %-m %-d').split()[m
+         return f'{date[0]}/{date[1]}/{date[2]}'[m
+     get_updated_brief.allow_tags = True[m
+     get_updated_brief.short_description = _('updated date')[m
+     [m
+     def get_created(self, obj):[m
+[31m-        date = MiladiToShamsi(obj.created.year, obj.created.month, obj.created.day).result(month_name=True)[m
+[31m-        return f'{date[2]} {date[1]} {date[0]}، ساعت {obj.created.hour}:{obj.created.minute}'[m
+[32m+[m[32m        date = jdatetime.datetime.fromgregorian(datetime=obj.published_date).strftime('%Y %B %-d').split()[m
+[32m+[m[32m        return format_html('{} {}&rlm; {}، ساعت {}:{}'.format(date[2], _(date[1]), date[0], obj.published_date.minute, obj.published_date.hour))[m
+     get_created.allow_tags = True[m
+     get_created.short_description = _('created date')[m
+     def get_updated(self, obj):             [m
+[31m-        date = MiladiToShamsi(obj.updated.year, obj.updated.month, obj.updated.day).result(month_name=True)[m
+[31m-        return f'{date[2]} {date[1]} {date[0]}، ساعت {obj.updated.hour}:{obj.updated.minute}'[m
+[32m+[m[32m        date = jdatetime.datetime.fromgregorian(datetime=obj.published_date).strftime('%Y %B %-d').split()[m
+[32m+[m[32m        return format_html('{} {}&rlm; {}، ساعت {}:{}'.format(date[2], _(date[1]), date[0], obj.published_date.minute, obj.published_date.hour))[m
+     get_updated.allow_tags = True[m
+     get_updated.short_description = _('updated date')[m
+     [m
+[36m@@ -158,7 +159,7 @@[m [mclass ProductAdmin(CustModelAdmin):[m
+         return queryset[m
+     [m
+     @csrf_protect_m[m
+[31m-    def changeform_view(self, request, object_id=None, form_url='', extra_context=None):        [m
+[32m+[m[32m    def changeform_view(self, request, object_id=None, form_url='', extra_context=None):[m
+         to_field = request.POST.get(TO_FIELD_VAR, request.GET.get(TO_FIELD_VAR))[m
+         obj = None[m
+         if object_id:                                   #in adding object in admin panel, object_id is none.[m
+[36m@@ -243,8 +244,8 @@[m [mclass CommentAdmin(admin.ModelAdmin):[m
+         return queryset[m
+     [m
+     def get_published_date(self, obj):                                       #auto_now_add and auto_now fields must be in read_only otherwise raise error (fill by django not user) and you cant control output of read_only fields with widget (from its form) so for this fiels you cant specify eny widget!![m
+[31m-        date = MiladiToShamsi(obj.published_date.year, obj.published_date.month, obj.published_date.day).result(month_name=True)[m
+[31m-        return format_html(f'{date[2]} {date[1]} {date[0]}، ساعت {obj.published_date.hour}:{obj.published_date.minute}')[m
+[32m+[m[32m        date = jdatetime.datetime.fromgregorian(datetime=obj.published_date).strftime('%Y %B %-d').split()[m
+[32m+[m[32m        return format_html('{} {}&rlm; {}، ساعت {}:{}'.format(date[2], _(date[1]), date[0], obj.published_date.minute, obj.published_date.hour))[m
+     get_published_date.allow_tags = True[m
+     get_published_date.short_description = _('published date')[m
+     '''[m
+[36m@@ -396,6 +397,13 @@[m [madmin.site.register(SmallImage)[m
+ admin.site.register(State)[m
+ [m
+ [m
+[32m+[m[32mclass TestAdmin(admin.ModelAdmin):[m
+[32m+[m[32m    @csrf_protect_m[m
+[32m+[m[32m    def changeform_view(self, request, object_id=None, form_url='', extra_context=None):[m
+[32m+[m[32m        if request.method == 'POST':[m
+[32m+[m[32m            print('@@@@@@@@@@@@@@@@@@@@@@2', request.POST)[m
+[32m+[m[32m        return super().changeform_view(request, object_id, form_url, extra_context)[m[41m     [m
+[32m+[m[32madmin.site.register(Test, TestAdmin)[m
+ #admin.site.disable_action('delete_selected') [m
+ [m
+ [m

@@ -1,0 +1,1 @@
+change_list.html:           <!-- this file is exatly django 4.0.3 change_list.html  except addition <br> in a loop -->

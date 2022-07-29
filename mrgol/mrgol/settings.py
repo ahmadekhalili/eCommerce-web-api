@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'ckeditor',
+    'ckeditor_uploader',
     #'rest_framework.authtoken',
 ]
 
@@ -94,10 +96,24 @@ DATABASES = {
         'NAME': 'akh_db',
         'USER': 'akh_db',                          
         'PASSWORD': 'a13431343',
-        'HOST': '127.0.0.1',
+        'HOST': '172.17.0.3',
         'PORT': '5432',
+    },
+    'mongo': {
+        'ENGINE': 'djongo',
+        'NAME': 'shop',
+        'CLIENT': {
+            'host': '172.17.0.2',
+            'port': 27017,
+            'username': 'akh2',
+            'password': '134313731374aA',
+            'authSource': 'shop',
+            'authMechanism': 'SCRAM-SHA-256'
+        },
     }
 }
+
+DATABASE_ROUTERS = ['main.db_router.MongoRouter']
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
@@ -156,6 +172,7 @@ LOCALE_PATHS = (BASE_DIR / 'locale', )
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+CKEDITOR_UPLOAD_PATH = "uploads/"
 #CART_PRODUCTS_ID = 'cart_cookie'
 #FAVORITE_PRODUCTS_ID = 'favorites_cookie'
 
@@ -167,3 +184,5 @@ AUTH_USER_MODEL = 'users.User'
 CART_SESSION_ID = 'cart'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
+#DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880            # 5 mg size for uploading posts like product.detailed_description = HTMLField(..)     (defult is 2.5) so we can write more posts with more images and ...
