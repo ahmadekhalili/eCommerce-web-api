@@ -60,11 +60,11 @@ class Cart(object):
         else:
             del self.cart[product_id]
 
-    def is_nested_dict(self, cart, product_id):                                # check we have nested dict in cart[product_id] or not for example self.cart[1] = {'quantity': quantity, 'price': ...} is dict level 1 (not nested) but self.cart[1] = {2: {'quantity': quantity, 'price': ...}} is dict level 2 (nested)
+    def is_nested_dict(self, cart, product_id):                                # check we have nested dict in cart[product_id] or not for example self.cart[1] = {'quantity': quantity, 'price': ...} is not nested (simple item in self.cart[1]) but self.cart[1] = {2: {'quantity': quantity, 'price': ...}} is nested level 2 dict(item with shopfilteritem in self.cart[1])
         return type(list(cart[product_id].keys())[0]) == int
 
-    def add(self, product_id, quantity=1, shopfilteritem_id=None):             # product_id (or shopfilteritem_id dont different) shoud be int, product_id type is important in __iter__  (in __ter__ ids type in product_ids var should be same with ids in ids_products var)
-        quantity = int(quantity)
+    def add(self, product_id, quantity=1, shopfilteritem_id=None):             # product_id (or shopfilteritem_id dont different) shoud be str, product_id type is important in __iter__  (in __ter__ ids type in product_ids var should be same with ids in ids_products var)
+        product_id, quantity = str(product_id), int(quantity)                  # product_id (or shopfilteritem_id dont different) shoud be str, because after saving data and keys in self.sassion in 'def save', keys will converte to str automatically (example: cart=Cart(request)  cart.add(1, 1, None)  again_cart=Cart(request)  again_cart.cart is like:  {'1': {'quantity': 1, ....}}   (doc says: "Use normal Python strings as dictionary keys on request.session. This is more of a convention than a hard-and-fast rule.") 
         item = get_object_or_404(ShopFilterItem, id=shopfilteritem_id) if shopfilteritem_id else get_object_or_404(Product, id=product_id)
         quantity = self.get_cart_item(product_id, shopfilteritem_id).get('quantity', 0) + quantity
         if quantity <= item.stock:                                             # note if quantity > item.stock we dont need do enything because it done in __iter__
@@ -97,11 +97,11 @@ class Cart(object):
 
     def __iter__(self):                                   # important: supose for item in cart: cart is like: [{'quantity': 2, 'price': 1, 'old_price': '1', 'product': product(1), 'shopfilteritem': None, 'price_changes': 0, 'lach_quantity': 0, 'total_price': 2}, {'quantity': 2, 'price': 10, 'old_price': '10', 'product': product(2), 'shopfilteritem': shopfilteritem(1), 'price_changes': 0, 'lach_quantity': 0, 'total_price': 2}]
         product_ids, shopfilteritem_ids =  self.cart.keys(), [key2 for key in self.cart if self.is_nested_dict(self.cart, key) for key2 in self.cart[key]]
-        ids_products = dict([(product.id, product) for product in Product.objects.filter(id__in=product_ids)])          #this is like: {'1': product_1, '2': product_2}   note ids of product_ids can be str
-        ids_shopfilteritems = dict([(shopfilteritem.id, shopfilteritem) for shopfilteritem in ShopFilterItem.objects.filter(id__in=shopfilteritem_ids)])  #ids_products key type should be same with ids_shopfilteritems key type.
+        ids_products = dict([(str(product.id), product) for product in Product.objects.filter(id__in=product_ids)])          # this is like: {'1': product_1, '2': product_2}   note ids of product_ids is str
+        ids_shopfilteritems = dict([(str(shopfilteritem.id), shopfilteritem) for shopfilteritem in ShopFilterItem.objects.filter(id__in=shopfilteritem_ids)])  # ids_products key type should be same with ids_shopfilteritems key type.
         for id in product_ids:
             item, mutable_item = self.cart[id].copy(), self.cart[id]                        # item = self.cart[key] is mutable so every change in item, affect self.cart and self.session and self.request!!!!
-            item['product'] = ids_products.get(id)        # supose you have product_ids = [1,2]  supose admin delete product(1) so ids_products should be like:  {'2': product(2)} so ids_products.get(1) = None, if we hanle it like this only deleted product will desapire in "sabad" of user but if we dont handle it and raise error in our program, all items of "sabad" will disapier.
+            item['product'] = ids_products.get(id)        # supose you have product_ids = [1,2]  supose admin delete product(1) so ids_products should be like:  {'2': product(2)} so ids_products.get(1) = None, if we hanle it like this only deleted product will disappear in "sabad" of user but if we dont handle it and raise error in our program, all items of "sabad" will disappear.
             if item['product']:
                 loop = list(self.cart[id].keys()) if self.is_nested_dict(self.cart, id) else ['one']                         # list(self.cart[id].keys())[0]) is like 1 when in cart we added a shopfilteritem but when in cart we added a product is like 'quantity'
                 for shopfilteritem_id in loop:                                                                               # should loop one time if we have not shopfilteritem
@@ -121,7 +121,7 @@ class Cart(object):
     def __len__(self):
         quantities = 0
         for product_id in self.cart:
-            if is_nested_dict(self.cart, product_id):
+            if self.is_nested_dict(self.cart, product_id):
                 for shopfilteritem_id in self.cart[product_id]:
                     quantities += self.cart[product_id][shopfilteritem_id]['quantity']
             else:
@@ -131,7 +131,7 @@ class Cart(object):
     def get_products_count(self):                        # we didnt use 'for item in cart' because it use database query and is not optimal
         counter = 0
         for product_id in self.cart:
-            if is_nested_dict(self.cart, product_id):
+            if self.is_nested_dict(self.cart, product_id):
                 for shopfilteritem_id in self.cart[product_id]:
                     counter += 1
             else:

@@ -23,11 +23,11 @@ class CartPageView(views.APIView):       #user come from 'sabad'(in header) to h
 
 
 
-    
+
 class CartMenuView(views.APIView):       #'sabad'(in header)
     def get(self, request, *args, **kwargs):                                       #supose user refresh /cart/ page
         serializers, cart, total_prices, total_weight, dimensions, dimensions_fail  = [], Cart(request), Decimal(0), 0, [], False          #we sended dimensions not volume for using in future (in formols for processing carton size).
-        for item in cart:           
+        for item in cart:
             serializers.append({**CartProductSerializer(item['product'], context={'request': request}).data, 'price': str(item['price']), 'quantity': item['quantity'], 'total_price': str(item['total_price'])})
             total_prices += item['total_price']
             total_weight += item['product'].weight * item['quantity'] if item['product'].weight else 0
@@ -38,7 +38,7 @@ class CartMenuView(views.APIView):       #'sabad'(in header)
 
 
 
-    
+
 class CartAdd(views.APIView):       #user come from 'sabad'(in header) to this method.  add id in front, just front must car add current_item + cart_cookie in add. #set_fingers and remove  is in front 
     def post(self, request, *args, **kwargs):
         #CustomSessionAuthentication().enforce_csrf(request)
