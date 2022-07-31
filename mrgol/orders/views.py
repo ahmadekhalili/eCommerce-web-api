@@ -25,10 +25,10 @@ class ListCreateProfileOrder(views.APIView):
     permission_classes = [IsAuthenticated]                               #redirect to login page by front if user is not loged in.
     def get(self, request, *args, **kwargs):                             #here listed ProfileOrders of a user.  come here from url /cart/.  here front side must create form refrencing to ListCreateOrderItem, and when click on checkbox auto submit to ProfileOrderDetail.get for optaining shiping price.  
         profileorders = request.user.profileorders.select_related('town__state')
+        cart_menu = CartMenuView().get(request).data
         if profileorders:
             for profileorder in profileorders:
                 profileorder.state = profileorder.town.state             #profileorder.state needed in ProfileOrderSerializer
-            cart_menu = CartMenuView().get(request).data
             return Response({**cart_menu, 'profileorders': ProfileOrderSerializer(profileorders, many=True).data})   
         else:            
             return Response({**cart_menu, 'profileorders': None})         #after this front side must create blank ProfileOrder Form with action refrenced to ListCreateProfileOrder.post. (you can create form and its html elements by django modelform and say to front html elements)    
