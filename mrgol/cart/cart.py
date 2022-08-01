@@ -61,7 +61,11 @@ class Cart(object):
             del self.cart[product_id]
 
     def is_nested_dict(self, cart, product_id):                                # check we have nested dict in cart[product_id] or not for example self.cart[1] = {'quantity': quantity, 'price': ...} is not nested (simple item in self.cart[1]) but self.cart[1] = {2: {'quantity': quantity, 'price': ...}} is nested level 2 dict(item with shopfilteritem in self.cart[1])
-        return type(list(cart[product_id].keys())[0]) == int
+        try:
+            int(list(cart[product_id].keys())[0])
+            return True
+        except:
+            return False
 
     def add(self, product_id, quantity=1, shopfilteritem_id=None):             # product_id (or shopfilteritem_id dont different) shoud be str, product_id type is important in __iter__  (in __ter__ ids type in product_ids var should be same with ids in ids_products var)
         product_id, quantity = str(product_id), int(quantity)                  # product_id (or shopfilteritem_id dont different) shoud be str, because after saving data and keys in self.sassion in 'def save', keys will converte to str automatically (example: cart=Cart(request)  cart.add(1, 1, None)  again_cart=Cart(request)  again_cart.cart is like:  {'1': {'quantity': 1, ....}}   (doc says: "Use normal Python strings as dictionary keys on request.session. This is more of a convention than a hard-and-fast rule.") 
@@ -106,7 +110,7 @@ class Cart(object):
                 loop = list(self.cart[id].keys()) if self.is_nested_dict(self.cart, id) else ['one']                         # list(self.cart[id].keys())[0]) is like 1 when in cart we added a shopfilteritem but when in cart we added a product is like 'quantity'
                 for shopfilteritem_id in loop:                                                                               # should loop one time if we have not shopfilteritem
                     if self.is_nested_dict(self.cart, id):
-                        item, mutable_item = self.cart[id][shopfilteritem_id].copy(), self.cart[id][shopfilteritem_id]
+                        item, mutable_item = {**item[shopfilteritem_id].copy(), 'product': item['product']}, self.cart[id][shopfilteritem_id]
                     item['shopfilteritem'] = ids_shopfilteritems.get(shopfilteritem_id)
                     item['price'] = item['shopfilteritem'].price if item['shopfilteritem'] else item['product'].price        # django_rest framework convert decimal to str so we convert to str not int!           
                     item['price_changes'] = item['price'] - Decimal(item['old_price'])                                       # price_changes should support posetive and negative numbers, means if price_changes was positive front should display message like: "gheimat aqlam price_changes afzesh yaft" or if was negative: "gheimat aqlam price_changes kahesh yaft"
