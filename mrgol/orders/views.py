@@ -29,8 +29,8 @@ class ListCreateProfileOrder(views.APIView):
         if profileorders:
             for profileorder in profileorders:
                 profileorder.state = profileorder.town.state             #profileorder.state needed in ProfileOrderSerializer
-            return Response({**cart_menu, 'profileorders': ProfileOrderSerializer(profileorders, many=True).data})   
-        else:            
+            return Response({**cart_menu, 'profileorders': ProfileOrderSerializer(profileorders, many=True).data})
+        else:
             return Response({**cart_menu, 'profileorders': None})         #after this front side must create blank ProfileOrder Form with action refrenced to ListCreateProfileOrder.post. (you can create form and its html elements by django modelform and say to front html elements)    
 
     def post(self, request, *args, **kwargs):                             #here ProfileOrder cerated from Form datas sended by user.
@@ -38,7 +38,7 @@ class ListCreateProfileOrder(views.APIView):
         main_profileorder = ProfileOrder.objects.filter(user=request.user, main=True)
         data['main'] = True if not main_profileorder else False           #first profileorder must be main profileorder.
         data['user'] = request.user.id
-        serializer  = ProfileOrderSerializer(data=data)     
+        serializer  = ProfileOrderSerializer(data=data)
         if serializer.is_valid():
             profileorder = serializer.save()
             get = request.GET.copy()
@@ -51,13 +51,13 @@ class ListCreateProfileOrder(views.APIView):
 
 
 
-class ProfileOrderDetail(views.APIView):                                  
+class ProfileOrderDetail(views.APIView):
     permission_classes = [IsAuthenticated]
-    def get(self, request, *args, **kwargs):                                       #here shipping price compute and sended to front. (depende whitch profileorder choisen)
-        dic = profile_order_detail(request, kwargs['pk'])                          #profile_order_detail set in cart vars: personal_shipping_price and personal_shipping_price 
+    def get(self, request, *args, **kwargs):                                       # here shipping price are computed and sended to front. (depend which profileorder choisen)
+        dic = profile_order_detail(request, kwargs['pk'])                          # profile_order_detail set in cart vars: personal_shipping_price and post_shipping_price
         if not dic:
-            return Response(_('your cart is empty, add a product to order.'))             
-        return Response(dic)        #profileorder_selected is for what? answer: front know whitch checkbox should be selected after profileorder creation(after coming from ListCreateProfileOrder.post to .get) 
+            return Response(_('your cart is empty, add a product to order.'))
+        return Response(dic)        # profileorder_selected is for what? answer: front know which checkbox should be selected after profileorder creation(after coming from ListCreateProfileOrder.post to .get)
             
     def put(self, request, *args, **kwargs):                                           #here ProfileOrder updated.
         profileorder = ProfileOrder.objects.get(id=kwargs.get('pk'))
