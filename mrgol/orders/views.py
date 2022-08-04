@@ -25,13 +25,13 @@ class ListCreateProfileOrder(views.APIView):
     permission_classes = [IsAuthenticated]                               #redirect to login page by front if user is not loged in.
     def get(self, request, *args, **kwargs):                             #here listed ProfileOrders of a user.  come here from url /cart/.  here front side must create form refrencing to ListCreateOrderItem, and when click on checkbox auto submit to ProfileOrderDetail.get for optaining shiping price.  
         profileorders = request.user.profileorders.select_related('town__state')
-        cart_menu = CartMenuView().get(request).data
+        total_prices = Cart(request).get_total_prices()
         if profileorders:
             for profileorder in profileorders:
                 profileorder.state = profileorder.town.state             #profileorder.state needed in ProfileOrderSerializer
-            return Response({**cart_menu, 'profileorders': ProfileOrderSerializer(profileorders, many=True).data})
+            return Response({'total_prices': str(total_prices), 'profileorders': ProfileOrderSerializer(profileorders, many=True).data})
         else:
-            return Response({**cart_menu, 'profileorders': None})         #after this front side must create blank ProfileOrder Form with action refrenced to ListCreateProfileOrder.post. (you can create form and its html elements by django modelform and say to front html elements)    
+            return Response({'total_prices': str(total_prices), 'profileorders': None})         #after this front side must create blank ProfileOrder Form with action refrenced to ListCreateProfileOrder.post. (you can create form and its html elements by django modelform and say to front html elements)    
 
     def post(self, request, *args, **kwargs):                             #here ProfileOrder cerated from Form datas sended by user.
         data = request.data                                               #data sended must be like {"first_name": "javad", "last_name":"haghi", "phone":"09127761277", "town":"1", "address":"tehran", "postal_code":"1111111111"} to save ProfileOrder object successfuly.
