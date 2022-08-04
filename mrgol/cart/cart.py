@@ -142,8 +142,22 @@ class Cart(object):
                 counter += 1
         return counter
 
-    def get_total_prices(self):
-        return sum(item['total_price'] for item in self)
+    def get_total_prices(self):                                          # this method should updated to return 'takhfif' in futer if requested in get_total_price argument.    get_total_prices use seperate queries to optain price, so dont use with methods like __iter__ (you can calculate total price in __iter__ itself) to prevent addiotional queries runing
+        product_ids =  [key for key in self.cart.keys() if not self.is_nested_dict(self.cart, key)]                               # we dont need productid contain shopfilteritem for example self.cart = {'1': {'2': {'quantity': 2, 'price': '30', 'old_price': '30'}}  now we don't need product id '1' inside product_ids  because dont need product.price with id=1 to calculate get_total_price)
+        shopfilteritem_ids = [key2 for key in self.cart if self.is_nested_dict(self.cart, key) for key2 in self.cart[key]]
+        ids_productsprice = dict([(str(product.id), product.price) for product in Product.objects.filter(id__in=product_ids).values_list('id', 'price', named=True)])
+        ids_shopfilteritemsprice = dict([(str(shopfilteritem.id), shopfilteritem.price) for shopfilteritem in ShopFilterItem.objects.filter(id__in=shopfilteritem_ids).values_list('id', 'price', named=True)])
+        total_price = Decimal('0')
+        for id in self.cart.keys():
+            item_price = ids_productsprice.get(id)
+            if item_price:
+                total_price += item_price * self.cart[id]['quantity']
+            else:
+                loop = list(self.cart[id].keys()) if self.is_nested_dict(self.cart, id) else []
+                for shopfilteritem_id in loop:
+                    item_price = ids_shopfilteritemsprice.get(shopfilteritem_id, Decimal('0'))        # myabe a shopfilteritem deleted by admin when that was in user cart so in that case  'ids_shopfilteritemsprice.get(shopfilteritem_id, Decimal('0'))' return Decimal('0')
+                    total_price += item_price * self.cart[id][shopfilteritem_id]['quantity']
+        return total_price
 
     def clear(self):                                                       # important: cart.clear work after .add for example supose you have:  cart.clear()  next run cart.add(product_id=data['product_id'], ...)  cart.clear dont ward!!!
         self.session[settings.CART_SESSION_ID] = {}
