@@ -146,12 +146,14 @@ class PostDispatchPrice:                       # weight in gram, and length in m
                  "__VIEWSTATE": str_viewstate, "__EVENTVALIDATION": str_eventvalidation}                                                                     #g3 can be: "rdoCity"(shahri) or "rdoBetweenCity"(beinshahri) not for rdoCity you must not put cboToState and cboToCity 
         form4 = session.post('https://parcelprice.post.ir/default.aspx', data=data3)
         soup = BeautifulSoup(form4.content.decode('UTF-8'), 'html.parser')
-        
-        price = soup.find('font', face="PostFont", color="Red", size="5").get_text()
-        price = ''.join(price[:-1].split(','))     #price is like: '199,545', we conver rial to toman (price[:-1]) and remove all ',' from number
-        return Decimal(price)
 
-
+        try:
+            price = soup.find('font', face="PostFont", color="Red", size="5").get_text()                              # if all thing was good soup contain price as: <font size="5" ..> price </font>  but if post didn't return price and raise error could be as: <font size="2" ..> error text </font>   as you see sizes are different
+            price = ''.join(price[:-1].split(','))     #price is like: '199,545', we conver rial to toman (price[:-1]) and remove all ',' from number
+            return Decimal(price)
+        except:
+            error_text = soup.find('font', face="PostFont", color="Red").get_text()
+            return error_text
 
 
 class make_next:                             #for adding next to list you shold use iter like:  list_with_next = iter(L) but for using that you should call like: next(list_with_next) or list_with_next.__init__() and you cant next of use list_with_next in template like next(list_with_next) or list_with_next.__next__ or list_with_next.__init__() is error you must define simple method as def next(self) insinde list_with_next for using intemplate like: list_with_next.next
