@@ -186,7 +186,7 @@ class ProductAdmin(CustModelAdmin):
             s = myserializers.ProductMongoSerializer(form.instance, context={'request': request}).data
             content = JSONRenderer().render(s)
             stream = io.BytesIO(content)
-            data = JSONParser().parse(stream)
+            data = JSONParser().parse(stream)                           # s is like: {'id': 12, 'name': 'test2', 'slug': 'test2', ...., 'roots': [OrderedDict([('name', 'Workout'), ('slug', 'Workout')])]} and 'OrderedDict' will cease raise error when want save in mongo so we fixed it in data, so data is like:  {'id': 12, 'name': 'test', 'slug': 'test', ...., 'roots': [{'name': 'Workout', 'slug': 'Workout'}]}   note in Response(some_serializer) some_serializer will fixed auto by Response class like our way
             MProduct(json=data).save(using='mongo')
         else:
             s = myserializers.ProductMongoSerializer(form.instance, context={'request': request}).data
@@ -194,7 +194,7 @@ class ProductAdmin(CustModelAdmin):
             stream = io.BytesIO(content)
             data = JSONParser().parse(stream)
             p = MProduct.objects.using('mongo').get(json={'id': data['id']})
-            p.json = data                                              # 'data' is updated type of product means if user for example change product.name in admin form, that changes persistce in 'data' because:  eny user changes in form has been saved on product instance in first lines of 'def save_related' so form.instance is updated so our serializer and 'data' is updated.
+            p.json = data
             p.save(using='mongo')
 
     @csrf_protect_m
