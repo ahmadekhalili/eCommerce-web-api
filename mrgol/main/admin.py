@@ -278,7 +278,7 @@ class CommentAdmin(admin.ModelAdmin):
     
     def get_published_date(self, obj):                                       #auto_now_add and auto_now fields must be in read_only otherwise raise error (fill by django not user) and you cant control output of read_only fields with widget (from its form) so for this fiels you cant specify eny widget!!
         date = jdatetime.datetime.fromgregorian(datetime=obj.published_date).strftime('%Y %B %-d').split()
-        return format_html('{} {}&rlm; {}، ساعت {}:{}'.format(date[2], _(date[1]), date[0], obj.published_date.minute, obj.published_date.hour))
+        return format_html('{} {} &rlm; {}، ساعت {}:{}'.format(date[2], _(date[1]), date[0], obj.published_date.hour, obj.published_date.minute))
     get_published_date.allow_tags = True
     get_published_date.short_description = _('published date')
     '''
