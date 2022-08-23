@@ -1,6 +1,7 @@
 from django.contrib.auth.models import Group
 #from django.template.defaultfilters import slugify      this  slugify has not allow_unicode argument(from git)    
 from django.utils.text import slugify
+from django.utils.translation import gettext_lazy as _
 
 from rest_framework import serializers
 
@@ -43,10 +44,10 @@ class ImageSerializer(serializers.ModelSerializer):
         try:
             url = request.build_absolute_uri(obj.image.url)                 #request.build_absolute_uri()  is like "http://127.0.0.1:8000/product_list/"     and   request.build_absolute_uri(obj.image_icon.url) is like:  "http://192.168.114.6:8000/product_list/media/3.jpg" (request.build_absolute_uri() + obj.image_icon.url)
         except:
-            url = ''                                                        #if obj have not image(obj.image_icone was blank) this line will run. 
+            url = ''
         return url
 
-    
+
 class SmallImageSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()  
     father = ImageSerializer()
@@ -153,9 +154,8 @@ class ShopFilterItemSerializer(serializers.ModelSerializer):
         model = ShopFilterItem
         fields = '__all__'
 
-    def to_representation(self, obj):  #supose: serializer=ShopFilterItemSerializer(ShopFilterItem).data  we use this serializer at least in two places. 1- for showing to user ShopFilterItems of a product in website (exatly like digikala) in this structure:  serializer['name']: serializer['filter_name'] this is like: rangh: narenji   2- for filing html input is like(shematic): <input type="radio" name=serializer['filter_name'] value=serializer['id']>  and this is like digikala  structure too!
+    def to_representation(self, obj):                 # supose: serializer1=ShopFilterItemSerializer(ShopFilterItem_1).data  we use this serializer at least in two places. 1- for showing to user ShopFilterItems of a product in website (exatly like popular websites) in this structure:   ShopFilterItem_1.filter_attribute.filterr.name: {serializer1['name'], serializer3['name']}  this is like: 'rangh': {'narenji', 'sefid', 'meshki'}   2- for filing html input is like(shematic): <input type="radio" name=serializer['name'] value=serializer['id']>  and this is like digikala  structure too!
         self.fields['name'] = serializers.SerializerMethodField()
-        self.fields['filter_name'] = serializers.SerializerMethodField() 
         fields = super().to_representation(obj)
         del fields['product']
         del fields['filter_attribute']
@@ -163,9 +163,6 @@ class ShopFilterItemSerializer(serializers.ModelSerializer):
 
     def get_name(self, obj):
         return obj.filter_attribute.name
-
-    def get_filter_name(self, obj):
-        return obj.filter_attribute.filterr.name
 
 
 
@@ -277,27 +274,32 @@ class PostDetailSerializer(serializers.ModelSerializer):
 
 
 
-class ProductDetailSerializer(serializers.ModelSerializer):       #comment_set will optained by front in other place so we deleted from here.
+class ProductDetailSerializer(serializers.ModelSerializer):       # important: for saving we should first switch to `en` language by:  django.utils.translation.activate('en').    comment_set will optained by front in other place so we deleted from here.   more description:  # all keys should save in database in `en` laguage(for showing data you can select eny language) otherwise it was problem understading which language should select to run query on them like in:  s = myserializers.ProductDetailMongoSerializer(form.instance, context={'request': request}).data['shopfilteritems']:     {'رنگ': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} it is false for saving, we should change language by  `activate('en')` and now true form for saving:  {'color': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} and query like: s['color']
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         request = self.context.get('request')
         self.fields['smallimages'].context['request'] = request
 
-    roots = serializers.SerializerMethodField()   
+    roots = serializers.SerializerMethodField()
+    brand = serializers.SerializerMethodField()
     rating = serializers.SerializerMethodField()
     smallimages = SmallImageSerializer(many=True)
     comment_count = serializers.SerializerMethodField()
+    shopfilteritems = serializers.SerializerMethodField()
     related_products = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
-        fields = ['id', 'name', 'slug', 'meta_title', 'meta_description', 'brief_description', 'detailed_description', 'price', 'available', 'roots', 'rating', 'stock', 'brand', 'weight', 'smallimages', 'comment_count', 'related_products']
+        fields = ['id', 'name', 'slug', 'meta_title', 'meta_description', 'brief_description', 'detailed_description', 'price', 'available', 'roots', 'rating', 'stock', 'brand', 'weight', 'smallimages', 'comment_count', 'shopfilteritems', 'related_products']
 
     def get_roots(self, obj):
         root_and_fathers = get_root_and_fathers(obj.root)
         root_and_fathers.reverse()                           #to fixing display order in front we reversed!!
         return RootChainedSerializer(root_and_fathers, many=True).data           
-    
+
+    def get_brand(self, obj):
+        return obj.brand.name
+
     def get_rating(self, obj):
         rate = obj.rating.rate
         return rate
@@ -305,6 +307,13 @@ class ProductDetailSerializer(serializers.ModelSerializer):       #comment_set w
     def get_comment_count(self, obj):
         rate = obj.comment_set.count()
         return rate
+
+    def get_shopfilteritems(self, obj):                                         # return value is like:  "shopfilteritems": { "رنگ": [ { "id": 3, "name": "سفید", "previous_stock": 12, ...}, { "id": 8, "name": "طلایی", "previous_stock": 8, ...}]}
+        shopfilteritems, data = obj.shopfilteritems.all(), {}
+        for shopfilteritem in shopfilteritems:
+            filter_name = str(_(shopfilteritem.filter_attribute.filterr.name))                  # filter_name should be str not __proxy__,  otherwise can't be used as key in data[filter_name]
+            data[filter_name] = [ShopFilterItemSerializer(shopfilteritem).data] if not data.get(filter_name) else [*data[filter_name], ShopFilterItemSerializer(shopfilteritem).data]
+        return data
 
     def get_related_products(self, obj):
         request = self.context.get('request', None)
@@ -326,14 +335,14 @@ class ProductDetailSerializer(serializers.ModelSerializer):       #comment_set w
 
 
 
-class ProductMongoSerializer(ProductDetailSerializer):
+class ProductDetailMongoSerializer(ProductDetailSerializer):
     filters = serializers.SerializerMethodField()  
     comment_set = CommentSerializer(read_only=True, many=True)
 
     def get_filters(self, obj):
-        filter_filter_attribute = {}                                              # is like: {'rang': 'abi', 'rang': germez', 'size': 'large', ...}
+        filter_filter_attribute = {}                                              # is like: {'rang': ['abi', germez'], 'size': ['large'], ...}
         for filter_attribute in obj.filter_attributes.all():
-            if filter_filter_attribute.get(filter_attribute.filterr.name):        # this line make prevent overiding filter_attribute of a product that have same filter for example if product1.filter_attributes = ['abi', 'narenji', ..],  abi narenji ave same filter 'color'    if we dont want saving filter_attributes of same filter in a product we should prevent it in saving product but now i don't feel any needs to that.
+            if filter_filter_attribute.get(filter_attribute.filterr.name):
                 filter_filter_attribute[filter_attribute.filterr.name] += [filter_attribute.name]
             else:
                 filter_filter_attribute[filter_attribute.filterr.name] = [filter_attribute.name]

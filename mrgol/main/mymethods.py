@@ -57,6 +57,18 @@ def get_root_and_fathers(root):
 
 
 
+def get_root_and_children(root):
+    for_query = [root]
+    children = [root]
+    while(for_query):
+        roots = list(for_query.pop(-1).father_root_set.all())
+        if roots:
+            for_query += [*roots]                 # `for_query` and `children` are not mutable
+            children += [*roots]
+    return children
+
+
+
 def get_posts_products_by_root(root):   
     if root.level < Root._meta.get_field('level').validators[1].limit_value:
         children_root_ids = list(filter(None, root.all_childes_id.split(',')))           #why we used filter? root.all_childes_id.split(',') may return: [''] that raise error in statements like  filter(in__in=['']) so we ez remove blank str of list by filter.

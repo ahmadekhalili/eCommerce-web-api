@@ -10,7 +10,7 @@ from customed_files.django.classes import myforms
 from users.models import User
 from . import myserializers
 from .mywidgets import *
-from .models import Post, Product, Root, Filter, Image, Comment, Filter_Attribute, ShopFilterItem
+from .models import Post, Product, Root, Filter, Image, Comment, Filter_Attribute, Brand, ShopFilterItem
 
 
 
@@ -79,6 +79,11 @@ class RootForm(forms.ModelForm):
         model = Root
         fields = '__all__'
 
+    def is_valid(self):
+        self.previouse_name = self.instance.name            # used in main.admin.RootAdmin.save_related
+        self.previouse_slug = self.instance.slug
+        return self.is_bound and not self.errors
+
 
 
 
@@ -89,6 +94,18 @@ class FilterForm(forms.ModelForm):
     class Meta:
         model = Filter
         fields = ['group', 'name', 'verbose_name', 'roots']
+
+
+
+
+class Filter_AttributeForm(forms.ModelForm):
+    class Meta:
+        model = Filter_Attribute
+        fields = '__all__'
+
+    def is_valid(self):
+        self.previouse_name = self.instance.name            # used in main.admin.Filter_AttributeAdmin.save_related
+        return self.is_bound and not self.errors
 
 
 

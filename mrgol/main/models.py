@@ -34,7 +34,7 @@ class Root(models.Model):                                  #note: supose roor2 o
     levels_afterthis = models.PositiveSmallIntegerField(default=0, blank=True)                         #in field neshan midahad chand sath farzand darad in pedar, masalam: <root(1) digital>,  <root(2) mobail>,  <root(3) samsung> farz konid mobail pedare samsung,  digital pedare mobail ast(<root(1) digital>.level=1,  <root(2) mobail>.level=2,  <root(3) samsung>.level=3)   . bala sare digital dar in mesal 2 sath farzand mibashad( mobail va samsung pas <root(1) digital>.levels_afterthis = 2   va <root(2) mobail>.levels_afterthis=1  va <root(3) samsung>.levels_afterthis=0
     previous_father_id = models.PositiveSmallIntegerField(null=True, blank=True)                         #supose you change root.father_root, we cant understant prevouse father was what in Root.save(ony new edited father_root is visible) so we added this field
     father_root = models.ForeignKey('self', related_name='root_childs', related_query_name='childs', null=True, blank=True, on_delete=models.CASCADE, verbose_name=_('father root'))        #if root.level>1 will force to filling this field.     
-    all_childes_id = models.TextField(default='', blank=True)                      #list all chiles of that object in this structure: "1,2,3,4"    naming this field like chiles_id maybe raise problem with related_query_name of father_root or other.
+    all_childes_id = models.TextField(default='', blank=True)                      #list all chiles of that object in this structure: "1,2,3,4"    if this field name was chiles_id maybe raise problem with related_query_name of father_root or other.
     post_product = models.CharField(_('post or product'), max_length=10, default='product')      #this should be radio button in admin panel.
     #root_childs
     #filter_set
@@ -228,7 +228,7 @@ class Product(models.Model):                                     #.order_by('-av
     updated = models.DateTimeField(_('updated date'), auto_now=True)
     filter_attributes = models.ManyToManyField(Filter_Attribute, through='Product_Filter_Attributes', blank=True, verbose_name=_('filter attributes'))
     root = models.ForeignKey(Root, on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('root'))
-    brand = models.ForeignKey(Brand,on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('brand'))          # brand field as CharField is not logical and should be ForeignKey why? because for example in adding product1 we may add brand "nokia" and in second product2 add "Nokia". when products increased (supose more than 100) it will raise real problems
+    brand = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('brand'))          # brand field as CharField is not logical and should be ForeignKey why? because for example in adding product1 we may add brand "nokia" and in second product2 add "Nokia". when products increased (supose more than 100) it will raise real problems
     image_icon = models.OneToOneField(Image_icon, on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('image icon'))     #in home page(page that list of product shown) dont query product.image_set.all()[0] for showing one image of product, instead query product.image_icon   (more fster)
     rating = models.OneToOneField(Rating, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('rating'))
     stock = models.PositiveIntegerField(_('stock'), default=0)                        # important: stock before creating first shopfilteritem of product shoud be 0 otherwise it will sum with shopfilteritem.stock, example: supose we have product1.stock = 10  now after creating shopfilteritem1 with stock=12 product1.stock will be 10+12   (address: in ShopFilterItem.save and model_methods.py/update_product_stock
@@ -276,7 +276,8 @@ Product_Filter_Attributes._meta.auto_created = True
 
 
 
-class MProduct(djongo_models.Model):
+class MDetailProduct(djongo_models.Model):
+    id = djongo_models.IntegerField(blank=False, null=False, primary_key=True)
     json = djongo_models.JSONField()
     #name = djongo_models.CharField(_('name'), max_length=60)
     #slug = djongo_models.CharField(_('slug'), max_length=60)
@@ -299,16 +300,13 @@ class MProduct(djongo_models.Model):
             return 'nameless'                             # return None can't accept (error)
 
 
-class Test(djongo_models.Model):
-    name = djongo_models.CharField(max_length=60)
-    objects = djongo_models.DjongoManager()
 
 
 class ShopFilterItem(models.Model):
     filter_attribute = models.ForeignKey(Filter_Attribute, on_delete=models.SET_NULL, null=True, verbose_name=_('filter attribute'))
     product =  models.ForeignKey(Product, on_delete=models.CASCADE, related_name='shopfilteritems', verbose_name=_('product'))         #why we dont use ShopFilterItem as manytomany field in Product? because we want one object of ShopFilterItem only point to one product (supose one  object of ShopFilterItem as shopfilteritem_1 if thos shopfilteritem_1 point to several product instead one product, so eny changes on shopfilteritem_1 like decreasing shopfilteritem_1.price will affect on other products!!!!
     previous_stock = models.PositiveIntegerField(blank=True)
-    stock = models.PositiveIntegerField(_('stock'))                                     # note: before creating first shopfilteritem for a product, product of that shopfilteritem should have stock=0 (shopfilteritem.product.stock=0) because shopfilteritem.sotck will assign to shopfilteritem.product.stock
+    stock = models.PositiveIntegerField(_('stock'))                                     # important: before creating first shopfilteritem for a product, product of that shopfilteritem should have stock=0 (shopfilteritem.product.stock=0) because shopfilteritem.sotck will assign to shopfilteritem.product.stock
     price = models.DecimalField(_('price'), max_digits=10, decimal_places=2)            # product.price shoud be arbitrary for filling, but this no!!! (if you have shopfilteritem.price it is btter and more logical shopfilteritem.product.price be 0)
     available = models.BooleanField(_('available'), default=False, db_index=True)
 

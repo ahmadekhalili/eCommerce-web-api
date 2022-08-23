@@ -300,7 +300,7 @@ class ProductDetail(views.APIView):
         select_related_father_root = 'root'
         for i in range(Root._meta.get_field('level').validators[1].limit_value-1):
             select_related_father_root += '__father_root'
-        product = Product.objects.filter(id=kwargs['pk']).select_related(select_related_father_root, 'rating').prefetch_related('comment_set', 'image_set')
+        product = Product.objects.filter(id=kwargs['pk']).select_related(select_related_father_root, 'brand', 'rating').prefetch_related('comment_set', 'image_set')
         for p in product:                                                         #using like product[0].comment_set revalute and use extra queries
             if request.user.is_authenticated:
                 comment_of_user = p.comment_set.filter(author=request.user, product=p)        #this line dont affect select_related and prefetch_related on product and they steal work perfect.                           
