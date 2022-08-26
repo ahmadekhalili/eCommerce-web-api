@@ -32,7 +32,7 @@ class Cart(object):
             cart = self.session[settings.CART_SESSION_ID] = {}  # eny changing self.session will affect request.sessio(mutable)
             self.session.modified = False 
         self.cart = cart
-        if unauth_cart:                                         # after login user previous cart values should put to new session, here done it
+        if unauth_cart:                                         # after login user, previous cart values should put to new session, here done it
             for product_id in unauth_cart:
                 if self.is_nested_dict(unauth_cart, product_id):
                     for shopfilteritem_id in unauth_cart[product_id]:

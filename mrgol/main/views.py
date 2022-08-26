@@ -52,7 +52,6 @@ def index(request):
 
 
 
-    
 class SupporterDatasSerializer(views.APIView):     #important: you can use class SupporterDatasSerializer in view like: SupporterDatasSerializer().get(request, datas_selector='csrf_products_user') (returned value is Response type, you need .data to convert it as python dict(json)     
     '''
     /supporter_datas/products/ __________
@@ -68,14 +67,14 @@ class SupporterDatasSerializer(views.APIView):     #important: you can use class
     '''
     def all_datas(self, request, **kwargs):
         datas = {}
-        datas_selector = kwargs.get('datas_selector') if kwargs.get('datas_selector') else ''        
+        datas_selector = kwargs.get('datas_selector') if kwargs.get('datas_selector') else ''
         if 'favorites' in datas_selector:
             pass
             #datas = {**datas, **{'favorites': Cart(request).get_favorite_products()}}
         if 'user' in datas_selector:                                                    #if datas_selector was None it will raise error in here.
             userserializer = UserSerializer(request.user, context={'request': request}) if request.user.is_authenticated else None
             datas = {'user': userserializer.data} if userserializer else {'user': None}            #calling UserSerializer(request.user).data for unauthenticated user  (anomouse user) will raise error
-            
+
         if 'csrf' in datas_selector:
             request_csrf_token, csrf_token= get_token(request), get_token(request) if "CSRF_COOKIE" not in request.META else ''
             datas = {**datas, **{'csrfmiddlewaretoken': get_token(request), 'csrftoken': get_token(request)}}
@@ -90,6 +89,7 @@ class SupporterDatasSerializer(views.APIView):     #important: you can use class
     
     def post(self, request, *args, **kwargs):
         return Response(self.all_datas(request, **kwargs))
+
 
 
 
@@ -111,7 +111,7 @@ class HomePage(views.APIView):
 
     def post(self, request, *args, **kwargs):
         return Response({'loooooooooool': 'tooooooool'})
-        
+
 
 
 
@@ -160,7 +160,7 @@ class PostList(views.APIView):
         return Response(serializers)    
 
 '''
-    
+
 
 
 
@@ -179,7 +179,7 @@ class PostList(views.APIView):
         posts = get_posts(0, 8).select_related('root')
         serializers = {'posts': myserializers.PostListSerializer(posts, many=True, context={'request': request}).data}             #you must put context={'request': request} in PostListSerializer argument for working request.build_absolute_uri  in PostListSerializer, otherwise request will be None in PostListSerializer and raise error 
         sessionid = request.session.session_key
-        return Response({'sessionid': sessionid, **serializers})   
+        return Response({'sessionid': sessionid, **serializers})
 
 
 
@@ -200,7 +200,7 @@ class ProductList(views.APIView):
             sidebarmenu_link = root_and_allitschiles.filter(level__in=[root.level, root.level+1]) if root.levels_afterthis > 1 else None
             filter_ids = root_and_allitschiles.values_list('filter', flat=True)
             filters_serialized = myserializers.FilterSerializer(Filter.objects.filter(id__in=filter_ids).prefetch_related('filter_attributes'), many=True).data       #in FilterSerializer has field 'filter_attributes' so if we dont put this prefetch, program will run 1+len(filters) queries (for example supose we have this filters:  <object(1) Filter>, <object(2) Filter> queries number was run for serializing filters: our program run one query for this two object and second for: <object(1) Filter>.filter_attributes.all() and third for <object(2) Filter>.filter_attributes.all() so run 3 query for this 2 filter object! but now just run 2 for eny filter objects.
-            
+
         else:                                      #none category.   url example:  /products/
             products = Product.objects.filter()
             sidebarmenu_checkbox = None

@@ -14,7 +14,7 @@ from cart.views import CartMenuView
 from cart.cart import Cart
 from orders.models import ProfileOrder
 from orders.myserializers import ProfileOrderSerializer
-from customed_files.rest_framework.rest_framework_customed_classes.custom_rest_authentication import CustomSessionAuthentication 
+from customed_files.rest_framework.rest_framework_customed_classes.custom_rest_authentication import CustomSessionAuthentication
 
 
 
@@ -27,20 +27,19 @@ class LogIn(views.APIView):
         return Response({**CartMenuView().get(request, datas_selector='csrf').data})              #dont need sending product or other, supose user request several time this page(refreshing page), why in every reqeust, send products and other, for optain product front can request to other link and optain it and save it and in refreshing page dont need send products again(cach it in user browser).
 
     def post(self, request, *args, **kwargs):                            #an example for acceesing to LogIn.post:   http POST http://192.168.114.6:8000/users/login/ email=a@gmail.com password=a13431343 csrfmiddlewaretoken=jKnAefVUhdxR0fS3Jh0uozdtBc3FwtDOy2ghKVucLG479jQMYFTSxxIpjVjEEkds cookie:"csrftoken=uBvlhHOgqfaYmASnY3BtanycxOKz00cVJTo2NnnyUIHevEQ6druRjl38fx0y8RMz; favorite_products_ids=1,3,4"        
-        
         '''
         input in request.POST {"csrfmiddlewaretoken": "...",  "phone": "...", "password": "..."}
         input in header cookie "csrftoken=..." or "csrftoken=...; favorite_products_ids=1,2,3;" if favorite_products_ids provides(in user cookie)
         output  {"sessionid": "...",  "user": "...", "favorite_products_ids": "..."}     "favorite_products_ids=1,2,3"
         '''
-        user = login_validate(request)        
+        user = login_validate(request)
         CustomSessionAuthentication().enforce_csrf(request)          #if you dont put this here, we will havent csrf check (meants without puting csrf codes we can login easily)(because in djangorest, csrf system based on runing class SessionAuthentication(here)CustomSessionAuthentication and class CustomSessionAuthentication runs when you are loged in, because of that we use handy method enforce_csrf(we arent here loged in), just in here(in other places, all critical tasks that need csrf checks have permissions.IsAuthenticated require(baese csrf check mishavad)).        
-        login(request, user)        
+        login(request, user)
         cart = Cart(request)
-        supporter_datas = CartMenuView().get(request, datas_selector='products_user').data                              
-        return Response({'sessionid': request.session.session_key, **supporter_datas})  
+        supporter_datas = CartMenuView().get(request, datas_selector='products_user').data
+        return Response({'sessionid': request.session.session_key, **supporter_datas})
 
-       
+
 
 
 from rest_framework import serializers
@@ -72,7 +71,7 @@ class SignUp(views.APIView):
 
         return Response(serializer)
 
-    
+
 
 
 class UserChange(views.APIView):
@@ -84,7 +83,7 @@ class UserChange(views.APIView):
         for decide which user fields should provide in userchangeform, you can see User table in /static/app1/mrgol_visualized.png/
         '''
         return Response({**CartMenuView().get(request, datas_selector='user_csrf').data})
-    
+
     def put(self, request, *args, **kwargs):                #connect like this:   http PUT http://192.168.114.21:3000/users/userchange/ cookie:"sessionid=87y70z4bnj6kj9698qbpas1a0w3ncfpx; csrftoken=SSp1m9eJ7mHuIncE88iEwF2VzspDFi7uOWlXamzNjd1vDZT9YjxrFgNjyDUIs7wQ" first_name="تچیز" csrfmiddlewaretoken=KZNz210BMpQLjRurCxxMtDnILetmQxMDG3JvQelFYgaMetbWsIMzCe86KpYrDmbZ        important: if you dont pot partial=True always raise error 
         '''
         input = submited userchangeform should sent here (/userchange/) like <from action="domain.com/users/userchange/" ...>__________
@@ -102,13 +101,10 @@ class UserChange(views.APIView):
                     return Response(serializer.errors)
             else:
                 return Response({})
-            
-        serializer = UserSerializer(request.user, data=request.data, partial=True)          
+
+        serializer = UserSerializer(request.user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(dict([(key, serializer.data.get(key)) for key in request.data if serializer.data.get(key)]))             #{**CartMenuView().get(request, datas_selector='user').data}
         else:
             return Response(serializer.errors)
-
-        
-

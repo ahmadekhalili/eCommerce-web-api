@@ -6,8 +6,8 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
 from datetime import datetime
+import jdatetime
 
-from customed_files.date_convertor import MiladiToShamsi
 from .models import *
 from .mymethods import get_root_and_fathers
 from users.models import User
@@ -212,7 +212,7 @@ class PostListSerializer(serializers.ModelSerializer):
 
     def get_published_date(self, obj):
         d_t = obj.published_date
-        shamsi_date = date_convertor.MiladiToShamsi(d_t.year, d_t.month, d_t.day).result(month_name=True)
+        shamsi_date = jdatetime.datetime.fromgregorian(datetime=d_t).strftime('%Y %B %-d').split()
         return f'{shamsi_date[2]} {shamsi_date[1]} {shamsi_date[0]}، ساعت {d_t.hour}:{d_t.minute}'
     
     def get_root(self, obj):                                        #we must create form like: <form method="get" action="/posts/?obj.root.slug"> .  note form must shown as link.
@@ -263,7 +263,7 @@ class PostDetailSerializer(serializers.ModelSerializer):
 
     def get_published_date(self, obj):
         d_t = obj.published_date
-        shamsi_date = date_convertor.MiladiToShamsi(d_t.year, d_t.month, d_t.day).result(month_name=True)
+        shamsi_date = jdatetime.datetime.fromgregorian(datetime=d_t).strftime('%Y %B %-d').split()
         return f'{shamsi_date[2]} {shamsi_date[1]} {shamsi_date[0]}، ساعت {d_t.hour}:{d_t.minute}'
     
     def get_root(self, obj):                                     #we must create form like: <form method="get" action="/posts/?obj.root.slug"> .  note form must shown as link. you can put that form in above of that post.

@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
-from customed_files.date_convertor import MiladiToShamsi
+import jdatetime
+
 from main.myserializers import StateSerializer, TownSerializer
 from cart.myserializers import CartProductSerializer
 from users.myserializers import UserNameSerializer
@@ -9,12 +10,11 @@ from .models import ProfileOrder, Order, OrderItem
 
 
 
-
 class ProfileOrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProfileOrder
         exclude = ['visible']
-        
+
     def to_representation(self, obj):
         self.fields['phone'] = serializers.SerializerMethodField()
         self.fields['state'] = StateSerializer(read_only=True)
@@ -24,7 +24,7 @@ class ProfileOrderSerializer(serializers.ModelSerializer):
         return fields
 
     def get_phone(self, obj):
-        return f'{obj.phone.national_number}'     
+        return f'{obj.phone.national_number}'
 
 
 
@@ -44,19 +44,17 @@ class OrderSerializer(serializers.ModelSerializer):
 
     def get_order_status(self, obj):
         return obj.get_order_status_display()
-    
+
     def get_delivery_date(self, obj):
         d_t = obj.delivery_date
-        shamsi_date = MiladiToShamsi(d_t.year, d_t.month, d_t.day).result(month_name=True) if d_t else None
+        shamsi_date = jdatetime.datetime.fromgregorian(datetime=d_t).strftime('%Y %B %-d').split() if d_t else None
         return f'{shamsi_date[2]} {shamsi_date[1]} {shamsi_date[0]}، ساعت {d_t.hour}:{d_t.minute}' if d_t else None
 
     def get_created(self, obj):
         d_t = obj.created
-        shamsi_date = MiladiToShamsi(d_t.year, d_t.month, d_t.day).result(month_name=True)
+        shamsi_date = jdatetime.datetime.fromgregorian(datetime=d_t).strftime('%Y %B %-d').split()
         return f'{shamsi_date[2]} {shamsi_date[1]} {shamsi_date[0]}، ساعت {d_t.hour}:{d_t.minute}'
 
-        
-        
 
 
 
