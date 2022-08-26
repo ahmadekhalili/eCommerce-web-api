@@ -186,3 +186,5 @@ CART_SESSION_ID = 'cart'
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 #DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880            # 5 mg size for uploading posts like product.detailed_description = HTMLField(..)     (defult is 2.5) so we can write more posts with more images and ...
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'

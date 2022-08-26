@@ -34,7 +34,8 @@ class CartMenuView(views.APIView):       #'sabad'(in header)
             dimensions += [item['product'].size for i in range(item['quantity'])]
             dimensions_fail = True if not item['product'].size else dimensions_fail
         dimensions = dimensions if not dimensions_fail else None             #if one product has not size, dont need dimensions at all. (we compute carton size as default size) 
-        return Response({'sabad': serializers, 'products_count': cart.get_products_count(), 'total_prices': str(total_prices), 'total_weight': total_weight, 'dimensions': dimensions})
+        sessionid = request.session.session_key
+        return Response({'sessionid': sessionid, 'sabad': serializers, 'products_count': cart.get_products_count(), 'total_prices': str(total_prices), 'total_weight': total_weight, 'dimensions': dimensions})
 
 
 

@@ -32,22 +32,20 @@ def index(request):
         #request.session[translation.LANGUAGE_SESSION_KEY] = user_language
         #Accept-Language
 
-        posts = ''
-
         a = ''
         b = ''
 
         #formset_factory(myforms.ImageForm)()
         #formset = formset_factory(myforms.RootForm, extra=2)
         #posts = f(initial=[{'name': 'asdasd', 'slug':'eqwe', 'level': 1, 'father_root': 26, 'post_product': 'product',}])#inlineformset_factory(Product, Root, fields=('name', 'slug', 'level', 'father_root', 'post_product'))(instance=p)
-        rend = render(request, 'main/index.html', {'posts': posts, 'a': a})
+        rend = render(request, 'main/index.html', {'a': a, 'b': b})
         #rend.set_cookie('cart_products', {'1': {'q': 23, 'p': 33}, '2': {'q': 230, 'p': 330}})
         return rend
     
     else:
-        posts= 'age' in request.POST
-        p=''
-        return render(request, 'main/index.html', {'posts': posts, 'p': p})
+        a = ''
+        b = ''
+        return render(request, 'main/index.html', {'a': a, 'b': b})
 
 
 
@@ -110,7 +108,7 @@ class HomePage(views.APIView):
         return Response({'sessionid': sessionid, **products_serialized, **posts_serialized})
 
     def post(self, request, *args, **kwargs):
-        return Response({'loooooooooool': 'tooooooool'})
+        return Response({'loooooooooool': request.session['name']})
 
 
 
