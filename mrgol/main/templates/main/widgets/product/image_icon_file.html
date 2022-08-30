@@ -15,7 +15,6 @@ document.getElementById("image_icon_input").addEventListener("change", image_ico
 function question_mark_image_icon() {
 	const labels = document.getElementsByTagName('LABEL');
 	for (var i = 0; i < labels.length; i++) {
-		console.log(labels[i]);
 		if (labels[i].htmlFor === 'id_image') {
 		    labels[i].textContent += " ";            // its more beautiful space before ? mark. like: "field_1: ?"
 			labels[i].classList.add('selector');     // class "selector" must be in parent element for working class "help help-tooltip help-icon"
