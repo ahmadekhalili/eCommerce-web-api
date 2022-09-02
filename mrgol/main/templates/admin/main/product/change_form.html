@@ -49,30 +49,61 @@
 {% for fieldset in adminform %}
   {% include "admin/includes/fieldset.html" %}
 {% endfor %}
-	<div id="id_div_input">
-	</div>
+
+
+	<div class="module aligned " id="id_divlists_db"></div>    
+	<div class="module aligned " id="id_divlists_js"></div>    
+
 	<div class="inline-group">
-		<div class="add-row"><a href="#" id="id_add_field">###################</a></div>
+		<div class="add-row">
+			<input type="text" name="additional_field_name" size="10" id="id_additional_field_name">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			<a href="#" id="id_add_field"> Add </a>
+		</div>
 	</div>
 <script>
-	let div = document.getElementById("id_div_input");
+	let div_lists_db = document.getElementById("id_divlists_db");
+	let div_lists_js = document.getElementById("id_divlists_js");
 	let link_add_field = document.getElementById("id_add_field");
-	let num = 0;
-	function akh() {
-		let input_div = document.createElement('div');
-		div.appendChild(input_div);
-		num = num + 1;
-		input_div.id = "id_additional_fields_" + String(num);
-		input_div.className = "form-row field-weight";
-		let input = document.createElement('input');
-		input.type = 'text';
-		input.name = '';
-		input.value = 'Submit';
-		input.id = 'submit';
-		input_div.appendChild(input);
-}
-link_add_field.addEventListener('click', akh);
+	function create_extra_field() {
+		let field_name = document.getElementById("id_additional_field_name").value;
+		if (field_name !== '') {
+			let inner_div = document.createElement('div');
+			inner_div.className = "form-row";
+			div_lists_js.appendChild(inner_div);
+
+			let label = document.createElement('label');
+			label.textContent = field_name + ":";
+			let input = document.createElement('input');
+			input.type = 'text';
+			input.name = "extra_" + field_name;
+			input.id = 'id_' + field_name;
+			inner_div.appendChild(label);
+			inner_div.appendChild(input);
+		}
+	}
+link_add_field.addEventListener('click', create_extra_field);
+
+	function show_extra_field() {
+		{% for key, value in extra_fields.items %}
+			console.log('ffffffffffffffff');
+			var div = document.createElement('div');
+			div.className = "form-row";
+			div_lists_db.appendChild(div);
+
+			var label_db = document.createElement('label');
+			label_db.textContent = '{{ key }}' + ":";
+			var input_db = document.createElement('input');
+			input_db.type = 'text';
+			input_db.name = "extra_" + '{{ key }}';
+			input_db.value = '{{ value }}';
+			input_db.id = 'id_' + '{{ key }}';
+			div.appendChild(label_db);
+			div.appendChild(input_db);
+		{% endfor %}
+	}
+document.load = show_extra_field();
 </script>
+
 {% endblock %}
 
 {% block after_field_sets %}{% endblock %}

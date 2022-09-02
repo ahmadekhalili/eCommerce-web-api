@@ -196,22 +196,26 @@ class ProductAdmin(CustModelAdmin):
         for formset in formsets:
             self.save_formset(request, form, formset, change=change)
 
+        data = {}
+        for tuple in request.POST.items():                              # find all additional fields added in admin panel and add to 'data' in order to save them to db
+            if len(tuple[0]) > 6 and tuple[0][:6] == 'extra_':
+                data[tuple[0]] = tuple[1]
         language_code = get_language()                                  # get current language code
         activate('en')                                                  # all keys should save in database in `en` laguage(for showing data you can select eny language) otherwise it was problem understading which language should select to run query on them like in:  s = myserializers.ProductDetailMongoSerializer(form.instance, context={'request': request}).data['shopfilteritems']:     {'رنگ': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} it is false for saving, we should change language by  `activate('en')` and now true form for saving:  {'color': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} and query like: s['color']
         if not change:
             s = myserializers.ProductDetailMongoSerializer(form.instance, context={'request': request}).data
             content = JSONRenderer().render(s)
             stream = io.BytesIO(content)
-            data = JSONParser().parse(stream)                           # s is like: {'id': 12, 'name': 'test2', 'slug': 'test2', ...., 'roots': [OrderedDict([('name', 'Workout'), ('slug', 'Workout')])]} and 'OrderedDict' will cease raise error when want save in mongo so we fixed it in data, so data is like:  {'id': 12, 'name': 'test', 'slug': 'test', ...., 'roots': [{'name': 'Workout', 'slug': 'Workout'}]}   note in Response(some_serializer) some_serializer will fixed auto by Response class like our way
+            data = {**JSONParser().parse(stream), **data}                           # s is like: {'id': 12, 'name': 'test2', 'slug': 'test2', ...., 'roots': [OrderedDict([('name', 'Workout'), ('slug', 'Workout')])]} and 'OrderedDict' will cease raise error when want save in mongo so we fixed it in data, so data is like:  {'id': 12, 'name': 'test', 'slug': 'test', ...., 'roots': [{'name': 'Workout', 'slug': 'Workout'}]}   note in Response(some_serializer) some_serializer will fixed auto by Response class like our way
             MDetailProduct(id=data['id'], json=data).save(using='mongo')
         else:
             s = myserializers.ProductDetailMongoSerializer(form.instance, context={'request': request}).data
             content = JSONRenderer().render(s)
             stream = io.BytesIO(content)
-            data = JSONParser().parse(stream)
-            p = MDetailProduct.objects.using('mongo').get(id=data['id'])
-            p.json = data
-            p.save(using='mongo')
+            data = {**JSONParser().parse(stream), **data}
+            mongo_product = MDetailProduct.objects.using('mongo').get(id=data['id'])
+            mongo_product.json = data
+            mongo_product.save(using='mongo')
         activate(language_code)
 
     @csrf_protect_m
@@ -246,6 +250,12 @@ class ProductAdmin(CustModelAdmin):
             selected_filters = [filter_attribute.filterr for filter_attribute in selected_filter_attributes if filter_attribute]             #if obj.filter_attributes.all() was blank, filter_attribute.id  raise error so we need check with if filter_attribute
             extra_context['selected_filter_attributes'] = make_next(selected_filter_attributes)  
             extra_context['selected_filters'] = make_next(selected_filters)
+            mongo_product = MDetailProduct.objects.using('mongo').get(id=obj.id)
+            extra_fields = {}
+            for tuple in mongo_product.json.items():                              # find all additional fields added in admin panel and add to 'data' in order to save them to db
+                if len(tuple[0]) > 6 and tuple[0][:6] == 'extra_':
+                    extra_fields[tuple[0]] = tuple[1]
+            extra_context['extra_fields'] = extra_fields                          # extra_fields is like: {'extra_colorbody': 'orange', 'extra_bodyweight': 2}
         return super().changeform_view(request, object_id, form_url, extra_context)
 
     def add_vieww(self, request, form_url='', extra_context=None):
@@ -395,7 +405,6 @@ class RootAdmin(admin.ModelAdmin):
     @csrf_protect_m
     def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
         if request.POST:
-            print('@@@@@@@@@@@@@@@@@@@@@@@@@@@', request.POST)
             #post = request.POST.copy()
             #post.setlist('level', ['1'])
             #request.POST = post
