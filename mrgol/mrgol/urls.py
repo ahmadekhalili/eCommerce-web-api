@@ -21,7 +21,6 @@ from django.conf.urls.static import static
 from django.conf.urls.i18n import i18n_patterns
 from django.views.i18n import JavaScriptCatalog
 
-from rest_framework.documentation import include_docs_urls
 
 
 
@@ -33,7 +32,6 @@ urlpatterns = i18n_patterns(
     path('orders/', include('orders.urls')),
     path('payment/', include('payment.urls')),
     path('__debug__/', include(debug_toolbar.urls)),
-    path('doc/', include_docs_urls(title='loooool', description='visualize database: /static/main/mrgol_visualized.png/')),
     path('ckeditor/', include('ckeditor_uploader.urls')),
     path('jsi18n/', JavaScriptCatalog.as_view(), name='javascript-catalog'),
     prefix_default_language=False,
