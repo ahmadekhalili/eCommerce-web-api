@@ -95,7 +95,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'akh_db',
         'USER': 'akh_db',                          
-        'PASSWORD': 'a13431343',
+        'PASSWORD': '134313731374aA',
         'HOST': '172.17.0.3',
         'PORT': '5432',
     },

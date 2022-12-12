@@ -1,9 +1,4 @@
 __pycache__
 mrgol/media/
-mrgol/cart/migrations/
-mrgol/main/migrations/
-mrgol/orders/migrations/
-mrgol/payment/migrations/
-mrgol/users/migrations/
 
 mrgol/db.sqlite3
