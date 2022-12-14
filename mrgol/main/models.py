@@ -128,7 +128,7 @@ class Filter_Attribute(models.Model):
 	
 class Rating(models.Model):                                                   #math operation of Rating will done in view. 
     submiters = models.PositiveIntegerField(_('submiters'), default=0)
-    rate = models.DecimalField(_('rate'), max_digits=2, decimal_places=1, default=0)
+    rate = models.DecimalField(_('rate'), max_digits=2, decimal_places=1, default=0)       # don't need add MaxValueValidator, rating of every product is created in Product.save() with controled value.
 
     class Meta:
         verbose_name = _('Rating')

@@ -205,8 +205,8 @@ class ProductList(views.APIView):
             sidebarmenu_link = Root.objects.filter(level=1)
             filters_serialized = myserializers.FilterSerializer(Filter.objects.all().prefetch_related('filter_attributes'), many=True).data    
 
-        ## 2 sidebar filter.   url example: /products?meshki_1=1/      filter_attributeslug_id_list is like: [{'meshki_1': '1'}, {'sefid_2': '2'}, ..]. why we choiced  slug+_+id?  answer: in below line we use requet.GET['key'] that is like request.GET['meshki_1'] so str "meshki_1' must be unique and with slung+_+id it is unique
-        filter_attributeslug_id_list = [{filter_attribute['slug']: str(filter_attribute['id'])} for filter in filters_serialized for filter_attribute in filter['filter_attributes']]
+        ## 2 sidebar filter.   url example: /products?zard1=1/      filter_attributeslug_id_list is like: [{'meshki1': '1'}, {'sefid2': '2'}, ..]. why we choiced  slug+id?  answer: slug must be unique and with slug+id it is unique. so front must add id to every slug before sending like: filter_attribute.slug+filter_attribute.id
+        filter_attributeslug_id_list = [{filter_attribute['slug']+str(filter_attribute['id']): str(filter_attribute['id'])} for filter in filters_serialized for filter_attribute in filter['filter_attributes']]
         selected_filter_attributes_ids = [int(request.GET[key]) for key in request.GET if {key: request.GET[key]} in filter_attributeslug_id_list]
         if selected_filter_attributes_ids:
             products = products.filter(Q(filter_attributes__in=selected_filter_attributes_ids) | Q(shopfilteritems__filter_attribute__in=selected_filter_attributes_ids))
