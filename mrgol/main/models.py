@@ -51,7 +51,7 @@ class Root(models.Model):                                  #note: supose roor2 o
         if self.level:                                                   #why we put this line?  answer: in adding root, self.father_root is None and raise erro if: 'self.level > 1' 
             if self.level > 1 and not self.father_root:                  #other conditions will control by form eazy (for example if self.level==1 father_root must be None)
                 raise ValidationError({'father_root': [_('This field is required for level more than 1.')]})
-        super().clean_fields(exclude=None)      
+        super().clean_fields(exclude=None)
 
     def save(self, *args, **kwargs):
         previous_father_queryset = Root.objects.filter(id=self.previous_father_id).select_related('father_root__'*4+'father_root') if self.previous_father_id else None
@@ -125,7 +125,7 @@ class Filter_Attribute(models.Model):
 
 
 
-	
+
 class Rating(models.Model):                                                   #math operation of Rating will done in view. 
     submiters = models.PositiveIntegerField(_('submiters'), default=0)
     rate = models.DecimalField(_('rate'), max_digits=2, decimal_places=1, default=0)       # don't need add MaxValueValidator, rating of every product is created in Product.save() with controled value.
@@ -208,7 +208,7 @@ class ProductManager(models.Manager):                             #we have two s
         product = super().create(*args, **kwargs)
         if product.stock==0 or product.available==False:
             product.stock = 0
-            product.available = False        
+            product.available = False
         r = Rating.objects.create()
         product.rating = r
         product.save()
@@ -261,8 +261,8 @@ class Product(models.Model):                                     #.order_by('-av
 
 
 class Product_Filter_Attributes(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE,  blank=True, null=True, verbose_name=_('product'))
-    filter_attribute = models.ForeignKey(Filter_Attribute, on_delete=models.CASCADE, blank=True, null=True, verbose_name=_('Filter Attribute'))            #without blank=True and blank=True in admin panel cant save product with blank filter_attribute
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name=_('product'))
+    filter_attribute = models.ForeignKey(Filter_Attribute, on_delete=models.CASCADE, verbose_name=_('Filter Attribute'))
 
     class Meta:
         verbose_name = _('Product_Filter_Attribute')
@@ -327,7 +327,7 @@ class ShopFilterItem(models.Model):
 
 
 
-class Image(models.Model):                                         
+class Image(models.Model):
     image = models.ImageField(_('image'), upload_to='products_images/%Y/%m/%d/')
     alt = models.CharField(_('alt'), max_length=55, unique=True, null=True, default='')                    # alt should not be dublicate because we used alt instead image id in def __str__(self)
     product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name=_('product'))
@@ -342,7 +342,7 @@ class Image(models.Model):
 
 
 
-class SmallImage(models.Model):                                         
+class SmallImage(models.Model):
     image = models.ImageField(_('image'), upload_to='products_images/%Y/%m/%d/smallimages/')
     alt = models.CharField(_('alt'), max_length=55, blank=True, default='')
     father = models.OneToOneField(Image, on_delete=models.CASCADE, verbose_name=_('father'))
@@ -376,7 +376,7 @@ class Comment(models.Model):
     published_date = models.DateTimeField(_('published date'), auto_now_add=True)
     content = models.TextField(_('content'), validators=[MaxLengthValidator(500)])
     author = models.ForeignKey(User, related_name='comment_set_author', related_query_name='comments_author', on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('author'))
-    confermer = models.ForeignKey(User, related_name='comment_set_confermer', related_query_name='comments_confermer', on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('confermer'))    
+    confermer = models.ForeignKey(User, related_name='comment_set_confermer', related_query_name='comments_confermer', on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('confermer'))
     post = models.ForeignKey(Post, on_delete=models.CASCADE, blank=True, null=True, verbose_name=_('post'))
     product = models.ForeignKey(Product, on_delete=models.CASCADE, blank=True, null=True, verbose_name=_('product'))
 
