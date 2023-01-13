@@ -1,0 +1,7 @@
+@import 'IRANSans.css';
+
+.v-application {
+  [class*= "text-fa"] {
+    font-family: IRANSans_FaNum !important;
+  }
+}

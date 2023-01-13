@@ -1,0 +1,6 @@
+
+.v-application {
+  [class*= "b-glass"] {
+     backdrop-filter: blur(10px) !important;
+  }
+}
