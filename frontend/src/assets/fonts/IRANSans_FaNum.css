@@ -1,0 +1,30 @@
+@font-face {
+  font-family: "IRANSans_FaNum";
+  src: url("IRANSans_FaNum/IRANSansWeb_FaNum_UltraLight.woff2");
+  font-weight: 200;
+}
+@font-face {
+  font-family: "IRANSans_FaNum";
+  src: url("IRANSans_FaNum/IRANSansWeb_FaNum_Light.woff2");
+  font-weight: 300;
+}
+@font-face {
+  font-family: "IRANSans_FaNum";
+  src: url("IRANSans_FaNum/IRANSansWeb_FaNum.woff2");
+  font-weight: 400;
+}
+@font-face {
+  font-family: "IRANSans_FaNum";
+  src: url("IRANSans_FaNum/IRANSansWeb_FaNum_Medium.woff2");
+  font-weight: 500;
+}
+@font-face {
+  font-family: "IRANSans_FaNum";
+  src: url("IRANSans_FaNum/IRANSansWeb_FaNum_Bold.woff2");
+  font-weight: 700;
+}
+@font-face {
+  font-family: "IRANSans_FaNum";
+  src: url("IRANSans_FaNum/IRANSansWeb_FaNum_Black.woff2");
+  font-weight: 900;
+}
