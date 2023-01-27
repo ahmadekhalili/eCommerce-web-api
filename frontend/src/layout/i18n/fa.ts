@@ -16,7 +16,7 @@ const footer = (): footerType => {
     subscribe: "اشتراک",
     "subscribe-description":
       "برای دریافت به‌روزرسانی‌ها، دسترسی به معاملات انحصاری و موارد دیگر مشترک شوید.",
-    "enter-your-email-address": "آدرس ایمیل خود را وارد کنید",
+    "enter-your-email-address": "آدرس ایمیل خود را وارد کنید0",
   };
 };
 const i18n = (): i18n => {
