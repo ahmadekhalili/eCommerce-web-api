@@ -36,7 +36,7 @@ def get_posts(first_index=None, last_index=None, queryset=None):
         
 '''
 def childest_root(root, childs=[]):                 
-    for child_root in root.root_childs.all():
+    for child_root in root.child_roots.all():
         childs.append(childest_root(child_root))
     return root
 def get_childs_and_root(root, return_self=True):                    
@@ -71,14 +71,14 @@ def get_root_and_children(root):
 
 def get_posts_products_by_root(root):   
     if root.level < Root._meta.get_field('level').validators[1].limit_value:
-        children_root_ids = list(filter(None, root.all_childes_id.split(',')))           #why we used filter? root.all_childes_id.split(',') may return: [''] that raise error in statements like  filter(in__in=['']) so we ez remove blank str of list by filter.
-        children_root_ids = [root.id] + children_root_ids
+        root_children_ids = list(filter(None, root.all_childes_id.split(',')))           #why we used filter? root.all_childes_id.split(',') may return: [''] that raise error in statements like  filter(in__in=['']) so we ez remove blank str of list by filter.
+        root_children_ids = [root.id] + root_children_ids
     else:
-        children_root_ids = [root.id]
+        root_children_ids = [root.id]
     if root.post_product == 'product':
-        return Product.objects.filter(root__id__in=children_root_ids)
+        return Product.objects.filter(root__id__in=root_children_ids)
     else:
-        return get_posts(queryset=Post.objects.filter(root__id__in=children_root_ids) )       
+        return get_posts(queryset=Post.objects.filter(root__id__in=root_children_ids))
 
 
 

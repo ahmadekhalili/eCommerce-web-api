@@ -1,6 +1,6 @@
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
-from  django.core.validators import MaxLengthValidator
+from django.core.validators import MaxLengthValidator
 from django.forms.utils import ErrorList
 from django import forms
 from django.conf import settings
@@ -93,7 +93,7 @@ class FilterForm(forms.ModelForm):
 
     class Meta:
         model = Filter
-        fields = ['group', 'name', 'verbose_name', 'roots']
+        fields = ['group', 'name', 'verbose_name']
 
 
 

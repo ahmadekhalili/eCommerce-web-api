@@ -192,10 +192,9 @@ class ProductAdmin(CustModelAdmin):
     def save_related(self, request, form, formsets, change):            # this is for adding product and it's changes in mongo database (MDetailProduct model)
         """
         """
-        form.save_m2m()
+        form.save_m2m()          # manytomany fields will remove from form.instance._meta.many_to_many after calling save_m2m()
         for formset in formsets:
             self.save_formset(request, form, formset, change=change)
-
         data = {}
         for tuple in request.POST.items():                              # find all additional fields added in admin panel and add to 'data' in order to save them to db
             if len(tuple[0]) > 6 and tuple[0][:6] == 'extra_':
@@ -362,11 +361,21 @@ class RootInline(admin.TabularInline):
     get_id.short_description = _('id')
 
 
+class Root_FiltersInline(admin.StackedInline):
+    model = Root_Filters
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        #kwargs["queryset"] = models.Testrelated.objects.all()
+        kwargs["widget"] = forms.Select#(attrs={"style": "width:400px"},)
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+
 Root_level_CHOICES = ((1,'1'), (2,'2'), (3,'3'))               #value for send is first element (here like 1) and value for showing is second (here like '1')
 class RootAdmin(admin.ModelAdmin):
     inlines = [RootInline]
     prepopulated_fields = {'slug':('name',)}
     #exclude = ('post_product',)
+    filter_horizontal = ('filters', 'brands')
     form = myforms.RootForm
     list_display = ['str_ob', 'id']
     ordering = ['id']
@@ -458,20 +467,9 @@ admin.site.register(Root, RootAdmin)
 
 
 
-class Filter_RootsInline(admin.StackedInline):
-    model = Filter_Roots
-
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        #kwargs["queryset"] = models.Testrelated.objects.all()
-        kwargs["widget"] = forms.Select#(attrs={"style": "width:400px"},)
-        return super().formfield_for_foreignkey(db_field, request, **kwargs)
-
-
 class FilterAdmin(admin.ModelAdmin):
     list_display = ['id', 'name']
-    filter_horizontal = ('roots',)
     form = myforms.FilterForm
-    #inlines = [Filter_RootsInline]
 
 admin.site.register(Filter, FilterAdmin)
 

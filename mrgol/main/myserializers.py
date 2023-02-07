@@ -93,7 +93,7 @@ class RootChainedSerializer(serializers.ModelSerializer):         #this is used 
 class Sub2RootListSerializer(serializers.ModelSerializer):         #serialize roots with level=3
     str = serializers.SerializerMethodField()
     url = serializers.SerializerMethodField()
-    #root_childs = 'self'                                             #list just ids of childs.
+    #child_roots = 'self'                                             #list just ids of childs.
 
     class Meta:
         model = Root
@@ -112,11 +112,11 @@ class Sub2RootListSerializer(serializers.ModelSerializer):         #serialize ro
 class Sub1RootListSerializer(serializers.ModelSerializer):         #serialize roots with level=2
     str = serializers.SerializerMethodField()
     url = serializers.SerializerMethodField()
-    root_childs = Sub2RootListSerializer(many=True)
+    child_roots = Sub2RootListSerializer(many=True)
     
     class Meta:
         model = Root
-        fields = ['id', 'name', 'slug', 'level', 'post_product', 'father_root', 'str', 'url', 'root_childs']      #for better displaying order we list all field.
+        fields = ['id', 'name', 'slug', 'level', 'post_product', 'father_root', 'str', 'url', 'child_roots']      #for better displaying order we list all field.
 
     def get_str(self, obj):
         return obj.__str__()
@@ -131,11 +131,11 @@ class Sub1RootListSerializer(serializers.ModelSerializer):         #serialize ro
 class RootListSerializer(serializers.ModelSerializer):         #urs for products should be like: /products/?slug  and for post should be likst /posts/?slug   note RootListSerializer should be before PostListSerializer
     str = serializers.SerializerMethodField()
     url = serializers.SerializerMethodField()
-    root_childs = Sub1RootListSerializer(many=True)
+    child_roots = Sub1RootListSerializer(many=True)
     
     class Meta:
         model = Root
-        fields = ['id', 'name', 'slug', 'level', 'post_product', 'father_root', 'str', 'url', 'root_childs']      #for better displaying order we list all field.
+        fields = ['id', 'name', 'slug', 'level', 'post_product', 'father_root', 'str', 'url', 'child_roots']      #for better displaying order we list all field.
 
     def get_str(self, obj):
         return obj.__str__()
@@ -186,6 +186,14 @@ class FilterSerializer(serializers.ModelSerializer):
     class Meta:
         model = Filter
         fields = ['id', 'name', 'filter_attributes']
+
+
+
+
+class BrandSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Filter
+        fields = '__all__'
 
 
 
@@ -319,7 +327,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):       # important: f
         request = self.context.get('request', None)
         related_products = Product.objects.filter(root=obj.root, visible=True).exclude(id=obj.id)[0:10] if obj.root else []
         if len(related_products) < 5 and obj.root and obj.root.father_root:                 #we must care obj.root had father_root 
-            child_roots = obj.root.father_root.root_childs.values_list('id')      #child_roots is like [(6,) , (7,)]
+            child_roots = obj.root.father_root.child_roots.values_list('id')      #child_roots is like [(6,) , (7,)]
             child_roots_ids = [root[0] for root in child_roots]
             related_products = Product.objects.filter(root_id__in=child_roots_ids, visible=True).exclude(id=obj.id)[0:10-len(related_products)]
 
@@ -339,6 +347,10 @@ class ProductDetailMongoSerializer(ProductDetailSerializer):
     filters = serializers.SerializerMethodField()  
     comment_set = CommentSerializer(read_only=True, many=True)
 
+    class Meta:
+        model = Product
+        fields = ProductDetailSerializer.Meta.fields + ['filters', 'comment_set']
+
     def get_filters(self, obj):
         filter_filter_attribute = {}                                              # is like: {'rang': ['abi', germez'], 'size': ['large'], ...}
         for filter_attribute in obj.filter_attributes.all():
@@ -347,10 +359,6 @@ class ProductDetailMongoSerializer(ProductDetailSerializer):
             else:
                 filter_filter_attribute[filter_attribute.filterr.name] = [filter_attribute.name]
         return filter_filter_attribute
-
-    class Meta:
-        model = Product
-        fields = ProductDetailSerializer.Meta.fields + ['filters', 'comment_set']
 
 
 class StateSerializer(serializers.ModelSerializer):

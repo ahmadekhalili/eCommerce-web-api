@@ -1,6 +1,6 @@
 def circle_roots(root=None, previous_root=None):          #only one of root / previous_root should provide.
     first_root = root                                     #first_root is first "root" we came to circle_roots with it.
-    first_root_childs = first_root.root_childs.all()
+    first_child_roots = first_root.child_roots.all()
     roots = []
     
     if root and previous_root:     
@@ -8,11 +8,11 @@ def circle_roots(root=None, previous_root=None):          #only one of root / pr
         ids_list = []
         changed_root = None
         while(True):
-            root_childs = [rot for rot in root.root_childs.all()]
-            for i in range(len(root_childs)):
-                if root_childs[i] == changed_root:
-                    root_childs[i] = changed_root
-            root.all_childes_id = ','.join(list(dict.fromkeys([s for child in root_childs for s in child.all_childes_id.split(',') if s] + [str(child.id) for child in root_childs]))) if root_childs else ''
+            child_roots = [rot for rot in root.child_roots.all()]
+            for i in range(len(child_roots)):
+                if child_roots[i] == changed_root:
+                    child_roots[i] = changed_root
+            root.all_childes_id = ','.join(list(dict.fromkeys([s for child in child_roots for s in child.all_childes_id.split(',') if s] + [str(child.id) for child in child_roots]))) if child_roots else ''
             changed_root = root
             roots.append(root)
             root = root.father_root
@@ -28,7 +28,7 @@ def circle_roots(root=None, previous_root=None):          #only one of root / pr
             cleared_ids_list.remove(str(root.id))
             root.all_childes_id = ','.join(cleared_ids_list)
             roots.append(root)
-            if root in first_root_childs:
+            if root in first_child_roots:
                 break
          
     return roots
@@ -60,7 +60,7 @@ def set_levels_afterthis_all_childes_id(previous_father_queryset, root_queryset,
                     while(True):
                         previous_root.all_childes_id = ','.join([s for s in previous_root.all_childes_id.split(',') if s and s not in list_childes_id])
                         if previous_root.levels_afterthis == upper_root_levels_afterthis + 1:
-                            childs = previous_root.root_childs.all().values('id', 'levels_afterthis')
+                            childs = previous_root.child_roots.all().values('id', 'levels_afterthis')
                             for child in childs:
                                 if child['id'] == changed_root.id:
                                     child['levels_afterthis'] = changed_root.levels_afterthis
@@ -141,26 +141,26 @@ def update_product_stock(self, product, saving):         # self is ShopFilterIte
 '''
 note:deprecated method find_levels_afterthis
 def find_levels_afterthis(previous_father_queryset, max_limit_value):  #this method find lelevls_afterthis handy
-    prefetch_query = 'root_childs'
+    prefetch_query = 'child_roots'
     for i in range(max_limit_value-1):
-        prefetch_query += '__root_childs'
+        prefetch_query += 'child_roots'
     root = previous_father_queryset.prefetch_related(prefetch_query)[0]
     x = 0
-    for root in root.root_childs.all():
+    for root in root.child_roots.all():
         x = 1 if x<=1 else x                     #when program return from post loops(lop haie badi) to here with upper x value (like 5) we must dont change x value to lower like 1!!!
-        for root in root.root_childs.all():
+        for root in root.child_roots.all():
             x = 2 if x<=2 else x
-            for root in root.root_childs.all():
+            for root in root.child_roots.all():
                 x = 3 if x<=3 else x
-                for root in root.root_childs.all():
+                for root in root.child_roots.all():
                     x = 4 if x<=4 else x
-                    for root in root.root_childs.all():
+                    for root in root.child_roots.all():
                         x = 5 if x<=5 else x
-                        for root in root.root_childs.all():
+                        for root in root.child_roots.all():
                             x = 6 if x<=6 else x
-                            for root in root.root_childs.all():
+                            for root in root.child_roots.all():
                                 x = 7 if x<=7 else x
-                                for root in root.root_childs.all():
+                                for root in root.child_roots.all():
                                     x = 8
     return x
 

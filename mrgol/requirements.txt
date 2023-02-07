@@ -1,5 +1,5 @@
 # **** important ****: run "sudo apt install python3-dev libpq-dev gcc=4:9.3.0-1ubuntu2" before installing this packages (before installing psycopg2 it must installed, gcc required for uwsgi instalation)
-# install gettext (help instalation in tutorial/django/translation) for using django traslation 
+# install gettext (help installation in tutorial/django/translation) for using django translation
 django==4.0.3
 djangorestframework==3.13.1
 django-debug-toolbar==3.2.4

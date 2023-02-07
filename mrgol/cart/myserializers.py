@@ -10,6 +10,7 @@ class CartProductSerializer(serializers.ModelSerializer):
     image_icon = Image_iconSerializer()
     rating = serializers.SerializerMethodField()
     url = serializers.SerializerMethodField()
+
     class Meta:
         model = Product
         fields = ['id', 'name', 'slug', 'meta_title', 'price', 'available', 'created', 'updated', 'image_icon', 'rating', 'stock', 'brand', 'weight', 'url']

@@ -17,7 +17,7 @@ from .cart import Cart
 
 
 class CartTestCase(TestCase):                             # note: ShopFilterItemCartTestCase use this class and run its methods, so in using cart methods like cart.add or cart.remove you should provide shopfilteritem_id argument
-    def setUp(self):                                      # session and other models create in test will remove after test ended, because test crete its own db and delete it after test ends
+    def setUp(self):                                      # session and other models create in test will remove after test ended, because test create its own db and delete it after test ends
         request = RequestFactory().get('/cart/add/')      # we should add session and user to request if creating request handy, reference: https://docs.djangoproject.com/en/4.0/topics/testing/advanced/#django.test.RequestFactory
         request.session = SessionStore()
         request.session.create()
@@ -49,7 +49,7 @@ class CartTestCase(TestCase):                             # note: ShopFilterItem
         self.assertEqual(cart.session[settings.CART_SESSION_ID], {})
         
         cart.add(item1['product_id'], quantity=1, shopfilteritem_id=item1['shopfilteritem_id'])
-        # second add shoud not accept, because stock=0
+        # second add should not accept, because stock=0
         cart.add(item1['product_id'], quantity=1, shopfilteritem_id=item1['shopfilteritem_id'])
         self.assertEqual(self._get_cart_session_item(cart, item1), {'quantity': 1, 'price': '0', 'old_price': '0'}) 
 

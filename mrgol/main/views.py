@@ -189,20 +189,22 @@ class ProductList(views.APIView):
         '''
         #menu_slug = request.GET.get('menu')
         menu_slug = kwargs.get('menu')
-        if menu_slug:                              
+        if menu_slug:
             ## 1- menu category. url example:  /products/menu=sumsung (or  /products/?menu=sumsung dont differrent) just dont put '/' in end of url!!!!
             root = get_object_or_404(Root, slug=menu_slug)
             products = get_posts_products_by_root(root)
             root_and_allitschiles = Root.objects.filter(id__in=list(filter(None, root.all_childes_id.split(',')))+[root.id])   #why we used filter? root.all_childes_id.split(',') may return: [''] that raise error in statements like  filter(in__in=['']) so we ez remove blank str of list by filter.
-            sidebarmenu_checkbox =  root_and_allitschiles.filter(level__in=[root.level, root.level+1]) if root.levels_afterthis == 1 else None
+            sidebarmenu_checkbox = root_and_allitschiles.filter(level__in=[root.level, root.level+1]) if root.levels_afterthis == 1 else None
             sidebarmenu_link = root_and_allitschiles.filter(level__in=[root.level, root.level+1]) if root.levels_afterthis > 1 else None
-            filter_ids = root_and_allitschiles.values_list('filter', flat=True)
-            filters_serialized = myserializers.FilterSerializer(Filter.objects.filter(id__in=filter_ids).prefetch_related('filter_attributes'), many=True).data       #in FilterSerializer has field 'filter_attributes' so if we dont put this prefetch, program will run 1+len(filters) queries (for example supose we have this filters:  <object(1) Filter>, <object(2) Filter> queries number was run for serializing filters: our program run one query for this two object and second for: <object(1) Filter>.filter_attributes.all() and third for <object(2) Filter>.filter_attributes.all() so run 3 query for this 2 filter object! but now just run 2 for eny filter objects.
+            root_ids = root_and_allitschiles.values_list('id', flat=True)
+            brands_serialized = myserializers.BrandSerializer(Brand.objects.filter(root__in=root_ids), many=True).data
+            filters_serialized = myserializers.FilterSerializer(Filter.objects.filter(root__in=root_ids).prefetch_related('filter_attributes'), many=True).data       # in FilterSerializer has field 'filter_attributes' so if we dont put this prefetch, program will run 1+len(filters) queries (for example supose we have this filters:  <object(1) Filter>, <object(2) Filter> queries number was run for serializing filters: our program run one query for this two object and second for: <object(1) Filter>.filter_attributes.all() and third for <object(2) Filter>.filter_attributes.all() so run 3 query for this 2 filter object! but now just run 2 for eny filter objects.
 
         else:                                      #none category.   url example:  /products/
             products = Product.objects.filter()
             sidebarmenu_checkbox = None
             sidebarmenu_link = Root.objects.filter(level=1)
+            brands_serialized = myserializers.BrandSerializer(Brand.objects.all(), many=True).data
             filters_serialized = myserializers.FilterSerializer(Filter.objects.all().prefetch_related('filter_attributes'), many=True).data    
 
         ## 2 sidebar filter.   url example: /products?zard1=1/      filter_attributeslug_id_list is like: [{'meshki1': '1'}, {'sefid2': '2'}, ..]. why we choiced  slug+id?  answer: slug must be unique and with slug+id it is unique. so front must add id to every slug before sending like: filter_attribute.slug+filter_attribute.id
@@ -225,7 +227,7 @@ class ProductList(views.APIView):
         sidebarmenu_link_serialized = myserializers.RootChainedSerializer(sidebarmenu_link, many=True).data
         sessionid = request.session.session_key
         
-        return Response({'sessionid': sessionid, **products_serialized, **{'sidebarmenu_checkbox': sidebarmenu_checkbox_serialized}, **{'sidebarmenu_link': sidebarmenu_link_serialized}, 'filters': filters_serialized})
+        return Response({'sessionid': sessionid, **products_serialized, **{'sidebarmenu_checkbox': sidebarmenu_checkbox_serialized}, **{'sidebarmenu_link': sidebarmenu_link_serialized}, 'brands': brands_serialized, 'filters': filters_serialized})
 
 
 
@@ -262,11 +264,11 @@ class ProductRootList(views.APIView):
         '''
         output all Products menues objects.
         '''
-        prefetch_query = 'root_childs'
+        prefetch_query = 'child_roots'
         for i in range(Root._meta.get_field('level').validators[1].limit_value-2):
-            prefetch_query += '__root_childs'
+            prefetch_query += '__child_roots'
         product_prant_roots = Root.objects.filter(post_product='product', level=1).prefetch_related(prefetch_query)
-        serializers = {'product_menues': myserializers.RootListSerializer(product_prant_roots, many=True).data}
+        serializers = {'product_menus': myserializers.RootListSerializer(product_prant_roots, many=True).data}
         #sessionid = request.session.session_key
         return Response({'sessionid': '', **serializers})
 

@@ -4,7 +4,6 @@
 function question_mark_auto_fill_name() {
 	const labels = document.getElementsByTagName('LABEL');
 	for (var i = 0; i < labels.length; i++) {
-		console.log(labels[i]);
 		if (labels[i].htmlFor === 'id_verbose_name') {
 		    labels[i].textContent += " ";            // its more beautiful space before ? mark. like: "field_1: ?"
 			labels[i].classList.add('selector');     // class "selector" must be in parent element for working class "help help-tooltip help-icon"

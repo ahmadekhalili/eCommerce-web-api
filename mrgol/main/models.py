@@ -1,5 +1,4 @@
-from django.db.models.signals import post_save
-from django.db.models.signals import m2m_changed
+from django.db.models.signals import post_save, m2m_changed
 from django.dispatch import receiver
 from django.core.validators import MinValueValidator, MaxValueValidator, MinLengthValidator, MaxLengthValidator
 from django.utils.translation import gettext_lazy as _
@@ -27,18 +26,54 @@ from users.models import User
 
 
 
-class Root(models.Model):                                  #note: supose roor2 object,  root2.father_root determine father of root2 and root2.root_childs is list of root2's childer,  root with level=1 can has eny father!
+group_choices = [(key, str(key)) for key in range(1, 11)]
+class Filter(models.Model):
+    group = models.PositiveIntegerField(_('group'), choices=group_choices)
+    name = models.CharField(_('name'), unique=True, max_length=25)        # name for quering.
+    verbose_name = models.CharField(_('verbose name'), max_length=25)     # name for showing. (to user).  for example you have two filter with names: "system amel goshi", "system amele laptop" but both of them have 'system amel' as verbose name.
+    #selling = models.BooleanField(_('selling filter'), default=False)
+    #filter_attributes
+    #root_set
+
+    class Meta:
+        verbose_name = _('Filter')
+        verbose_name_plural = _('Filters')
+
+    def __str__(self):
+        return str(self.name)
+
+
+
+
+class Brand(models.Model):
+    name = models.CharField(_('name'), max_length=25, null=True, blank=True)
+    slug = models.SlugField(_('slug'), allow_unicode=True, db_index=False)
+    #root_set
+
+    class Meta:
+        verbose_name = _('brand')
+        verbose_name_plural = _('brands')
+
+    def __str__(self):
+        return self.name
+
+
+
+
+class Root(models.Model):                                  #note: supose roor2 object,  root2.father_root determine father of root2 and root2.child_roots is list of root2's childer,  root with level=1 can has eny father!
     name = models.CharField(_('name'), unique=True, max_length=50)
     slug = models.SlugField(_('slug'), allow_unicode=True, db_index=False)
     level = models.PositiveSmallIntegerField(_('level'), default=1, validators=[MinValueValidator(1), MaxValueValidator(6)])        #important: in main/views/ProductRootList & ProductDetail and in main/mymethods/get_posts_products_by_root   we used MaxValueValidator with its posation in validator, so validator[1] must be MaxValueValidator otherwise will raise error.
+    father_root = models.ForeignKey('self', related_name='child_roots', related_query_name='childs', null=True, blank=True, on_delete=models.CASCADE, verbose_name=_('father root'))        #if root.level>1 will force to filling this field.
     levels_afterthis = models.PositiveSmallIntegerField(default=0, blank=True)                         #in field neshan midahad chand sath farzand darad in pedar, masalam: <root(1) digital>,  <root(2) mobail>,  <root(3) samsung> farz konid mobail pedare samsung,  digital pedare mobail ast(<root(1) digital>.level=1,  <root(2) mobail>.level=2,  <root(3) samsung>.level=3)   . bala sare digital dar in mesal 2 sath farzand mibashad( mobail va samsung pas <root(1) digital>.levels_afterthis = 2   va <root(2) mobail>.levels_afterthis=1  va <root(3) samsung>.levels_afterthis=0
     previous_father_id = models.PositiveSmallIntegerField(null=True, blank=True)                         #supose you change root.father_root, we cant understant prevouse father was what in Root.save(ony new edited father_root is visible) so we added this field
-    father_root = models.ForeignKey('self', related_name='root_childs', related_query_name='childs', null=True, blank=True, on_delete=models.CASCADE, verbose_name=_('father root'))        #if root.level>1 will force to filling this field.     
+    filters = models.ManyToManyField(Filter, through='Root_Filters', blank=True, verbose_name=_('filters'))
+    brands = models.ManyToManyField(Brand, through='Root_Brands', blank=True, verbose_name=_('brands'))
     all_childes_id = models.TextField(default='', blank=True)                      #list all chiles of that object in this structure: "1,2,3,4"    if this field name was chiles_id maybe raise problem with related_query_name of father_root or other.
     post_product = models.CharField(_('post or product'), max_length=10, default='product')      #this should be radio button in admin panel.
-    #root_childs
-    #filter_set
-    
+    #child_roots
+    #product_set
+
     class Meta:
         ordering = ('level',)                    #main/views/ProductList/sidebarmenu_link affect order of Root.  ('level', '-father_root_id') '-father_root_id' make in ProductRootList products order from last to first (reverse order) -father_root_id  will make childs with same father be in together. and '-' will make decending order like ordering django admin for 'order by ids' means lower ids will go to down.(tested)
         verbose_name = _('menu')
@@ -73,36 +108,32 @@ class Root(models.Model):                                  #note: supose roor2 o
         return dell
 
 
-
-
-group_choices = [(key, str(key)) for key in range(1, 11)]
-class Filter(models.Model):
-    group = models.PositiveIntegerField(_('group'), choices=group_choices)
-    name = models.CharField(_('name'), unique=True, max_length=25)        # name for quering. 
-    verbose_name = models.CharField(_('verbose name'), max_length=25)     # name for showing. (to user).  for example you have two filter with names: "system amel goshi", "system amele laptop" but both of them have 'system amel' as verbose name.
-    #selling = models.BooleanField(_('selling filter'), default=False)
-    roots = models.ManyToManyField(Root, through='Filter_Roots', verbose_name=_('roots'))
-    #filter_attributes
-
-    class Meta:
-        verbose_name = _('Filter')
-        verbose_name_plural = _('Filters')
-
-    def __str__(self):
-        return str(self.name)
-
-class Filter_Roots(models.Model):
-    filter = models.ForeignKey(Filter, on_delete=models.CASCADE, verbose_name=_('filter'))
+class Root_Filters(models.Model):
     root = models.ForeignKey(Root, on_delete=models.CASCADE, verbose_name=_('root'))
+    filter = models.ForeignKey(Filter, on_delete=models.CASCADE, verbose_name=_('filter'))
 
     class Meta:
-        verbose_name = _('Filter Root')
-        verbose_name_plural = _('Filter Roots')
+        verbose_name = _('Root Filter')
+        verbose_name_plural = _('Root Filters')
 
     def __str__(self):
-        return _('Filter Roots') + str(self.id)
+        return _('Root Filters') + str(self.id)
 
-Filter_Roots._meta.auto_created = True                        #if you dont put this you cant use filter_horizontal in admin.py for  Filter.roots or other manytomany fields that use Filter_Roots.
+Root_Filters._meta.auto_created = True                        #if you dont put this you cant use filter_horizontal in admin.py for  Filter.roots or other manytomany fields that use Filter_Roots.
+
+
+class Root_Brands(models.Model):
+    root = models.ForeignKey(Root, on_delete=models.CASCADE, verbose_name=_('root'))
+    brand = models.ForeignKey(Brand, on_delete=models.CASCADE, verbose_name=_('brand'))
+
+    class Meta:
+        verbose_name = _('Root Brand')
+        verbose_name_plural = _('Root Brands')
+
+    def __str__(self):
+        return _('Root Brand') + str(self.id)
+
+Root_Brands._meta.auto_created = True
 
 
 
@@ -191,18 +222,6 @@ class Post(models.Model):
 
 
 
-class Brand(models.Model):
-    name = models.CharField(_('name'), max_length=25, null=True, blank=True)
-    slug = models.SlugField(_('slug'), allow_unicode=True, db_index=False)
-
-    class Meta:
-        verbose_name = _('brand')
-        verbose_name_plural = _('brands')
-
-    def __str__(self):
-        return self.name
-
-
 class ProductManager(models.Manager):                             #we have two seperate way for creating an object,  .create( product.objects.create ) and .save( p=product(..) p.save() ), it is important for us in two way rating creation suported same.
     def create(self, *args, **kwargs):
         product = super().create(*args, **kwargs)
@@ -221,7 +240,7 @@ class Product(models.Model):                                     #.order_by('-av
     meta_description = models.TextField(_('meta description'), validators=[MaxLengthValidator(160)], blank=True, default='')
     brief_description = models.TextField(_('brief description'), validators=[MaxLengthValidator(1000)])
     detailed_description = RichTextUploadingField(_('detailed description'), blank=True, null=True)
-    price = models.DecimalField(_('price'), max_digits=10, decimal_places=2, default=0)       # for $ prices we need decimal_places fpr example price: 19.99$ has 2 decimal places
+    price = models.DecimalField(_('price'), max_digits=10, decimal_places=2, default=0)       # for $ prices we need decimal_places for example price: 19.99$ has 2 decimal places
     available = models.BooleanField(_('available'), default=False, db_index=True)
     visible = models.BooleanField(_('delete'), default=True, db_index=True)                #we use visible for deleting an object, for deleting visible=False, in fact we must dont delete any product.    
     created = models.DateTimeField(_('created date'), auto_now_add=True)
@@ -252,8 +271,12 @@ class Product(models.Model):                                     #.order_by('-av
 
     def save(self, *args, **kwargs):
         create_Rating = True if not self.pk else False                                     #when you create new object like p = product(..)  p.save()   self.pk here is None
-        self.available = False if self.stock < 1 else True                                 #self.available should always folow self.stock value not reverse, means if admin select stock=0 our availlable should be False, but puting availabe false cant make our stock=0, stock has priority and its logical. 
+        self.available = False if self.stock < 1 else True                                 #self.available should always folow self.stock value not reverse, means if admin select stock=0 our availlable should be False, but puting availabe false cant make our stock=0, stock has priority and its logical.
+        from main.signals import FillRootfilters_brands
+        pre_product = Product.objects.get(id=self.id) if self.id else None
+        FillRootfilters_brands.pre_root, FillRootfilters_brands.pre_brand_id = (pre_product.root, pre_product.brand_id) if pre_product else (None, None)
         super().save(*args, **kwargs)
+        FillRootfilters_brands.root_brand_changed(self)
         if create_Rating:
             r = Rating.objects.create()
             self.rating = r
@@ -272,6 +295,8 @@ class Product_Filter_Attributes(models.Model):
         return _('Product_Filter_Attribute') + ' ' + str(self.id)
 
 Product_Filter_Attributes._meta.auto_created = True
+
+from main.signals import FillRootfilters_brands         # this cause "m2m_changed.connect(filter_attributes_changed, sender=Product.filter_attributes.through)" loads here. changing Root.brands Root.filters automatically related to several fields, one of them is product.filter_attributes, we collected all related fields to one class 'FillRootfilters_bradns to clearer structure and design.
 
 
 
