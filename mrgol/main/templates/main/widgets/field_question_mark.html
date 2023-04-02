@@ -1,0 +1,23 @@
+{% if input %}{% include input %}{% endif %}
+{% if extra_template %}{% include extra_template %}{% endif %}
+
+<script>
+function add_question_mark() {
+    const li = document.querySelector('[aria-controls="{{ aria_control }}"]');
+    const label = document.querySelector('[for="{{ htmlFor }}"]');
+    label.textContent += " ";            // its more beautiful space before ? mark. like: "field_1: ?"
+	label.classList.add('selector');     // class "selector" must be in parent element for working class "help help-tooltip help-icon"
+    if (li !== null) {
+        if ({{ required }})
+            li.classList.add('required');
+        else
+            li.classList.remove('required'); // without this we have 'required' in unexpected li elements (tested)
+    }
+    quickElement(
+        'span', label, '',
+        'class', 'help help-tooltip help-icon',
+        'title', gettext('{{ qus_text }}')
+    );
+}
+window.addEventListener('load', add_question_mark);
+</script>

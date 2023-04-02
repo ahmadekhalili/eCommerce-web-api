@@ -1,4 +1,5 @@
 from django.db.models import Max, Min
+from django.conf import settings
 
 import copy
 from decimal import Decimal
@@ -79,6 +80,15 @@ def get_posts_products_by_root(root):
         return Product.objects.filter(root__id__in=root_children_ids)
     else:
         return get_posts(queryset=Post.objects.filter(root__id__in=root_children_ids))
+
+
+
+
+def get_mt_input_classes(name):         # configure md==modeltranslation with QuestionMark widget. in fact if we want question mark icon shown when we use modeltranslation admin tabbed. we have to add these classes. otherwise, modeltranslation admin can't be shown in 'tabbed' mod.
+    indx = name.rfind('_')              # if rfind not found result, indx will be -1
+    name, lng_cd = (name[:indx], name[indx+1:]) if indx > 0 else ('', '')
+    default = ' mt-bidi mt-default' if settings.LANGUAGES[0][0] == lng_cd else ''   # for first language we should add default classes to. to be selected by default in admin pannel.
+    return f'vTextField mt mt-field-{name}-{lng_cd}' + default
 
 
 

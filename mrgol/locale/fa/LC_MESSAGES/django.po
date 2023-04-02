@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-12-09 18:38+0330\n"
+"POT-Creation-Date: 2023-03-26 23:07+0330\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -34,63 +34,67 @@ msgstr "کليد سشن"
 msgid "ses keys"
 msgstr "کليد سشن ها"
 
-#: customed_files/django/classes/custom_ModelAdmin.py:9 main/models.py:167
-#: main/models.py:206 orders/models.py:29 orders/models.py:55
+#: customed_files/django/classes/custom_ModelAdmin.py:12 main/models.py:208
+#: main/models.py:246 orders/models.py:29 orders/models.py:55
 #: orders/models.py:87 users/models.py:61
 msgid "delete"
 msgstr "حذف"
 
-#: main/admin.py:27
+#: main/admin.py:37
 msgid "{} site panel"
 msgstr "پنل سایت {}"
 
-#: main/admin.py:28
+#: main/admin.py:38
 msgid "{} admin panel"
 msgstr "پنل ادمین {}"
 
-#: main/admin.py:29
+#: main/admin.py:39
 msgid "admin panel"
 msgstr "پنل ادمین"
 
-#: main/admin.py:40 main/admin.py:53 main/admin.py:249 main/models.py:168
-#: main/models.py:344
+#: main/admin.py:51 main/admin.py:74 main/admin.py:344 main/models.py:209
+#: main/models.py:402
 msgid "published date"
 msgstr "تاريخ انتشار"
 
-#: main/admin.py:104 main/models.py:216
+#: main/admin.py:156 main/models.py:256
 msgid "size"
 msgstr "اندازه"
 
-#: main/admin.py:108
+#: main/admin.py:160
 msgid "seo fields"
 msgstr "فیلد های سئو"
 
-#: main/admin.py:119 main/admin.py:238 main/admin.py:287 orders/admin.py:41
-#: orders/admin.py:101
-msgid "id"
-msgstr "شناسه"
-
-#: main/admin.py:125 main/admin.py:136 main/models.py:207 orders/admin.py:137
+#: main/admin.py:181 main/admin.py:192 main/models.py:247 orders/admin.py:137
 #: orders/models.py:54
 msgid "created date"
 msgstr "تاریخ ایجاد"
 
-#: main/admin.py:130 main/admin.py:141 main/models.py:208
+#: main/admin.py:186 main/admin.py:197 main/models.py:248
 msgid "updated date"
 msgstr "تاریخ ویرایش"
 
-#: main/admin.py:283 main/models.py:25 main/models.py:73 main/models.py:103
-#: main/models.py:198 main/models.py:363 main/models.py:376
-msgid "name"
-msgstr "نام"
-
-#: main/admin.py:284
+#: main/admin.py:388
 msgid "Sub menu"
 msgstr "زیر منو"
 
-#: main/admin.py:285
+#: main/admin.py:389
 msgid "Sub menus"
 msgstr "زیر منوها"
+
+#: main/admin.py:396 orders/admin.py:41 orders/admin.py:101
+msgid "id"
+msgstr "شناسه"
+
+#: main/admin.py:430 main/models.py:33 main/models.py:50 main/models.py:65
+#: main/models.py:143 main/models.py:238 main/models.py:421 main/models.py:434
+#: main/myforms.py:98
+msgid "name"
+msgstr "نام"
+
+#: main/admin.py:579 main/models.py:341 orders/models.py:88
+msgid "shopfilteritem"
+msgstr "آیتم فیلتر فروش"
 
 #: main/apps.py:6
 msgid "MRGol"
@@ -100,317 +104,361 @@ msgstr "ام آر گل"
 msgid "main app"
 msgstr "بخش اصلی"
 
-#: main/models.py:26 main/models.py:104 main/models.py:163 main/models.py:199
-msgid "slug"
-msgstr "آدرس وب"
-
-#: main/models.py:27 main/myforms.py:63
-msgid "level"
-msgstr "سطح"
-
-#: main/models.py:30 main/myforms.py:64
-msgid "father root"
-msgstr "منو پدر"
-
 #: main/models.py:32
-msgid "post or product"
-msgstr "کالا يا پست"
+msgid "group"
+msgstr ""
 
-#: main/models.py:38 main/myforms.py:32
-msgid "menu"
-msgstr "منو"
-
-#: main/models.py:39
-msgid "menus"
-msgstr "منو ها"
-
-#: main/models.py:47
-msgid "This field is required for level more than 1."
-msgstr "برای سطح بالاتر از 1 اين قسمت ضروري است."
-
-#: main/models.py:74
+#: main/models.py:34
 msgid "verbose name"
 msgstr "نام جهت نمایش"
 
-#: main/models.py:76
-msgid "roots"
-msgstr "ريشه ها"
-
-#: main/models.py:80 main/templates/admin/change_list.html:76
+#: main/models.py:40 main/templates/admin/change_list.html:76
+#: main/templates/admin/main/filter/change_list.html:76
+#: main/templates/admin/main/filter_attribute/change_list.html:76
+#: main/templates/admin/main/shopfilteritem/change_list.html:76
 msgid "Filter"
 msgstr "فيلتر"
 
-#: main/models.py:81
+#: main/models.py:41
 msgid "Filters"
 msgstr "فيلتر ها"
 
-#: main/models.py:87 main/models.py:105
-msgid "filter"
+#: main/models.py:51 main/models.py:66 main/models.py:144 main/models.py:203
+#: main/models.py:239
+msgid "slug"
+msgstr "آدرس وب"
+
+#: main/models.py:55 main/models.py:128 main/models.py:251
+msgid "brand"
+msgstr "برند"
+
+#: main/models.py:56 main/models.py:72
+msgid "brands"
+msgstr "برندها"
+
+#: main/models.py:67 main/myforms.py:80
+msgid "level"
+msgstr "سطح"
+
+#: main/models.py:68 main/myforms.py:81
+msgid "father root"
+msgstr "منو پدر"
+
+#: main/models.py:71
+#, fuzzy
+#| msgid "filter"
+msgid "filters"
 msgstr "فيلتر"
 
-#: main/models.py:88 main/models.py:170 main/models.py:210
+#: main/models.py:74
+msgid "post or product"
+msgstr "کالا يا پست"
+
+#: main/models.py:80 main/myforms.py:46
+msgid "menu"
+msgstr "منو"
+
+#: main/models.py:81
+msgid "menus"
+msgstr "منو ها"
+
+#: main/models.py:89
+msgid "This field is required for level more than 1."
+msgstr "برای سطح بالاتر از 1 اين قسمت ضروري است."
+
+#: main/models.py:113 main/models.py:127 main/models.py:211 main/models.py:250
+#: main/myforms.py:20
 msgid "root"
 msgstr "منو"
 
-#: main/models.py:91
-msgid "Filter Root"
-msgstr "منو و فیلتر"
+#: main/models.py:114 main/models.py:145
+msgid "filter"
+msgstr "فيلتر"
 
-#: main/models.py:92 main/models.py:95
-msgid "Filter Roots"
-msgstr "منوها و فيلتر"
+#: main/models.py:117
+#, fuzzy
+#| msgid "Filter"
+msgid "Root Filter"
+msgstr "فيلتر"
 
-#: main/models.py:111 main/models.py:245
+#: main/models.py:118 main/models.py:121
+#, fuzzy
+#| msgid "Filters"
+msgid "Root Filters"
+msgstr "فيلتر ها"
+
+#: main/models.py:131 main/models.py:135
+msgid "Root Brand"
+msgstr ""
+
+#: main/models.py:132
+msgid "Root Brands"
+msgstr ""
+
+#: main/models.py:152 main/models.py:289
 msgid "Filter Attribute"
 msgstr "آيتم فيلتر"
 
-#: main/models.py:112
+#: main/models.py:153
 msgid "Filter Attributes"
 msgstr "آيتم هاي فيلتر"
 
-#: main/models.py:121
+#: main/models.py:162
 msgid "submiters"
 msgstr "وارد کنندگان"
 
-#: main/models.py:122
+#: main/models.py:163
 msgid "rate"
 msgstr "رتبه"
 
-#: main/models.py:125
+#: main/models.py:166
 msgid "Rating"
 msgstr "رتبه بندي"
 
-#: main/models.py:126
+#: main/models.py:167
 msgid "Ratings"
 msgstr "رتبه بندي ها"
 
-#: main/models.py:140 main/models.py:284 main/models.py:299 main/models.py:314
-#: main/myforms.py:74
+#: main/models.py:181 main/models.py:357 main/models.py:372 main/myforms.py:123
 msgid "image"
 msgstr "تصویر"
 
-#: main/myforms.py:86
-msgid "verbose_name"
-msgstr "نام جهت نمایش"
-
-#: main/models.py:141 main/models.py:300 main/models.py:315 main/myforms.py:34
-#: main/myforms.py:75
+#: main/models.py:182 main/models.py:358 main/models.py:373 main/myforms.py:48
+#: main/myforms.py:49 main/myforms.py:124
 msgid "alt"
 msgstr "توضيحات عکس"
 
-#: main/models.py:142
+#: main/models.py:183
 msgid "path"
 msgstr "آدرس"
 
-#: main/models.py:145 main/models.py:149
+#: main/models.py:186
 msgid "Image icon"
 msgstr "تصوير آيکن"
 
-#: main/models.py:146
+#: main/models.py:187
 msgid "Image icones"
 msgstr "تصاوير آيکن ها"
 
-#: main/models.py:162
+#: main/models.py:202
 msgid "title"
 msgstr "عنوان"
 
-#: main/models.py:164 main/models.py:200
+#: main/models.py:204 main/models.py:240
 msgid "meta title"
 msgstr "متا عنوان"
 
-#: main/models.py:165 main/models.py:201
+#: main/models.py:205 main/models.py:241
 msgid "meta description"
 msgstr "متا توضيحات"
 
-#: main/models.py:166 main/models.py:202
+#: main/models.py:206 main/models.py:242
 msgid "brief description"
 msgstr "توضيحات مختصر"
 
-#: main/models.py:169 main/models.py:211 main/myforms.py:33
-msgid "image icon"
-msgstr "تصوير آيکن"
-
-#: main/models.py:171 main/models.py:346
-msgid "author"
-msgstr "نويسنده"
-
-#: main/models.py:176 main/models.py:286
-msgid "Post"
-msgstr "پست"
-
-#: main/models.py:177
-msgid "Posts"
-msgstr "پست ها"
-
-#: main/models.py:203
+#: main/models.py:207 main/models.py:243
 msgid "detailed description"
 msgstr "توضيحات مشروح"
 
-#: main/models.py:204 main/models.py:263 orders/models.py:49
+#: main/models.py:210 main/models.py:252 main/myforms.py:47
+msgid "image icon"
+msgstr "تصوير آيکن"
+
+#: main/models.py:212 main/models.py:404
+msgid "author"
+msgstr "نويسنده"
+
+#: main/models.py:216
+msgid "Post"
+msgstr "پست"
+
+#: main/models.py:217
+msgid "Posts"
+msgstr "پست ها"
+
+#: main/models.py:244 main/models.py:336 orders/models.py:49
 #: orders/models.py:85
 msgid "price"
 msgstr "قيمت"
 
-#: main/models.py:205 main/models.py:264
+#: main/models.py:245 main/models.py:337
 msgid "available"
 msgstr "موجود"
 
-#: main/models.py:209
+#: main/models.py:249
 msgid "filter attributes"
 msgstr "آيتم های فيلتر"
 
-#: main/models.py:212
+#: main/models.py:253
 msgid "rating"
 msgstr "رتبه بندی"
 
-#: main/models.py:213 main/models.py:262
+#: main/models.py:254 main/models.py:335
 msgid "stock"
 msgstr "موجودی انبار"
 
-#: main/models.py:214
-msgid "brand"
-msgstr "برند"
-
-msgid "brands"
-msgstr "برندها"
-
-#: main/models.py:215
+#: main/models.py:255 main/myforms.py:50 main/myforms.py:51
 msgid "weight"
 msgstr "وزن"
 
-#: main/models.py:227
+#: main/models.py:267 main/models.py:319
 msgid "Product"
 msgstr "کالا"
 
-#: main/models.py:228
+#: main/models.py:268 main/models.py:320
 msgid "Products"
 msgstr "کالا ها"
 
-#: main/models.py:244 main/models.py:260 main/models.py:301 main/models.py:317
-#: main/models.py:349 orders/models.py:89
+#: main/models.py:288 main/models.py:333 main/models.py:359 main/models.py:375
+#: main/models.py:407 orders/models.py:89
 msgid "product"
 msgstr "کالا"
 
-#: main/models.py:248 main/models.py:252
+#: main/models.py:292 main/models.py:296
 msgid "Product_Filter_Attribute"
 msgstr "آيتم فيلتر و کالا"
 
-#: main/models.py:249
+#: main/models.py:293
 msgid "Product_Filter_Attributes"
 msgstr "آيتم هاي فيلتر و کالا"
 
-#: main/models.py:259
+#: main/models.py:332
 msgid "filter attribute"
 msgstr "آیتم فیلتر"
 
-#: main/models.py:273 orders/models.py:88
-msgid "shopfilteritem"
-msgstr "آیتم فیلتر فروش"
-
-#: main/models.py:274
+#: main/models.py:342
 msgid "shopfilteritems"
 msgstr "آیتم های فیلتر فروش"
 
-#: main/models.py:304
+#: main/models.py:362
 msgid "Image"
 msgstr "تصویر"
 
-#: main/models.py:305
+#: main/models.py:363
 msgid "Images"
 msgstr "تصاوير"
 
-#: main/models.py:316
+#: main/models.py:374
 msgid "father"
 msgstr "پدر"
 
-#: main/models.py:320
+#: main/models.py:378
 msgid "SmallImage"
 msgstr "تصوير کوچک"
 
-#: main/models.py:321
+#: main/models.py:379
 msgid "SmallImages"
 msgstr "تصاویر کوچک شده"
 
-#: main/models.py:341
+#: main/models.py:399
 msgid "not checked"
 msgstr "بررسی نشده"
 
-#: main/models.py:341
+#: main/models.py:399
 msgid "confirmed"
 msgstr "تایید شده"
 
-#: main/models.py:341
+#: main/models.py:399
 msgid "not confirmed"
 msgstr "رد شده"
 
-#: main/models.py:341
+#: main/models.py:399
 msgid "deleted"
 msgstr "حذف شده"
 
-#: main/models.py:343 main/myforms.py:51
+#: main/models.py:401 main/myforms.py:68
 msgid "confirm status"
 msgstr "وضعيت تاييد"
 
-#: main/models.py:345
+#: main/models.py:403
 msgid "content"
 msgstr "محتوا"
 
-#: main/models.py:347
+#: main/models.py:405
 msgid "confermer"
 msgstr "تایید/رد کننده"
 
-#: main/models.py:348
+#: main/models.py:406
 msgid "post"
 msgstr "پست"
 
-#: main/models.py:352 main/models.py:356
+#: main/models.py:410 main/models.py:414
 msgid "Comment"
 msgstr "نظر"
 
-#: main/models.py:353
+#: main/models.py:411
 msgid "Comments"
 msgstr "نظرات"
 
-#: main/models.py:362 main/models.py:375
+#: main/models.py:420 main/models.py:433
 msgid "key"
 msgstr "کلید"
 
-#: main/models.py:367
+#: main/models.py:425
 msgid "State"
 msgstr "استان"
 
-#: main/models.py:368
+#: main/models.py:426
 msgid "States"
 msgstr "استان ها"
 
-#: main/models.py:377 orders/admin.py:18 orders/admin.py:45 orders/forms.py:19
+#: main/models.py:435 orders/admin.py:18 orders/admin.py:45 orders/forms.py:19
 #: orders/forms.py:44 orders/forms.py:62
 msgid "state"
 msgstr "استان"
 
-#: main/models.py:380
+#: main/models.py:438
 msgid "Town"
 msgstr "شهر"
 
-#: main/models.py:381
+#: main/models.py:439
 msgid "Towns"
 msgstr "شهرها"
 
-#: main/myforms.py:35
+#: main/myforms.py:28
+msgid "Image rate should be 1:1"
+msgstr "نسبت تصویر باید 1:1 باشد"
+
+#: main/myforms.py:29
+msgid "weight in gram"
+msgstr "وزن بر حسب گرم"
+
+#: main/myforms.py:30
+msgid "size in millimeter"
+msgstr "اندازه بر حسب میلیمتر"
+
+#: main/myforms.py:52
 msgid "length"
 msgstr "طول"
 
-#: main/myforms.py:36
+#: main/myforms.py:53
 msgid "width"
 msgstr "عرض"
 
-#: main/myforms.py:37
+#: main/myforms.py:54
 msgid "height"
 msgstr "ارتفاع"
 
+#: main/myforms.py:95
+msgid ""
+"name for quering. it should be unique. (it is equel to verbose_name of "
+"filter in most cases but can be difference. for example supose we have "
+"filter1 and filter2 so: name of filter1=`Phone Operating System` unequel "
+"with verbose_name of filter1=`Operating System`  name of filter2=`Laptop "
+"Operating System` unequel with verbose_name of filter2=`Operating System`)"
+msgstr ""
+"نام برای کوئری زدن. باید یکتا باشد. (در اکثر مواقع با `نام جهت نمایش` برابر "
+"است اما می تواند متفاوت باشد. مثلا دو فیلتر را در نظر بگیرید. نام فیلتر 1: "
+"سیستم عامل گوشی  نام جهت نمایش فیلتر 1: سیستم عامل  نام فیلتر 2: سیستم عامل "
+"لپتاپ  نام جهت نمایش فیلتر 2: سیستم عامل"
+
+#: main/myforms.py:96
+msgid "name for showing to user. (it is equel to name of filter in most cases)"
+msgstr "نام جهت نمایش به کاربر. (در اکثر مواقع با نام فیلتر برابر است)"
+
 #: main/templates/admin/base.html:40
 msgid "Welcome,"
-msgstr ""
+msgstr "سس"
 
 #: main/templates/admin/base.html:45
 msgid "View site"
@@ -429,20 +477,35 @@ msgid "Log out"
 msgstr ""
 
 #: main/templates/admin/base.html:66 main/templates/admin/change_list.html:31
+#: main/templates/admin/main/filter/change_list.html:31
+#: main/templates/admin/main/filter_attribute/change_list.html:31
+#: main/templates/admin/main/product/change_form.html:18
+#: main/templates/admin/main/shopfilteritem/change_list.html:31
 #: main/templates/admin/object_history.html:6
 #: main/templates/registration/logged_out.html:4
 msgid "Home"
 msgstr ""
 
 #: main/templates/admin/change_list.html:51 main/templates/admin/login.html:23
+#: main/templates/admin/main/filter/change_list.html:51
+#: main/templates/admin/main/filter_attribute/change_list.html:51
+#: main/templates/admin/main/product/change_form.html:43
+#: main/templates/admin/main/shopfilteritem/change_list.html:51
 msgid "Please correct the error below."
 msgstr ""
 
 #: main/templates/admin/change_list.html:51 main/templates/admin/login.html:23
+#: main/templates/admin/main/filter/change_list.html:51
+#: main/templates/admin/main/filter_attribute/change_list.html:51
+#: main/templates/admin/main/product/change_form.html:43
+#: main/templates/admin/main/shopfilteritem/change_list.html:51
 msgid "Please correct the errors below."
 msgstr ""
 
 #: main/templates/admin/change_list.html:78
+#: main/templates/admin/main/filter/change_list.html:78
+#: main/templates/admin/main/filter_attribute/change_list.html:78
+#: main/templates/admin/main/shopfilteritem/change_list.html:78
 msgid "Clear all filters"
 msgstr "فیلتر فروش"
 
@@ -463,22 +526,6 @@ msgstr ""
 #: orders/templates/admin/edit_inline/dispatch_tabular.html:43
 msgid "View on site"
 msgstr ""
-
-#: main/templates/admin/filter_attribute_filter_custom.html:5
-#: orders/templates/admin/state_filter_custom.html:3
-#, python-format
-msgid " By %(filter_title)s "
-msgstr ""
-
-#: main/templates/admin/filter_attribute_filter_custom.html:6
-#: orders/templates/admin/state_filter_custom.html:3
-msgid "more"
-msgstr "بیشتر"
-
-#: main/templates/admin/filter_attribute_filter_custom.html:7
-#: orders/templates/admin/state_filter_custom.html:3
-msgid "less"
-msgstr "کمتر"
 
 #: main/templates/admin/index.html:23
 msgid "Recent actions"
@@ -513,6 +560,46 @@ msgstr ""
 msgid "Log in"
 msgstr ""
 
+#: main/templates/admin/main/filter/change_list_results.html:17
+#: main/templates/admin/main/filter_attribute/change_list_results.html:17
+#: main/templates/admin/main/shopfilteritem/change_list_results.html:17
+msgid "Remove from sorting"
+msgstr ""
+
+#: main/templates/admin/main/filter/change_list_results.html:18
+#: main/templates/admin/main/filter_attribute/change_list_results.html:18
+#: main/templates/admin/main/shopfilteritem/change_list_results.html:18
+#, python-format
+msgid "Sorting priority: %(priority_number)s"
+msgstr ""
+
+#: main/templates/admin/main/filter/change_list_results.html:19
+#: main/templates/admin/main/filter_attribute/change_list_results.html:19
+#: main/templates/admin/main/shopfilteritem/change_list_results.html:19
+msgid "Toggle sorting"
+msgstr ""
+
+#: main/templates/admin/main/product/change_form.html:21
+#, python-format
+msgid "Add %(name)s"
+msgstr ""
+
+#: main/templates/admin/main/product/filter_attribute_filter_custom.html:5
+#: orders/templates/admin/state_filter_custom.html:3
+#, python-format
+msgid " By %(filter_title)s "
+msgstr ""
+
+#: main/templates/admin/main/product/filter_attribute_filter_custom.html:6
+#: orders/templates/admin/state_filter_custom.html:3
+msgid "more"
+msgstr "بیشتر"
+
+#: main/templates/admin/main/product/filter_attribute_filter_custom.html:7
+#: orders/templates/admin/state_filter_custom.html:3
+msgid "less"
+msgstr "کمتر"
+
 #: main/templates/admin/object_history.html:10
 msgid "History"
 msgstr ""
@@ -542,6 +629,14 @@ msgstr "با تشکر از شما برای گذراندن وقت با ارزشت
 
 #: main/templates/registration/logged_out.html:12
 msgid "Log in again"
+msgstr ""
+
+#: mrgol/settings.py:166
+msgid "Farsi"
+msgstr ""
+
+#: mrgol/settings.py:167
+msgid "English"
 msgstr ""
 
 #: orders/admin.py:48 orders/forms.py:20 orders/forms.py:45 orders/forms.py:63
@@ -712,7 +807,7 @@ msgstr "ارسال"
 msgid "Delete?"
 msgstr "حذف"
 
-#: orders/views.py:60
+#: orders/views.py:59
 msgid "your cart is empty, add a product to order."
 msgstr "سبد شما خالی است، برای سفارش کالایی وارد کنید."
 
@@ -1713,108 +1808,3 @@ msgstr "این فیلد باید برای ماه \"{date_field}\" یکتا با�
 #, python-brace-format
 msgid "This field must be unique for the \"{date_field}\" year."
 msgstr "این فیلد باید برای سال \"{date_field}\" یکتا باشد."
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# roots (menus)
-msgid "digital"
-msgstr "دیجیتال"
-
-msgid "car"
-msgstr "ماشین"
-
-msgid "clothing"
-msgstr "پوشاک"
-
-msgid "books"
-msgstr "کتاب"
-
-msgid "phone"
-msgstr "گوشی"
-
-msgid "laptop"
-msgstr "لپتاپ"
-
-msgid "smart phone"
-msgstr "گوشی هوشمند"
-
-msgid "cell phone"
-msgstr "گوشی تماس"
-
-msgid "women"
-msgstr "زنانه"
-
-msgid "men"
-msgstr "مردانه"
-
-msgid "plant training"
-msgstr "آموزش کاشت گیاهان"
-
-msgid "Workout"
-msgstr "ورزش"
-
-msgid "Palm tree planting training"
-msgstr "آموزش کاشت درخت نخل"
-
-
-# filters  
-msgid "Color"
-msgstr "رنگ"
-
-msgid "SIM cart counts"
-msgstr "تعداد سیم کارت"
-
-# filter_attributes
-
-msgid "The history of palm tree cultivation in the world has reached more than 5000 years ago and its planting has been common in Iran since the beginning of the Achaemenid dynasty. This tree is propagated by palm kernels or by moving the shoots (date buds)."
-msgstr "سابقه کشت درخت خرما(نخل) در دنیا به بیش از 5000 سال پیش رسیده و کاشت آن در ایران از بدو تاریخ و تشکیل سلسله هخامنشی معمول بوده است. تکثیر این درخت بوسیله هسته خرما یا بوسیله جابجا کردن پاجوشها (جوانه های خرما) صورت می گیرد."
-
-msgid "The TANK is a user friendly bar phone that will stand out among all competitors. With its large and easy to read keypad, it is a hit sensation with seniors. With a 1.8 inch screen, FM Radio, Camera, and Social Networks this phone has all the fixing for a brilliant and simple phone that will sure to impress the user."
-msgstr "تانک یک گوشی کاربر پسند است که در بین رقبا متمایز خواهد شد. با صفحه ‌کلید بزرگ و آسان برای خواندن، برای سالمندان بسیار جذاب است. این گوشی با صفحه نمایش 1.8 اینچی، رادیو FM، دوربین و شبکه های اجتماعی تمام امکانات را برای یک گوشی ساده و براق دارد که مطمئناً استفاده کننده آن را تحت تأثیر قرار می دهد."
-
-msgid "This affordable dual-band GSM phone packs in a good number of features for a low-end model, including GPRS high-speed data, Java, MMS, SyncML, and voice dialing."
-msgstr "این تلفن مقرون به صرفه دو بانده GSM دارای تعداد زیادی ویژگی برای یک مدل ارزان قیمت است، از جمله داده‌های پرسرعت GPRS، جاوا، MMS، SyncML و شماره‌گیری صوتی."
-
-# brief_description of samsung note 20
-msgid "It’s easy to forget about the Samsung Galaxy Note 20. Oh, sure — the $1,299 Galaxy Note 20 Ultra is impossible to overlook, with its 6.9-inch adaptive 120Hz display, meticulous glass-and-metal design and absurd triple-camera bump. But the regular Note 20 has none of those things, leading some to dismiss it — perhaps unfairly — as a cut-rate afterthought in Samsung’s roster of premium handsets."
-msgstr "به راحتی می توان گلکسی نوت 20 سامسونگ را فراموش کرد. اوه، مطمئناً نمی توان گلکسی نوت 20 اولترا 1299 دلاری را نادیده گرفت، با صفحه نمایش 6.9 اینچی تطبیقی 120 هرتزی، طراحی دقیق شیشه ای و فلزی و برآمدگی نامعقول دوربین سه گانه. اما نوت 20 معمولی هیچ یک از این چیزها را ندارد، و باعث شد که برخی آن را - شاید به طور غیرمنصفانه - به عنوان یک مدل پایین‌تر در فهرست گوشی‌های ممتاز سامسونگ رد کنند."
-
-# brief_description of Galaxy S20 FE
-msgid "Don't dismiss the Samsung Galaxy S20 FE as an also-ran. This solid value delivers on the all-important basics such as screen quality and performance. With a 120Hz display and the Snapdragon 865 processor on board, you have all the beauty and speed in the world. Weighing the rest of the features against the reduced $600 price point leaves things in good balance."
-msgstr "سامسونگ گلکسی اس 20 FE را نیز به عنوان یک نسخه قابل اتکا نادیده نگیرید. این گوشی به شدت ارزش، اصول اولیه مهمی مانند کیفیت و عملکرد صفحه نمایش را ارائه می دهد. با صفحه نمایش 120 هرتزی و پردازنده اسنپدراگون 865 روی آن، تمام زیبایی و سرعت دنیا را در اختیار دارید. سنجیدن بقیه ویژگی ها در مقابل قیمت کاهش یافته 600 دلاری، تعادل خوبی را ایجاد می کند."
-
-# brief_description of LG Velvet LM-G910EMW
-msgid "first and foremost. With the LG Velvet, the company is attempting to redefine itself in the smartphone space. LG is shedding the G series and V series, instead creating unique product designs with their own identities. But can LG’s first swing at a new style be a home run?"
-msgstr "LG Velvet یک حرکت جدید جسورانه برای LG است که در درجه اول بر استایل تمرکز دارد. با LG Velvet، این شرکت در تلاش است تا خود را در فضای گوشی های هوشمند بازتعریف کند. ال‌جی سری‌های G و سری V را کنار می‌گذارد، در عوض طرح‌های منحصربه‌فردی را با هویت خود ایجاد می‌کند. اما آیا اولین حرکت ال‌جی در سبک جدید می‌تواند جدی باشد؟"
-
-# brief_description of Samsung galaxy s20 plus
-msgid "The Samsung Galaxy S20 Plus is one of the most well-rounded smartphones I've used in years. It has versatile cameras that compete with the best, customizable software, and a display that's so good it will ruin other smartphone displays for you. $1,200 is a lot of money though, and Samsung is really pushing it with this high price tag."
-msgstr "گوشی های سامسونگ گلکسی اس 20 پلاس یکی از قوی‌ترین گوشی‌های هوشمندی است که در سال‌های اخیر استفاده کرده‌ام. دوربین های همه کاره ای دارد که با بهترین نرم افزارهای قابل تنظیم رقابت می کنند و صفحه نمایش آنقدر خوب است که نمایشگرهای دیگر گوشی های هوشمند را با اختلاف شکست می دهند. با این حال، 1200 دلار پول زیادی است، و سامسونگ واقعاً آن را با این قیمت بالا ارائه داده است."
-
-# brief_description of iPhone 12 Pro Max
-msgid "The iPhone 12 Pro is a fantastic addition to Apple's ecosystem of devices. While the iPhone 12 Mini and iPhone 12 Pro Max will also likely tempt buyers at either end of the price spectrum, the iPhone 12 Pro is a great default device for fans of iOS."
-msgstr "آیفون 12 پرو یک گوشی دیگر از اکوسیستم دستگاه های اپل است. در حالی که آیفون 12 مینی و آیفون 12 پرو مکس نیز احتمالا خریداران را در هر دو انتهای طیف قیمت وسوسه خواهند کرد، آیفون 12 پرو یک دستگاه پیش فرض عالی برای طرفداران iOS است."
-
-# brief_description of Macbook m1
-msgid "The MacBook Pro 13-inch (M1, 2020) wasn’t just a welcome refresh. It was a sign that Apple had turned over a new leaf. That’s thanks to Apple’s own SoC, the M1 chip, being introduced with the refresh, which also came with the MacBook Air (M1, 2020) and Mac mini (M1, 2020) that launched at the same time. This new chip replaces the Intel processors that had powered Apple computers up to this point, marking a new era for Apple as well as breathing fresh air into its laptops and reminding everyone what’s made Apple products so special."
-msgstr "مک بوک پرو 13 اینچی (M1، 2020) فقط یک محصول جدید نبود. این نشانه این بود که اپل برگ جدیدی رو کرده است. این به لطف SoC خود اپل، تراشه M1 است که همراه با به‌روزرسانی معرفی شد، که همزمان با (MacBook Air (M1, 2020) and Mac mini (M1, 2020 عرضه شد. این تراشه جدید جایگزین پردازنده‌های اینتل می‌شود که تا این لحظه به رایانه‌های اپل نیرو می‌دادند و عصر جدیدی را برای اپل و همچنین تنفس تازه ای در لپ‌تاپ‌هایش به حساب می آمد و به همه یادآوری کرد که چه چیزی محصولات اپل را بسیار خاص کرده است."

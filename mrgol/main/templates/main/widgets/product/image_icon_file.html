@@ -10,21 +10,3 @@ function image_icon_img_wh() {
 }
 document.getElementById("image_icon_input").addEventListener("change", image_icon_img_wh)
 </script>
-
-<script>
-function question_mark_image_icon() {
-	const labels = document.getElementsByTagName('LABEL');
-	for (var i = 0; i < labels.length; i++) {
-		if (labels[i].htmlFor === 'id_image') {
-		    labels[i].textContent += " ";            // its more beautiful space before ? mark. like: "field_1: ?"
-			labels[i].classList.add('selector');     // class "selector" must be in parent element for working class "help help-tooltip help-icon"
-            quickElement(
-                'span', labels[i], '',
-                'class', 'help help-tooltip help-icon',
-                'title', gettext("Image rate should be 1:1")
-            );
-		}
-	}
-}
-window.addEventListener('load', question_mark_image_icon);
-</script>

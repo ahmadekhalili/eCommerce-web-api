@@ -14,7 +14,7 @@ from orders.models import OrderItem, Order
 
 
 MERCHANT = 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'
-client = Client('https://sandbox.zarinpal.com/pg/services/WebGate/wsdl')
+#client = Client('https://sandbox.zarinpal.com/pg/services/WebGate/wsdl')
 description = "توضیحات مربوط به تراکنش را در این قسمت وارد کنید"                      
 email = 'email@example.com'                                                           
 mobile = '09123456789'                                           

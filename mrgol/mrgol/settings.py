@@ -30,6 +30,7 @@ ALLOWED_HOSTS = ['*']
 #Application definition
 
 INSTALLED_APPS = [
+    'modeltranslation',
     'debug_toolbar',
     'django_extensions',
     'main.apps.MainConfig',
@@ -160,6 +161,11 @@ USE_TZ = False
 
 
 LANGUAGE_CODE = 'fa'
+gettext = lambda s: s
+LANGUAGES = (
+    ('fa', gettext('Farsi')),
+    ('en', gettext('English')),
+)                                             # main/management/createstates use 'fa' as default. it is important put default language in first (use in mymethods.conf_questwidget_class).
 
 PHONENUMBER_DEFAULT_REGION = 'IR'
 PHONENUMBER_DB_FORMAT = 'NATIONAL'
@@ -191,6 +197,6 @@ CART_SESSION_ID = 'cart'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
-#DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880            # 5 mg size for uploading posts like product.detailed_description = HTMLField(..)     (defult is 2.5) so we can write more posts with more images and ...
+#DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880            # 5 mg size for uploading posts like product.detailed_description = HTMLField(..)     (default is 2.5) so we can write more posts with more images and ...
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'

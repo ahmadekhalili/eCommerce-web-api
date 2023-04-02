@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-07-29 11:17+0000\n"
+"POT-Creation-Date: 2023-04-02 16:43+0330\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -318,82 +318,3 @@ msgstr ""
 #: static/admin/js/collapse.js:30
 msgid "Hide"
 msgstr ""
-
-#: static/tinymce/plugins/lists/plugin.min.js:9
-msgid "opera"
-msgstr ""
-
-#: static/tinymce/plugins/lists/plugin.min.js:9
-msgid "firefox"
-msgstr ""
-
-#: static/tinymce/plugins/lists/plugin.min.js:9
-msgid "win"
-msgstr ""
-
-#: static/tinymce/plugins/lists/plugin.min.js:9
-msgid "android"
-msgstr ""
-
-#: static/tinymce/plugins/lists/plugin.min.js:9
-msgid "mac os x"
-msgstr ""
-
-#: static/tinymce/plugins/lists/plugin.min.js:9
-msgid "linux"
-msgstr ""
-
-#: static/tinymce/plugins/lists/plugin.min.js:9
-msgid "sunos"
-msgstr ""
-
-#: static/tinymce/plugins/lists/plugin.min.js:9
-msgid "freebsd"
-msgstr ""
-
-#: static/tinymce/plugins/lists/plugin.min.js:9
-msgid "cros"
-msgstr ""
-
-#: static/tinymce/themes/silver/theme.min.js:9
-msgid "Cannot set source of a broadcasted event"
-msgstr ""
-
-#: static/tinymce/themes/silver/theme.min.js:9
-msgid "Cannot get source of a broadcasted event"
-msgstr ""
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-msgid "Image rate should be 1:1"
-msgstr "نسبت تصویر باید 1:1 باشد"
-
-msgid "size in millimeter"
-msgstr "اندازه بر حسب میلیمتر"
-
-msgid "weight in gram"
-msgstr "ورزن بر حسب گرم"
-
-msgid "name for quering. it should be unique. (it is equel to verbose_name of filter in most cases but can be difference. for example supose we have filter1 and filter2 so: name of filter1 = 'Phone Operating System' unequel with verbose_name of filter1='Operating System'  name of filter2='Laptop Operating System' unequel with verbose_name of filter2='Operating System')"
-msgstr "نام برای کوئری زدن. باید یکتا باشد. (در اکثر مواقع با `نام جهت نمایش` برابر است اما می تواند متفاوت باشد. مثلا دو فیلتر را در نظر بگیرید. نام فیلتر 1: سیستم عامل گوشی  نام جهت نمایش فیلتر 1: سیستم عامل  نام فیلتر 2: سیستم عامل لپتاپ  نام جهت نمایش فیلتر 2: سیستم عامل"
-
-msgid "name for showing to user. (it is equel to name of filter in most cases)"
-msgstr "نام جهت نمایش به کاربر. (در اکثر مواقع با نام فیلتر برابر است)"
-

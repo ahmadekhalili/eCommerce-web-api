@@ -5,6 +5,7 @@ from django.utils.translation import gettext_lazy as _
 
 from rest_framework import serializers
 
+from modeltranslation.utils import get_translation_fields as g_t
 from datetime import datetime
 import jdatetime
 
@@ -37,7 +38,7 @@ class ImageSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()  
     class Meta:
         model = Image
-        fields = ['id', 'image', 'alt']
+        fields = ['id', 'image', *g_t('alt')]
         
     def get_image(self, obj):
         request = self.context.get('request', None)
@@ -53,7 +54,7 @@ class SmallImageSerializer(serializers.ModelSerializer):
     father = ImageSerializer()
     class Meta:
         model = SmallImage
-        fields = ['id', 'image', 'alt', 'father']
+        fields = ['id', 'image', *g_t('alt'), 'father']
         
     def get_image(self, obj):
         request = self.context.get('request', None)
@@ -68,7 +69,7 @@ class Image_iconSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()  
     class Meta:
         model = Image_icon
-        fields = ['id', 'image', 'alt']
+        fields = ['id', 'image', *g_t('alt')]
         
     def get_image(self, obj):
         request = self.context.get('request', None)
@@ -84,7 +85,7 @@ class Image_iconSerializer(serializers.ModelSerializer):
 class RootChainedSerializer(serializers.ModelSerializer):         #this is used for chane roost like: 'digital' > 'phone' > 'sumsung'    
     class Meta:
         model = Root
-        fields = ['name', 'slug']
+        fields = [*g_t('name'), *g_t('slug')]
 #'/products/roots/detail/{}/{}/'.format(obj.id, slugify(obj.name, allow_unicode=True))
 
 
@@ -97,7 +98,7 @@ class Sub2RootListSerializer(serializers.ModelSerializer):         #serialize ro
 
     class Meta:
         model = Root
-        fields = ['id', 'name', 'slug', 'level', 'post_product', 'father_root', 'str', 'url']
+        fields = ['id', *g_t('name'), *g_t('slug'), 'level', 'post_product', 'father_root', 'str', 'url']
 
     def get_str(self, obj):
         return obj.__str__()
@@ -116,7 +117,7 @@ class Sub1RootListSerializer(serializers.ModelSerializer):         #serialize ro
     
     class Meta:
         model = Root
-        fields = ['id', 'name', 'slug', 'level', 'post_product', 'father_root', 'str', 'url', 'child_roots']      #for better displaying order we list all field.
+        fields = ['id', *g_t('name'), *g_t('slug'), 'level', 'post_product', 'father_root', 'str', 'url', 'child_roots']      #for better displaying order we list all field.
 
     def get_str(self, obj):
         return obj.__str__()
@@ -135,7 +136,7 @@ class RootListSerializer(serializers.ModelSerializer):         #urs for products
     
     class Meta:
         model = Root
-        fields = ['id', 'name', 'slug', 'level', 'post_product', 'father_root', 'str', 'url', 'child_roots']      #for better displaying order we list all field.
+        fields = ['id', *g_t('name'), *g_t('slug'), 'level', 'post_product', 'father_root', 'str', 'url', 'child_roots']      #for better displaying order we list all field.
 
     def get_str(self, obj):
         return obj.__str__()
@@ -185,7 +186,7 @@ class FilterSerializer(serializers.ModelSerializer):
     filter_attributes = Filter_AttributeListSerializer(many=True)
     class Meta:
         model = Filter
-        fields = ['id', 'name', 'filter_attributes']
+        fields = ['id', *g_t('name'), 'filter_attributes']
 
 
 
@@ -208,7 +209,7 @@ class PostListSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Post
-        fields = ['id', 'title', 'slug',  'meta_title', 'meta_description', 'brief_description', 'published_date', 'url', 'image_icon', 'root', 'author']
+        fields = ['id', *g_t('title'), *g_t('slug'), *g_t('meta_title'), *g_t('meta_description'), *g_t('brief_description'), 'published_date', 'url', 'image_icon', 'root', 'author']
 
     def get_image_icon(self, obj):
         request = self.context.get('request', None)
@@ -246,7 +247,7 @@ class ProductListSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Product
-        fields = ['id', 'name', 'slug', 'meta_title', 'meta_description', 'brief_description', 'price', 'available', 'image_icon', 'rating', 'url']       #visible, filter_attributes, root are filtered(removed) here.
+        fields = ['id', *g_t('name'), *g_t('slug'), *g_t('meta_title'), *g_t('meta_description'), *g_t('brief_description'), *g_t('price'), *g_t('available'), 'image_icon', 'rating', 'url']       #visible, filter_attributes, root are filtered(removed) here.
 
     def get_rating(self, obj):
         rate = obj.rating.rate
@@ -298,7 +299,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):       # important: f
 
     class Meta:
         model = Product
-        fields = ['id', 'name', 'slug', 'meta_title', 'meta_description', 'brief_description', 'detailed_description', 'price', 'available', 'roots', 'rating', 'stock', 'brand', 'weight', 'smallimages', 'comment_count', 'shopfilteritems', 'related_products']
+        fields = ['id', *g_t('name'), *g_t('slug'), *g_t('meta_title'), *g_t('meta_description'), *g_t('brief_description'), *g_t('detailed_description'), *g_t('price'), *g_t('available'), 'roots', 'rating', *g_t('stock'), 'brand', *g_t('weight'), 'smallimages', 'comment_count', 'shopfilteritems', 'related_products']
 
     def get_roots(self, obj):
         root_and_fathers = get_root_and_fathers(obj.root)
@@ -343,7 +344,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):       # important: f
 
 
 
-class ProductDetailMongoSerializer(ProductDetailSerializer):
+class ProductDetailMongoSerializer(ProductDetailSerializer):    # we create/edit mongo product by receive data from this
     filters = serializers.SerializerMethodField()  
     comment_set = CommentSerializer(read_only=True, many=True)
 
@@ -364,10 +365,10 @@ class ProductDetailMongoSerializer(ProductDetailSerializer):
 class StateSerializer(serializers.ModelSerializer):
     class Meta:
         model = State
-        fields = ['key', 'name']                            #we use key instead id for saving of states and towns. (id can be change in next db but key is more stable)
+        fields = ['key', *g_t('name')]                            #we use key instead id for saving of states and towns. (id can be change in next db but key is more stable)
 
 
 class TownSerializer(serializers.ModelSerializer):
     class Meta:
         model = Town
-        fields = ['key', 'name']                            #key is unique so dont need to state or other fields for saving ProfileOrder or ...
+        fields = ['key', *g_t('name')]                            #key is unique so dont need to state or other fields for saving ProfileOrder or ...

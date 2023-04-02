@@ -46,7 +46,7 @@ class Order(models.Model):
     paid_type = models.CharField(_('paid type'), max_length=10, choices=paid_type_choices)
     paid = models.BooleanField(_('paid'), default=False)
     cd_peigiry = models.CharField(_('cd peigiry'), max_length=30, blank=True, null=True)
-    price = models.DecimalField(_('price'), max_digits=10, decimal_places=0, blank=False, null=False)
+    price = models.DecimalField(_('price'), max_digits=10, decimal_places=0, blank=False, null=False)       # this price has not to translate, we want saved in history and whould be clear that in which type of price and which type of product (en product or fa) user has ordered?
     shipping_price = models.DecimalField(_('shipping price'), max_digits=10, decimal_places=0, blank=False, null=False)           #shipping_price(hazine hamlo naghl) = dispatch price(hazine ersal)  +  haqozzahme (hazine tahvil kala be post)
     shipping_type = models.CharField(_('shipping type'), max_length=20)                                                           #must be post or personal_dispatch
     order_status = models.CharField(_('order status'), max_length=1, choices=order_status_choices)

@@ -22,8 +22,9 @@ from .model_methods import set_levels_afterthis_all_childes_id, update_product_s
 from customed_files.django.classes import model_fields_custom
 from customed_files.date_convertor import MiladiToShamsi
 from users.models import User
-#note: changing classes places may raise error when creating tables(makemigrations), for example changing Content with Post will raise error(Content use Post in its field and shuld be definded after Post)
-
+# note1: changing classes places may raise error when creating tables(makemigrations), for example changing Content with Post will raise error(Content use Post in its field and shuld be definded after Post)
+# note2: if you add or remove a field, you should apply it in traslation.py 'fields' if was required.
+# note3: if you make changes in Product or it's related objects (etc. Brand, Root, ...) you should apply changes to it's serialisers like ProductListSerializer, ProductDetailMongoSerializer and mongo product saving (in admin.py) if required.
 
 
 group_choices = [(key, str(key)) for key in range(1, 11)]
@@ -329,7 +330,7 @@ class MDetailProduct(djongo_models.Model):
 
 class ShopFilterItem(models.Model):
     filter_attribute = models.ForeignKey(Filter_Attribute, on_delete=models.SET_NULL, null=True, verbose_name=_('filter attribute'))
-    product =  models.ForeignKey(Product, on_delete=models.CASCADE, related_name='shopfilteritems', verbose_name=_('product'))         #why we dont use ShopFilterItem as manytomany field in Product? because we want one object of ShopFilterItem only point to one product (supose one  object of ShopFilterItem as shopfilteritem_1 if thos shopfilteritem_1 point to several product instead one product, so eny changes on shopfilteritem_1 like decreasing shopfilteritem_1.price will affect on other products!!!!
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='shopfilteritems', verbose_name=_('product'))         #why we dont use ShopFilterItem as manytomany field in Product? because we want one object of ShopFilterItem only point to one product (supose one  object of ShopFilterItem as shopfilteritem_1 if thos shopfilteritem_1 point to several product instead one product, so eny changes on shopfilteritem_1 like decreasing shopfilteritem_1.price will affect on other products!!!!
     previous_stock = models.PositiveIntegerField(blank=True)
     stock = models.PositiveIntegerField(_('stock'))                                     # important: before creating first shopfilteritem for a product, product of that shopfilteritem should have stock=0 (shopfilteritem.product.stock=0) because shopfilteritem.sotck will assign to shopfilteritem.product.stock
     price = models.DecimalField(_('price'), max_digits=10, decimal_places=2)            # product.price shoud be arbitrary for filling, but this no!!! (if you have shopfilteritem.price it is btter and more logical shopfilteritem.product.price be 0)
@@ -398,7 +399,7 @@ post_save.connect(save_smallimage, sender=Image)
 statuses = [('1', _('not checked')), ('2', _('confirmed')), ('3', _('not confirmed')), ('4', _('deleted'))]
 class Comment(models.Model):
     confirm_status = models.CharField(_('confirm status'), default='1', max_length=1, choices=statuses)               #confirm site comments by admin and show comment in site if confirmed, '1' = confirmed     '2' = not checked(admin should check comment to confirm or not)      '3' = not confirmed(admin can confirm afters if want)    '4' = deleted
-    published_date = models.DateTimeField(_('published date'), auto_now_add=True)
+    published_date = models.DateTimeField(_('published date'), auto_now_add=True)           # published_date should translate in front. for example comment1 (1390/1/27) can translate like: comment1 (2016/4/16)
     content = models.TextField(_('content'), validators=[MaxLengthValidator(500)])
     author = models.ForeignKey(User, related_name='comment_set_author', related_query_name='comments_author', on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('author'))
     confermer = models.ForeignKey(User, related_name='comment_set_confermer', related_query_name='comments_confermer', on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('confermer'))

@@ -10,6 +10,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect
 from django.utils.translation import gettext_lazy as _, activate, get_language
 from django.contrib.admin.utils import unquote
+from django.conf import settings
 
 from rest_framework.response import Response
 from rest_framework.renderers import JSONRenderer
@@ -19,6 +20,8 @@ import io
 import json
 import jdatetime
 import pymongo
+from modeltranslation.admin import TranslationAdmin
+from modeltranslation.utils import get_translation_fields as g_t
 
 from customed_files.django.classes.custom_ModelAdmin import CustModelAdmin
 from . import myserializers
@@ -48,11 +51,21 @@ class CommentInline(admin.TabularInline):
     get_published_date.short_description = _('published date')
 
 
-class PostAdmin(admin.ModelAdmin):
+class PostAdmin(TranslationAdmin):
     prepopulated_fields = {'slug':('title',)}
     inlines = [CommentInline]
     readonly_fields = ('get_published_date',)
     form = myforms.PostForm
+
+    class Media:                                 # this cause languages shown separatly in admin panel. (it should be use always, otherwise all field of all languages shown under each other at once)
+        js = (
+            'http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
+            'http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js',
+            'modeltranslation/js/tabbed_translation_fields.js',
+        )
+        css = {
+            'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
+        }
 
     def get_published_date(self, obj):                                       #auto_now_add and auto_now fields must be in read_only otherwise raise error (fill by django not user) and you cant control output of read_only fields with widget (from its form) so for this fiels you cant specify eny widget!!
         date = jdatetime.datetime.fromgregorian(datetime=obj.published_date).strftime('%Y %B %-d').split()
@@ -65,8 +78,18 @@ admin.site.register(Post, PostAdmin)
 
 
 
-class BrandAdmin(admin.ModelAdmin):
+class BrandAdmin(TranslationAdmin):
     prepopulated_fields = {'slug':('name',)}
+
+    class Media:                                 # this cause languages shown separatly in admin panel. (it should be use always, otherwise all field of all languages shown under each other at once)
+        js = (
+            'http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
+            'http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js',
+            'modeltranslation/js/tabbed_translation_fields.js',
+        )
+        css = {
+            'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
+        }
 
     def save_related(self, request, form, formsets, change):             # here update product in mongo database  (MDetailProduct.json.brand) according to Brand changes. for example if brand_1.name changes to 'Apl'  MDetailProduct:  [{ id: 1, json: {brand: 'Apl', ...}}, {id: 2, ...}]
         form.save_m2m()
@@ -124,9 +147,10 @@ class ProductAdmin(CustModelAdmin):
     inlines = [ImageInline, CommentInline]   
     readonly_fields = ('rating', 'get_created', 'get_updated')
     form = myforms.ProductForm
+    alt = g_t('alt')
     fieldsets = (
         (None, {
-            'fields': ('name', 'slug', 'brief_description', 'detailed_description', 'price', 'available', 'image', 'alt', 'root', 'filter_attributes', 'rating', 'stock', 'brand', 'weight', 'get_created', 'get_updated')
+            'fields': ('name', 'slug', 'brief_description', 'detailed_description', 'price', 'available', 'image', *alt, 'root', 'filter_attributes', 'rating', 'stock', 'brand', 'weight', 'get_created', 'get_updated')
         }),
         (_('size'), {
             'classes': ('collapse',),
@@ -138,8 +162,16 @@ class ProductAdmin(CustModelAdmin):
         }),
     )
 
-    class Media:
-        js = ('js/admin/searchbar_help_text_product.js',)                   #addres is in static folder
+    class Media:                                 # this cause languages shown separatly in admin panel. (it should be use always, otherwise all field of all languages shown under each other at once)
+        js = (
+            'http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
+            'http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js',
+            'modeltranslation/js/tabbed_translation_fields.js',
+            'js/admin/searchbar_help_text_product.js',  # addres is in static folder
+        )
+        css = {
+            'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
+        }
 
     def get_created_brief(self, obj):
         date = jdatetime.datetime.fromgregorian(date=obj.created).strftime('%Y %-m %-d').split()       # -m -d month date in one|two digit,  but m d is month day in two digit
@@ -168,11 +200,12 @@ class ProductAdmin(CustModelAdmin):
         if not instance.image_icon:             #in new product adding
             image_icon = Image_icon.objects.create(image=request.FILES.get('image'), alt=request.POST.get('alt'))
             instance.image_icon = image_icon
-        else:                                   #in change page product we dont need create new Image_icone (it is created in add product page) we just need refresh image and alt of product.image_icone because maybe user changed image or alt!  
+        else:                                   # 'image' and 'alt' are not fields of Product, so we should save it manually.
             if request.FILES.get('image'):
                 instance.image_icon.image = request.FILES.get('image')
-            if request.POST.get('alt'):
-                instance.image_icon.alt = request.POST.get('alt')
+            for f in g_t('alt'):
+                if request.POST.get(f):
+                    instance.image_icon.alt = request.POST.get(f)
             instance.image_icon.save()                                    #you must save image_icone seperatly, otherwise dont saved changes!!!
         return instance
 
@@ -243,18 +276,20 @@ class ProductAdmin(CustModelAdmin):
         extra_context['selected_filters'] = make_next([])
         extra_context['selectname_filters'], extra_context['selectid_filters'] = make_next(selectname_filters), make_next(selectid_filters)
         extra_context['selectname_filter_attributes'], extra_context['selectid_filter_attributes'] = make_next(selectname_filter_attributes), make_next(selectid_filter_attributes)
-        
+
         if object_id:
             selected_filter_attributes = obj.filter_attributes.select_related('filterr')      #value is current product.  
             selected_filters = [filter_attribute.filterr for filter_attribute in selected_filter_attributes if filter_attribute]             #if obj.filter_attributes.all() was blank, filter_attribute.id  raise error so we need check with if filter_attribute
             extra_context['selected_filter_attributes'] = make_next(selected_filter_attributes)  
             extra_context['selected_filters'] = make_next(selected_filters)
-            mongo_product = MDetailProduct.objects.using('mongo').get(id=obj.id)
+            mongo_product_query = MDetailProduct.objects.using('mongo').filter(id=obj.id)
+            mongo_product = mongo_product_query[0] if mongo_product_query else None  # if add product in shell, mongo_product can be None
             extra_fields = {}
-            for tuple in mongo_product.json.items():                              # find all additional fields added in admin panel and add to 'data' in order to save them to db
-                if len(tuple[0]) > 6 and tuple[0][:6] == 'extra_':
-                    extra_fields[tuple[0]] = tuple[1]
-            extra_context['extra_fields'] = extra_fields                          # extra_fields is like: {'extra_colorbody': 'orange', 'extra_bodyweight': 2}
+            if mongo_product:
+                for tuple in mongo_product.json.items():                              # find all additional fields added in admin panel and add to 'data' in order to save them to db
+                    if len(tuple[0]) > 6 and tuple[0][:6] == 'extra_':
+                        extra_fields[tuple[0]] = tuple[1]
+                extra_context['extra_fields'] = extra_fields                          # extra_fields is like: {'extra_colorbody': 'orange', 'extra_bodyweight': 2}
         return super().changeform_view(request, object_id, form_url, extra_context)
 
     def add_vieww(self, request, form_url='', extra_context=None):
@@ -371,7 +406,7 @@ class Root_FiltersInline(admin.StackedInline):
 
 
 Root_level_CHOICES = ((1,'1'), (2,'2'), (3,'3'))               #value for send is first element (here like 1) and value for showing is second (here like '1')
-class RootAdmin(admin.ModelAdmin):
+class RootAdmin(TranslationAdmin):
     inlines = [RootInline]
     prepopulated_fields = {'slug':('name',)}
     #exclude = ('post_product',)
@@ -379,7 +414,17 @@ class RootAdmin(admin.ModelAdmin):
     form = myforms.RootForm
     list_display = ['str_ob', 'id']
     ordering = ['id']
-    
+
+    class Media:                                 # this cause languages shown separatly in admin panel. (it should be use always, otherwise all field of all languages shown under each other at once)
+        js = (
+            'http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
+            'http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js',
+            'modeltranslation/js/tabbed_translation_fields.js',
+        )
+        css = {
+            'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
+        }
+
     def str_ob(self, obj):
         return obj.__str__()
     str_ob.short_description = _('name')
@@ -467,17 +512,37 @@ admin.site.register(Root, RootAdmin)
 
 
 
-class FilterAdmin(admin.ModelAdmin):
+class FilterAdmin(TranslationAdmin):
     list_display = ['id', 'name']
     form = myforms.FilterForm
+
+    class Media:                                 # this cause languages shown separatly in admin panel. (it should be use always, otherwise all field of all languages shown under each other at once)
+        js = (
+            'http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
+            'http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js',
+            'modeltranslation/js/tabbed_translation_fields.js',
+        )
+        css = {
+            'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
+        }
 
 admin.site.register(Filter, FilterAdmin)
 
 
-class Filter_AttributeAdmin(admin.ModelAdmin):
+class Filter_AttributeAdmin(TranslationAdmin):
     list_display = ('id', 'name', 'filterr')                         # filterr doesnt add additional query (can read project\project parts\admin\list_display seperat
     prepopulated_fields = {'slug':('name',)}
     form = myforms.Filter_AttributeForm
+
+    class Media:                                 # this cause languages shown separatly in admin panel. (it should be use always, otherwise all field of all languages shown under each other at once)
+        js = (
+            'http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
+            'http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js',
+            'modeltranslation/js/tabbed_translation_fields.js',
+        )
+        css = {
+            'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
+        }
 
     def save_related(self, request, form, formsets, change):         # here update MDetailProduct.json.filters.{filter_name} with new filter_attribute.name like: {id: 1, json: {filters: {'color': ['abi', 'zar']}, ...}} >== {id:1, json: {filters: {'color': ['sefid', 'zar']}, ...}}   filter_attribute = form.instance     previouse filter_attribute.name only exists before runing form.is_valid() in _changeform_view  so we saved previouse name in Filter_AttributeForm.is_valid
         form.save_m2m()
@@ -495,10 +560,20 @@ class Filter_AttributeAdmin(admin.ModelAdmin):
 admin.site.register(Filter_Attribute, Filter_AttributeAdmin)
 
 
-class ShopFilterItemAdmin(admin.ModelAdmin):
+class ShopFilterItemAdmin(TranslationAdmin):
     form = myforms.ShopFilterItemForm
     list_display = ['get_str', 'stock', 'price']
-    
+
+    class Media:                                 # this cause languages shown separatly in admin panel. (it should be use always, otherwise all field of all languages shown under each other at once)
+        js = (
+            'http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
+            'http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js',
+            'modeltranslation/js/tabbed_translation_fields.js',
+        )
+        css = {
+            'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
+        }
+
     def get_str(self, obj):
         return str(obj)
     get_str.short_description = _('shopfilteritem')                  # should be same with ShopFilterItem.Meta.verbose_name
@@ -517,7 +592,17 @@ class ShopFilterItemAdmin(admin.ModelAdmin):
 admin.site.register(ShopFilterItem, ShopFilterItemAdmin)
 
 
-class ImageAdmin(admin.ModelAdmin):
+class ImageAdmin(TranslationAdmin):
+    class Media:                                 # this cause languages shown separatly in admin panel. (it should be use always, otherwise all field of all languages shown under each other at once)
+        js = (
+            'http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
+            'http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js',
+            'modeltranslation/js/tabbed_translation_fields.js',
+        )
+        css = {
+            'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
+        }
+
     def save_related(self, request, form, formsets, change):         # here update product in mongo database  (MDetailProduct.json.smallimages) according to Image changes. for example if image_1.alt changes to 'another_alt'  MDetailProduct.json.smallimages:  [{ id: 1, image: '...', alt: 'Macbook m1-2', father: {id: 27, image: '...', alt: 'another_alt'}}, {id: 2, ...}}    note: image is subset of smallimage,we used smallimage instead image and dont different because eny changes on image appears on smallimage too.
         form.save_m2m()
         for formset in formsets:
@@ -536,7 +621,17 @@ class ImageAdmin(admin.ModelAdmin):
 admin.site.register(Image, ImageAdmin)
 
 
-class SmallImageAdmin(admin.ModelAdmin):
+class SmallImageAdmin(TranslationAdmin):
+    class Media:                                 # this cause languages shown separatly in admin panel. (it should be use always, otherwise all field of all languages shown under each other at once)
+        js = (
+            'http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
+            'http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js',
+            'modeltranslation/js/tabbed_translation_fields.js',
+        )
+        css = {
+            'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
+        }
+
     def save_related(self, request, form, formsets, change):         # here update product in mongo database  (MDetailProduct.json.smallimages) according to SmallImage changes. for example if smallimage_1.alt changes to 'another_alt'  MDetailProduct.json.smallimages:  [{ id: 1, image: '...', alt: 'another_alt', father: {id: 27, image: '...', alt: 'Macbook m1-2'}}, {id: 2, ...}}
         form.save_m2m()
         for formset in formsets:

@@ -8,7 +8,48 @@ from . import myserializers
 from .models import Product, Root, Filter, Filter_Attribute
 from .mymethods import make_next
 
-    
+
+class QuestionMark:
+    """
+    this class add question mark to inherited class. widget classes has to inherites this class at first like:
+    TextInputQuesMark(QuestionMark, forms.widgets.TextInput), now if you use TextInputQuesMark in a form field,
+    question mark will be shown for that field in admin panel. this TextInputQuesMark has three in puts: 1- qus_text
+    2- input  3- self.template that should define inside TextInputQuesMark when need extra template.
+    """
+    main_template = 'main/widgets/field_question_mark.html'
+
+    def __init__(self, attrs=None, qus_text='', input="django/forms/widgets/input.html", *args, **kwargs):
+        self.qus_text = qus_text
+        self.input = input                # this cause we use 'QuestionMark' widget in different fields (default CharField) like FileField, DateField...
+        super().__init__(attrs, *args, **kwargs)
+
+    def get_context(self, name, value, attrs):
+        context = super().get_context(name, value, attrs)
+        context['extra_template'] = type(self).mro()[0].__dict__.get('template_name')  # don't get inherited template_name (return None if current class has not 'template_name').
+        context['input'] = self.input
+        context['aria_control'] = f'tab_id_{name}'
+        context['htmlFor'] = f'id_{name}'
+        lang_code = name[name.rfind('_') + 1:] if name.rfind('_') > 0 else ''
+        context['required'] = 1 if lang_code == settings.LANGUAGES[0][0] else 0
+        context['qus_text'] = self.qus_text
+        return context
+
+    def render(self, name, value, attrs=None, renderer=None):
+        context = self.get_context(name, value, attrs)
+        return self._render(self.main_template, context, renderer)
+
+
+
+
+class TextInputQuesMark(QuestionMark, forms.widgets.TextInput):
+    pass
+
+class NumberInputQuesMark(QuestionMark, forms.widgets.NumberInput):
+    pass
+
+
+
+
 class filter_attributes_widget(forms.Select):
     template_name = 'main/widgets/filter_attributes_two_select.html'
     
@@ -73,31 +114,8 @@ class product_root_widget(forms.Select):
         return two_select_context
 
 
-class image_icon_widget(forms.widgets.FileInput):
+class image_icon_widget(QuestionMark, forms.widgets.FileInput):
     template_name = 'main/widgets/product/image_icon_file.html'
-    
-    def get_context(self, name, value, attrs):
-        context = super().get_context(name, value, attrs)
-        context['value'] = value
-        return context
-
-
-class weight_widget(forms.widgets.NumberInput):
-    template_name = 'main/widgets/product/weight_file.html'
-    
-    def get_context(self, name, value, attrs):
-        context = super().get_context(name, value, attrs)
-        context['value'] = value
-        return context
-
-
-class length_widget(forms.widgets.NumberInput):
-    template_name = 'main/widgets/product/length_file.html'
-    
-    def get_context(self, name, value, attrs):
-        context = super().get_context(name, value, attrs)
-        context['value'] = value
-        return context
 
 
 
@@ -181,15 +199,6 @@ class father_root_widget(forms.Select):
             two_select_context['selected_root_id'] = value.father_root_id
 
         return two_select_context
-
-
-
-
-class filter_name_widget(forms.widgets.TextInput):
-    template_name = 'main/widgets/filter_name.html'
-
-class filter_verbose_name_widget(forms.widgets.TextInput):
-    template_name = 'main/widgets/filter_verbose_name.html'
 
 
 

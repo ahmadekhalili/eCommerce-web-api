@@ -8,7 +8,7 @@ from collections.abc import Mapping
 
 
 
-class BaseCartProductSerializer(serializers.ModelSerializer):          # suppose 'item' in: for item in Cart(request),  BaseCartProductSerializer serialize item['product']
+class BaseCartProductSerializer(serializers.ModelSerializer):          # this serilize product fields of cart item.
     image_icon = Image_iconSerializer()
     rating = serializers.SerializerMethodField()
     url = serializers.SerializerMethodField()
@@ -30,8 +30,7 @@ class BaseCartProductSerializer(serializers.ModelSerializer):          # suppose
         return obj['brand'] if isinstance(obj, Mapping) else obj.brand.id
 
 
-class CartProductSerializer(BaseCartProductSerializer):             # suppose 'item' in: for item in Cart(request),  CartProductSerializer serialize most attributes of 'item' like item['product'] (helped by BaseCartProductSerializer), item['price'], item['total_price']
-    #price = serializers.SerializerMethodField()                     # impotant: price here is difference from product.price. price here can be shopfilteritem.price
+class CartProductSerializer(BaseCartProductSerializer):              # this serialize additional attributes other than product fields like: item['price'], item['total_price']. note: price here is difference from BaseCartProductSerializer.price. price here can be shopfilteritem.price
     quantity = serializers.IntegerField()
     total_price = serializers.CharField()                           # total_price shoud be str, this field convert decimal inputed total_price to str total_price.
 
@@ -42,6 +41,3 @@ class CartProductSerializer(BaseCartProductSerializer):             # suppose 'i
     def to_representation(self, obj):            # obj == cart item
         item = {**BaseCartProductSerializer(obj['product']).data, 'price': obj['price'], 'quantity': obj['quantity'], 'total_price': obj['total_price']}
         return super().to_representation(item)
-
-    def get_price(self, obj):
-        return 'hhhhhhh'
