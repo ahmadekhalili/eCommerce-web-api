@@ -241,7 +241,7 @@ class Product(models.Model):                                     #.order_by('-av
     meta_description = models.TextField(_('meta description'), validators=[MaxLengthValidator(160)], blank=True, default='')
     brief_description = models.TextField(_('brief description'), validators=[MaxLengthValidator(1000)])
     detailed_description = RichTextUploadingField(_('detailed description'), blank=True, null=True)
-    price = models.DecimalField(_('price'), max_digits=10, decimal_places=2, default=0)       # for $ prices we need decimal_places for example price: 19.99$ has 2 decimal places
+    price = models.DecimalField(_('price'), max_digits=10, decimal_places=2, default='0')       # if default=0 (instead default='0') products with price=0 will saves in database as 0 instead '0.00' while all other prices are in two decimal format, this made collision and cause problems in like main/tests/test_add_to_session. for $ prices we need 2 decimal places like 19.99$
     available = models.BooleanField(_('available'), default=False, db_index=True)
     visible = models.BooleanField(_('delete'), default=True, db_index=True)                #we use visible for deleting an object, for deleting visible=False, in fact we must dont delete any product.    
     created = models.DateTimeField(_('created date'), auto_now_add=True)
