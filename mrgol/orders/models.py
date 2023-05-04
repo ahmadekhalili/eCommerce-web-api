@@ -17,7 +17,7 @@ def validate_postal_code(date):
         raise ValidationError(_("10 digit postal code"))
     
 class ProfileOrder(models.Model):
-    user = models.ForeignKey(User, related_name='profileorders', on_delete=models.SET_NULL, null=True, verbose_name=_('user'))
+    user = models.ForeignKey(User, related_name='profileorders', on_delete=models.SET_NULL, null=True, verbose_name=_('user'))     # a user can have several profile_orders. for example one user create two profile_order for two different address. first for it's work orders (different address and postal code)  and second for home orders. even may you want work orders's factor print with different name than you.
     first_name = models.CharField(_('first name'), max_length=50)
     last_name = models.CharField(_('last name'), max_length=50)
     phone = PhoneNumberField(_('phone number'))    
