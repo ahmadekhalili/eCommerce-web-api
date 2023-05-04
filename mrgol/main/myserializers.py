@@ -193,7 +193,7 @@ class FilterSerializer(serializers.ModelSerializer):
 
 class BrandSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Filter
+        model = Brand
         fields = '__all__'
 
 
