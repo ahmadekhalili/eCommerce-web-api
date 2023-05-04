@@ -15,7 +15,8 @@ from cart.cart import Cart
 from orders.models import ProfileOrder
 from orders.myserializers import ProfileOrderSerializer
 from customed_files.rest_framework.rest_framework_customed_classes.custom_rest_authentication import CustomSessionAuthentication
-
+from main.models import Post, Comment
+from main.myserializers import CommentSerializer, PostListSerializer
 
 
 class LogIn(views.APIView):
@@ -108,3 +109,20 @@ class UserChange(views.APIView):
             return Response(dict([(key, serializer.data.get(key)) for key in request.data if serializer.data.get(key)]))             #{**CartMenuView().get(request, datas_selector='user').data}
         else:
             return Response(serializer.errors)
+
+
+
+
+    class AdminProfile(views.APIView):
+        def get(self, request, *args, **kwargs):
+            user = User.objects.filter(id=kwargs.get('id'))
+            if user:
+                user_serialized = UserSerializer(user[0]).data
+                fields = ['first_name', 'last_name', 'date_joined', 'email']
+                # we don't want to create admin profile serializer just for reading process. filter UserSerializer instead.
+                profile = {key: user_serialized[key] for key in user_serialized if key in fields}
+                posts = Post.objects.filter(author=user[0])
+                posts_serialized = PostListSerializer(posts, many=True, context={'request': request}).data
+                comments = Comment.objects.filter(author=user[0])
+                comments_serialized = CommentSerializer(comments, many=True).data
+            return Response({'profile': profile, 'posts': posts_serialized, 'comments': comments_serialized})

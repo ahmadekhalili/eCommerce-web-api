@@ -5,6 +5,8 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 from rest_framework.exceptions import ErrorDetail, ValidationError, ErrorDetail
 
+import jdatetime
+
 from customed_files import date_convertor
 from orders.models import ProfileOrder
 from .models import User
@@ -60,17 +62,17 @@ class UserSerializer(serializers.ModelSerializer):
     
     def get_phone(self, obj):
         return str(obj.phone.national_number)
-    
+
     def get_date_joined(self, obj):
         d_t = obj.date_joined
         y, m, d, h, minute, s = d_t.year, d_t.month, d_t.day, d_t.hour, d_t.minute, d_t.second
-        y, m, d = date_convertor.MiladiToShamsi(y, m, d).result()
+        y, m, d = jdatetime.datetime.fromgregorian(datetime=d_t).strftime('%Y %M %-d').split()
         return '{}/{}/{} {}:{}:{}'.format(y, m, d, h, minute, s)
-    
+
     def get_last_login(self, obj):
         d_t = obj.last_login
         y, m, d, h, minute, s = d_t.year, d_t.month, d_t.day, d_t.hour, d_t.minute, d_t.second
-        y, m, d = date_convertor.MiladiToShamsi(y, m, d).result()
+        y, m, d = jdatetime.datetime.fromgregorian(datetime=d_t).strftime('%Y %M %-d').split()
         return '{}/{}/{} {}:{}:{}'.format(y, m, d, h, minute, s)
 
     def get_postal_code(self, obj):
