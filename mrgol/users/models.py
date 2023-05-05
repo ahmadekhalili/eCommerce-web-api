@@ -67,10 +67,9 @@ class User(AbstractUser):                #User post_save in cart.models.SesKey, 
     objects = UserManager()
 
     class Meta:
-        verbose_name =  _('user')
-        verbose_name_plural =  _('users')
+        verbose_name = _('user')
+        verbose_name_plural = _('users')
         #abstract = True                                    #puting this will rase error (abstract will assign correctly by parrent class PermissionsMixin)
     
     def __str__(self):
         return user_name_shown(self)                   
-    

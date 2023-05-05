@@ -112,7 +112,7 @@ class OrderItem(models.Model):
 
 
 class Shipping(models.Model):                                     #this is specefic model class(non create and del permission). we have two type Shipping, "personal" and "post" that is in one Shipping.
-    fee =  models.DecimalField(_('personal fee'), max_digits=10, decimal_places=0, default=0, blank=True)                #for only post shipping..        
+    fee = models.DecimalField(_('personal fee'), max_digits=10, decimal_places=0, default=0, blank=True)                #for only post shipping..
     town = models.ForeignKey(Town, to_field='key', on_delete=models.SET_NULL, null=True, verbose_name=_('town'))         #this is adderes mabda
     address = models.CharField(_('address'), max_length=250)              
     #dispatch_set

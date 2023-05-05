@@ -10,6 +10,6 @@ urlpatterns = [
     path('signup/', views.SignUp.as_view(), name='signupview'),
     path('userchange/', views.UserChange.as_view(), name='user-change'),
     #path('profile/<user_id>/',  , name=''),
-    path('profile/admin/<id>/',  views.AdminProfile.as_view(), name='admin-profile'),     #we used this url for mian/myserializers/PostListSerializer/get_author()
+    path('profile/admin/<id>/',  views.AdminProfile.as_view(), name='admin-profile'),     #we used this url for main/myserializers/PostListSerializer/get_author()
 ]
 

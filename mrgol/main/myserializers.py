@@ -284,11 +284,6 @@ class PostDetailSerializer(serializers.ModelSerializer):
 
 
 class ProductDetailSerializer(serializers.ModelSerializer):       # important: for saving we should first switch to `en` language by:  django.utils.translation.activate('en').    comment_set will optained by front in other place so we deleted from here.   more description:  # all keys should save in database in `en` laguage(for showing data you can select eny language) otherwise it was problem understading which language should select to run query on them like in:  s = myserializers.ProductDetailMongoSerializer(form.instance, context={'request': request}).data['shopfilteritems']:     {'رنگ': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} it is false for saving, we should change language by  `activate('en')` and now true form for saving:  {'color': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} and query like: s['color']
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        request = self.context.get('request')
-        self.fields['smallimages'].context['request'] = request
-
     roots = serializers.SerializerMethodField()
     brand = serializers.SerializerMethodField()
     rating = serializers.SerializerMethodField()
@@ -300,6 +295,11 @@ class ProductDetailSerializer(serializers.ModelSerializer):       # important: f
     class Meta:
         model = Product
         fields = ['id', *g_t('name'), *g_t('slug'), *g_t('meta_title'), *g_t('meta_description'), *g_t('brief_description'), *g_t('detailed_description'), *g_t('price'), *g_t('available'), 'roots', 'rating', *g_t('stock'), 'brand', *g_t('weight'), 'smallimages', 'comment_count', 'shopfilteritems', 'related_products']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        request = self.context.get('request')
+        self.fields['smallimages'].context['request'] = request
 
     def get_roots(self, obj):
         root_and_fathers = get_root_and_fathers(obj.root)

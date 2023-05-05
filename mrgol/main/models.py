@@ -48,7 +48,7 @@ class Filter(models.Model):
 
 class Brand(models.Model):
     name = models.CharField(_('name'), max_length=25, null=True, blank=True)
-    slug = models.SlugField(_('slug'), allow_unicode=True, db_index=False)
+    slug = models.SlugField(_('slug'), allow_unicode=True, null=True, blank=True, db_index=False)
     #root_set
 
     class Meta:
@@ -160,7 +160,7 @@ class Filter_Attribute(models.Model):
 
 class Rating(models.Model):                                                   #math operation of Rating will done in view. 
     submiters = models.PositiveIntegerField(_('submiters'), default=0)
-    rate = models.DecimalField(_('rate'), max_digits=2, decimal_places=1, default=0)       # don't need add MaxValueValidator, rating of every product is created in Product.save() with controled value.
+    rate = models.DecimalField(_('rate'), max_digits=2, decimal_places=1, default='0')       # don't need add MaxValueValidator, rating of every product is created in Product.save() with controled value.
 
     class Meta:
         verbose_name = _('Rating')
@@ -204,7 +204,7 @@ class Post(models.Model):
     meta_title = models.CharField(_('meta title'), max_length=60, blank=True, default='')
     meta_description = models.TextField(_('meta description'), validators=[MaxLengthValidator(160)], blank=True, default='')    
     brief_description = models.TextField(_('brief description'), validators=[MaxLengthValidator(1000)])
-    detailed_description = RichTextUploadingField(_('detailed description'), blank=True, null=True)
+    detailed_description = RichTextUploadingField(_('detailed description'), blank=True)
     visible = models.BooleanField(_('delete'), default=True)
     published_date = models.DateTimeField(_('published date'), auto_now_add=True)
     image_icon = models.OneToOneField(Image_icon, on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('image icon'))
@@ -240,7 +240,7 @@ class Product(models.Model):                                     #.order_by('-av
     meta_title = models.CharField(_('meta title'), max_length=60, blank=True, default='')
     meta_description = models.TextField(_('meta description'), validators=[MaxLengthValidator(160)], blank=True, default='')
     brief_description = models.TextField(_('brief description'), validators=[MaxLengthValidator(1000)])
-    detailed_description = RichTextUploadingField(_('detailed description'), blank=True, null=True)
+    detailed_description = RichTextUploadingField(_('detailed description'), blank=True)
     price = models.DecimalField(_('price'), max_digits=10, decimal_places=2, default='0')    # for $ prices we need 2 decimal places like 19.99$ and for rial it's x.00 that should serialize to x    if default=0 (instead default='0') products with price=0 will saves in database as 0 instead '0.00' while all other prices are in two decimal format, this removes integrity and cause problems in like main/tests/test_add_to_session.
     available = models.BooleanField(_('available'), default=False, db_index=True)
     visible = models.BooleanField(_('delete'), default=True, db_index=True)                #we use visible for deleting an object, for deleting visible=False, in fact we must dont delete any product.    
@@ -253,7 +253,7 @@ class Product(models.Model):                                     #.order_by('-av
     rating = models.OneToOneField(Rating, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('rating'))
     stock = models.PositiveIntegerField(_('stock'), default=0)                        # important: stock before creating first shopfilteritem of product shoud be 0 otherwise it will sum with shopfilteritem.stock, example: supose we have product1.stock = 10  now after creating shopfilteritem1 with stock=12 product1.stock will be 10+12   (address: in ShopFilterItem.save and model_methods.py/update_product_stock
     weight = models.FloatField(_('weight'), null=True, blank=False)                   # weight is in gram and used in orders/mymethods/profile_order_detail/PostDispatchPrice  but if you dont specify weight in saving a product, it will be None and will ignore in PostDispatchPrice. its better null=True easier in creating products in tests.
-    size = models.CharField(_('size'), max_length=25, null=True, blank=True)          # value should be in mm  and like '100,150,150'  this field seperate to 3 field in ProductForm in __init__ and save func), also we use size in mymethods.PostDispatchPrice  to define which box size should choice for posting.
+    size = models.CharField(_('size'), max_length=25, blank=True)          # value should be in mm  and like '100,150,150'  this field seperate to 3 field in ProductForm in __init__ and save func), also we use size in mymethods.PostDispatchPrice  to define which box size should choice for posting.
     #image_set                                                    backward relation field
     #comment_set
     #product_filter_attributes_set
@@ -310,7 +310,7 @@ class MDetailProduct(djongo_models.Model):
     #meta_title = djongo_models.CharField(_('meta title'), max_length=60, blank=True, default='')
     #meta_description = djongo_models.TextField(_('meta description'), validators=[MaxLengthValidator(160)], blank=True, default='')
     #brief_description = djongo_models.TextField(_('brief description'), validators=[MaxLengthValidator(1000)])
-    #detailed_description = RichTextUploadingField(_('detailed description'), blank=True, null=True)
+    #detailed_description = RichTextUploadingField(_('detailed description'), blank=True)
     #price = djongo_models.DecimalField(_('price'), max_digits=10, decimal_places=2, default=0) 
     #available = djongo_models.BooleanField(_('available'), default=False)
     objects = djongo_models.DjongoManager()
