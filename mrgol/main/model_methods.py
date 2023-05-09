@@ -49,7 +49,7 @@ def set_levels_afterthis_all_childes_id(previous_father_queryset, category_query
     previous_category = previous_father_queryset[0] if previous_father_queryset else None              #if previous_father_queryset, previous_father_queryset[0] raise error.  dont change previous_category variabe name, "recursive effect".
     if category:                        #for example in creating firt category.
         list_childes_id = [category.all_childes_id + f',{category.id}' if category.all_childes_id else f'{category.id}'][0].split(',')
-        previous_categories, categories  = [], []
+        previous_categories, categories = [], []
         if previous_category:
             updated_to_1level_category = True if category.level==1 and previous_category.level>1 else False                  #this will true when supose you have a category with level=4, now convert it to level=1, now category.category.father_category is None so we should handle program with this instead "previous_category.id != category.father_category.id"
             if delete or updated_to_1level_category or previous_category.id != category.father_category.id:                  #updated_to_1level_category must be before previous_category.id != category.father_category.id otherwise raise error

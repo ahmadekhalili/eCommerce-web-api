@@ -200,16 +200,15 @@ class BrandSerializer(serializers.ModelSerializer):
 
 
 class PostListSerializer(serializers.ModelSerializer):
-    published_date = serializers.SerializerMethodField() 
-    category = serializers.SerializerMethodField()
-    url = serializers.SerializerMethodField()                                 #showing solo str datas like 'url' before dict/list type datas like image_icone, category, author  is more readable and clear.
+    published_date = serializers.SerializerMethodField()
     image_icon = Image_iconSerializer()
     category = serializers.SerializerMethodField()
     author = serializers.SerializerMethodField()
-    
+    url = serializers.SerializerMethodField()                                 #showing solo str datas like 'url' before dict/list type datas like image_icone, category, author  is more readable and clear.
+
     class Meta:
         model = Post
-        fields = ['id', *g_t('title'), *g_t('slug'), *g_t('meta_title'), *g_t('meta_description'), *g_t('brief_description'), 'published_date', 'url', 'image_icon', 'category', 'author']
+        fields = ['id', *g_t('title'), *g_t('slug'), *g_t('meta_title'), *g_t('meta_description'), *g_t('brief_description'), 'published_date', 'image_icon', 'category', 'author', 'url']
 
     def get_image_icon(self, obj):
         request = self.context.get('request', None)
