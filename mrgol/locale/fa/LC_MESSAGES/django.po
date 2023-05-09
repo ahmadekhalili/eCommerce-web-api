@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-26 23:07+0330\n"
+"POT-Creation-Date: 2023-05-09 04:36+0330\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -57,29 +57,29 @@ msgstr "پنل ادمین"
 msgid "published date"
 msgstr "تاريخ انتشار"
 
-#: main/admin.py:156 main/models.py:256
+#: main/admin.py:155 main/models.py:256
 msgid "size"
 msgstr "اندازه"
 
-#: main/admin.py:160
+#: main/admin.py:159
 msgid "seo fields"
 msgstr "فیلد های سئو"
 
-#: main/admin.py:181 main/admin.py:192 main/models.py:247 orders/admin.py:137
+#: main/admin.py:180 main/admin.py:191 main/models.py:247 orders/admin.py:137
 #: orders/models.py:54
 msgid "created date"
 msgstr "تاریخ ایجاد"
 
-#: main/admin.py:186 main/admin.py:197 main/models.py:248
+#: main/admin.py:185 main/admin.py:196 main/models.py:248
 msgid "updated date"
 msgstr "تاریخ ویرایش"
 
 #: main/admin.py:388
-msgid "Sub menu"
+msgid "Sub category"
 msgstr "زیر منو"
 
 #: main/admin.py:389
-msgid "Sub menus"
+msgid "Sub categories"
 msgstr "زیر منوها"
 
 #: main/admin.py:396 orders/admin.py:41 orders/admin.py:101
@@ -88,7 +88,7 @@ msgstr "شناسه"
 
 #: main/admin.py:430 main/models.py:33 main/models.py:50 main/models.py:65
 #: main/models.py:143 main/models.py:238 main/models.py:421 main/models.py:434
-#: main/myforms.py:98
+#: main/myforms.py:105 main/myforms.py:106
 msgid "name"
 msgstr "نام"
 
@@ -136,12 +136,12 @@ msgstr "برند"
 msgid "brands"
 msgstr "برندها"
 
-#: main/models.py:67 main/myforms.py:80
+#: main/models.py:67 main/myforms.py:87
 msgid "level"
 msgstr "سطح"
 
-#: main/models.py:68 main/myforms.py:81
-msgid "father root"
+#: main/models.py:68 main/myforms.py:88
+msgid "father category"
 msgstr "منو پدر"
 
 #: main/models.py:71
@@ -154,22 +154,18 @@ msgstr "فيلتر"
 msgid "post or product"
 msgstr "کالا يا پست"
 
-#: main/models.py:80 main/myforms.py:46
-msgid "menu"
+#: main/models.py:80 main/models.py:113 main/models.py:127 main/models.py:211
+#: main/models.py:250 main/myforms.py:22 main/myforms.py:53
+msgid "category"
 msgstr "منو"
 
 #: main/models.py:81
-msgid "menus"
+msgid "categories"
 msgstr "منو ها"
 
 #: main/models.py:89
 msgid "This field is required for level more than 1."
 msgstr "برای سطح بالاتر از 1 اين قسمت ضروري است."
-
-#: main/models.py:113 main/models.py:127 main/models.py:211 main/models.py:250
-#: main/myforms.py:20
-msgid "root"
-msgstr "منو"
 
 #: main/models.py:114 main/models.py:145
 msgid "filter"
@@ -178,22 +174,22 @@ msgstr "فيلتر"
 #: main/models.py:117
 #, fuzzy
 #| msgid "Filter"
-msgid "Root Filter"
+msgid "Category Filter"
 msgstr "فيلتر"
 
 #: main/models.py:118 main/models.py:121
 #, fuzzy
 #| msgid "Filters"
-msgid "Root Filters"
+msgid "Category Filters"
 msgstr "فيلتر ها"
 
 #: main/models.py:131 main/models.py:135
-msgid "Root Brand"
-msgstr ""
+msgid "Category Brand"
+msgstr "برند"
 
 #: main/models.py:132
-msgid "Root Brands"
-msgstr ""
+msgid "Category Brands"
+msgstr "برندها"
 
 #: main/models.py:152 main/models.py:289
 msgid "Filter Attribute"
@@ -219,12 +215,12 @@ msgstr "رتبه بندي"
 msgid "Ratings"
 msgstr "رتبه بندي ها"
 
-#: main/models.py:181 main/models.py:357 main/models.py:372 main/myforms.py:123
+#: main/models.py:181 main/models.py:357 main/models.py:372 main/myforms.py:130
 msgid "image"
 msgstr "تصویر"
 
-#: main/models.py:182 main/models.py:358 main/models.py:373 main/myforms.py:48
-#: main/myforms.py:49 main/myforms.py:124
+#: main/models.py:182 main/models.py:358 main/models.py:373 main/myforms.py:55
+#: main/myforms.py:56 main/myforms.py:131 main/myforms.py:132
 msgid "alt"
 msgstr "توضيحات عکس"
 
@@ -260,7 +256,7 @@ msgstr "توضيحات مختصر"
 msgid "detailed description"
 msgstr "توضيحات مشروح"
 
-#: main/models.py:210 main/models.py:252 main/myforms.py:47
+#: main/models.py:210 main/models.py:252 main/myforms.py:54
 msgid "image icon"
 msgstr "تصوير آيکن"
 
@@ -297,7 +293,7 @@ msgstr "رتبه بندی"
 msgid "stock"
 msgstr "موجودی انبار"
 
-#: main/models.py:255 main/myforms.py:50 main/myforms.py:51
+#: main/models.py:255 main/myforms.py:57 main/myforms.py:58
 msgid "weight"
 msgstr "وزن"
 
@@ -366,7 +362,7 @@ msgstr "رد شده"
 msgid "deleted"
 msgstr "حذف شده"
 
-#: main/models.py:401 main/myforms.py:68
+#: main/models.py:401 main/myforms.py:75
 msgid "confirm status"
 msgstr "وضعيت تاييد"
 
@@ -415,31 +411,31 @@ msgstr "شهر"
 msgid "Towns"
 msgstr "شهرها"
 
-#: main/myforms.py:28
+#: main/myforms.py:30
 msgid "Image rate should be 1:1"
 msgstr "نسبت تصویر باید 1:1 باشد"
 
-#: main/myforms.py:29
+#: main/myforms.py:31
 msgid "weight in gram"
 msgstr "وزن بر حسب گرم"
 
-#: main/myforms.py:30
+#: main/myforms.py:32
 msgid "size in millimeter"
 msgstr "اندازه بر حسب میلیمتر"
 
-#: main/myforms.py:52
+#: main/myforms.py:59
 msgid "length"
 msgstr "طول"
 
-#: main/myforms.py:53
+#: main/myforms.py:60
 msgid "width"
 msgstr "عرض"
 
-#: main/myforms.py:54
+#: main/myforms.py:61
 msgid "height"
 msgstr "ارتفاع"
 
-#: main/myforms.py:95
+#: main/myforms.py:102
 msgid ""
 "name for quering. it should be unique. (it is equel to verbose_name of "
 "filter in most cases but can be difference. for example supose we have "
@@ -452,9 +448,15 @@ msgstr ""
 "سیستم عامل گوشی  نام جهت نمایش فیلتر 1: سیستم عامل  نام فیلتر 2: سیستم عامل "
 "لپتاپ  نام جهت نمایش فیلتر 2: سیستم عامل"
 
-#: main/myforms.py:96
+#: main/myforms.py:103
 msgid "name for showing to user. (it is equel to name of filter in most cases)"
 msgstr "نام جهت نمایش به کاربر. (در اکثر مواقع با نام فیلتر برابر است)"
+
+#: main/myforms.py:107 main/myforms.py:108
+#, fuzzy
+#| msgid "verbose name"
+msgid "verbose_name"
+msgstr "نام جهت نمایش"
 
 #: main/templates/admin/base.html:40
 msgid "Welcome,"
@@ -645,7 +647,7 @@ msgid "town"
 msgstr "شهر"
 
 #: orders/admin.py:87 orders/admin.py:122 orders/forms.py:46
-#: orders/models.py:25 orders/models.py:117 users/forms.py:18
+#: orders/models.py:25 orders/models.py:117 users/forms.py:19
 #: users/models.py:60
 msgid "address"
 msgstr "آدرس"
@@ -855,39 +857,9 @@ msgstr "اطلاعات داده شده جهت ورود صحیح نمی باشد.
 msgid "Must include phone and password."
 msgstr "شماره تلفن و پسورد باید وارد شوند."
 
-#: users/myserializers.py:102
+#: users/myserializers.py:104
 msgid "admin"
 msgstr "ادمین"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -1,7 +1,7 @@
 from django import forms
 
 from .BoundField_custom import CustomBoundField
-from main.models import Root, Town
+from main.models import Category, Town
 
 
 

@@ -10,7 +10,7 @@ from datetime import datetime
 import jdatetime
 
 from .models import *
-from .mymethods import get_root_and_fathers
+from .mymethods import get_category_and_fathers
 from users.models import User
 from users.myserializers import UserNameSerializer
 from users.myserializers import UserSerializer
@@ -82,23 +82,23 @@ class Image_iconSerializer(serializers.ModelSerializer):
 
 
 
-class RootChainedSerializer(serializers.ModelSerializer):         #this is used for chane roost like: 'digital' > 'phone' > 'sumsung'    
+class CategoryChainedSerializer(serializers.ModelSerializer):         #this is used for chane roost like: 'digital' > 'phone' > 'sumsung'
     class Meta:
-        model = Root
+        model = Category
         fields = [*g_t('name'), *g_t('slug')]
-#'/products/roots/detail/{}/{}/'.format(obj.id, slugify(obj.name, allow_unicode=True))
+#'/products/categories/detail/{}/{}/'.format(obj.id, slugify(obj.name, allow_unicode=True))
 
 
 
 
-class Sub2RootListSerializer(serializers.ModelSerializer):         #serialize roots with level=3
+class Sub2CategoryListSerializer(serializers.ModelSerializer):         #serialize categories with level=3
     str = serializers.SerializerMethodField()
     url = serializers.SerializerMethodField()
-    #child_roots = 'self'                                             #list just ids of childs.
+    #child_categories = 'self'                                             #list just ids of childs.
 
     class Meta:
-        model = Root
-        fields = ['id', *g_t('name'), *g_t('slug'), 'level', 'post_product', 'father_root', 'str', 'url']
+        model = Category
+        fields = ['id', *g_t('name'), *g_t('slug'), 'level', 'post_product', 'father_category', 'str', 'url']
 
     def get_str(self, obj):
         return obj.__str__()
@@ -110,14 +110,14 @@ class Sub2RootListSerializer(serializers.ModelSerializer):         #serialize ro
             return f'/posts/{obj.slug}/'
 
 
-class Sub1RootListSerializer(serializers.ModelSerializer):         #serialize roots with level=2
+class Sub1CategoryListSerializer(serializers.ModelSerializer):         #serialize categories with level=2
     str = serializers.SerializerMethodField()
     url = serializers.SerializerMethodField()
-    child_roots = Sub2RootListSerializer(many=True)
+    child_categories = Sub2CategoryListSerializer(many=True)
     
     class Meta:
-        model = Root
-        fields = ['id', *g_t('name'), *g_t('slug'), 'level', 'post_product', 'father_root', 'str', 'url', 'child_roots']      #for better displaying order we list all field.
+        model = Category
+        fields = ['id', *g_t('name'), *g_t('slug'), 'level', 'post_product', 'father_category', 'str', 'url', 'child_categories']      #for better displaying order we list all field.
 
     def get_str(self, obj):
         return obj.__str__()
@@ -129,14 +129,14 @@ class Sub1RootListSerializer(serializers.ModelSerializer):         #serialize ro
             return f'/posts/{obj.slug}/'
 
 
-class RootListSerializer(serializers.ModelSerializer):         #urs for products should be like: /products/?slug  and for post should be likst /posts/?slug   note RootListSerializer should be before PostListSerializer
+class CategoryListSerializer(serializers.ModelSerializer):         #urs for products should be like: /products/?slug  and for post should be likst /posts/?slug   note CategoryListSerializer should be before PostListSerializer
     str = serializers.SerializerMethodField()
     url = serializers.SerializerMethodField()
-    child_roots = Sub1RootListSerializer(many=True)
+    child_categories = Sub1CategoryListSerializer(many=True)
     
     class Meta:
-        model = Root
-        fields = ['id', *g_t('name'), *g_t('slug'), 'level', 'post_product', 'father_root', 'str', 'url', 'child_roots']      #for better displaying order we list all field.
+        model = Category
+        fields = ['id', *g_t('name'), *g_t('slug'), 'level', 'post_product', 'father_category', 'str', 'url', 'child_categories']      #for better displaying order we list all field.
 
     def get_str(self, obj):
         return obj.__str__()
@@ -201,15 +201,15 @@ class BrandSerializer(serializers.ModelSerializer):
 
 class PostListSerializer(serializers.ModelSerializer):
     published_date = serializers.SerializerMethodField() 
-    root = serializers.SerializerMethodField()
-    url = serializers.SerializerMethodField()                                 #showing solo str datas like 'url' before dict/list type datas like image_icone, root, author  is more readable and clear.
+    category = serializers.SerializerMethodField()
+    url = serializers.SerializerMethodField()                                 #showing solo str datas like 'url' before dict/list type datas like image_icone, category, author  is more readable and clear.
     image_icon = Image_iconSerializer()
-    root = serializers.SerializerMethodField()
+    category = serializers.SerializerMethodField()
     author = serializers.SerializerMethodField()
     
     class Meta:
         model = Post
-        fields = ['id', *g_t('title'), *g_t('slug'), *g_t('meta_title'), *g_t('meta_description'), *g_t('brief_description'), 'published_date', 'url', 'image_icon', 'root', 'author']
+        fields = ['id', *g_t('title'), *g_t('slug'), *g_t('meta_title'), *g_t('meta_description'), *g_t('brief_description'), 'published_date', 'url', 'image_icon', 'category', 'author']
 
     def get_image_icon(self, obj):
         request = self.context.get('request', None)
@@ -224,9 +224,9 @@ class PostListSerializer(serializers.ModelSerializer):
         shamsi_date = jdatetime.datetime.fromgregorian(datetime=d_t).strftime('%Y %B %-d').split()
         return f'{shamsi_date[2]} {shamsi_date[1]} {shamsi_date[0]}، ساعت {d_t.hour}:{d_t.minute}'
     
-    def get_root(self, obj):                                        #we must create form like: <form method="get" action="/posts/?obj.root.slug"> .  note form must shown as link.
+    def get_category(self, obj):                                        #we must create form like: <form method="get" action="/posts/?obj.category.slug"> .  note form must shown as link.
         pk, slug = obj.id, obj.slug
-        name, url = (obj.root.name, f'/posts/{obj.root.slug}/') if obj.root else ('', '')       #post.root has null=True so this field can be blank like when you remove and root.
+        name, url = (obj.category.name, f'/posts/{obj.category.slug}/') if obj.category else ('', '')       #post.category has null=True so this field can be blank like when you remove and category.
         return {'name': name, 'url': url}
 
     def get_author(self, obj):
@@ -247,7 +247,7 @@ class ProductListSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Product
-        fields = ['id', *g_t('name'), *g_t('slug'), *g_t('meta_title'), *g_t('meta_description'), *g_t('brief_description'), *g_t('price'), *g_t('available'), 'image_icon', 'rating', 'url']       #visible, filter_attributes, root are filtered(removed) here.
+        fields = ['id', *g_t('name'), *g_t('slug'), *g_t('meta_title'), *g_t('meta_description'), *g_t('brief_description'), *g_t('price'), *g_t('available'), 'image_icon', 'rating', 'url']       #visible, filter_attributes, category are filtered(removed) here.
 
     def get_rating(self, obj):
         rate = obj.rating.rate
@@ -263,7 +263,7 @@ class ProductListSerializer(serializers.ModelSerializer):
 class PostDetailSerializer(serializers.ModelSerializer):
     published_date = serializers.SerializerMethodField() 
     author = UserNameSerializer()
-    root = serializers.SerializerMethodField() 
+    category = serializers.SerializerMethodField()
     comment_set = CommentSerializer(read_only=True, many=True)
 
     class Meta:
@@ -275,16 +275,16 @@ class PostDetailSerializer(serializers.ModelSerializer):
         shamsi_date = jdatetime.datetime.fromgregorian(datetime=d_t).strftime('%Y %B %-d').split()
         return f'{shamsi_date[2]} {shamsi_date[1]} {shamsi_date[0]}، ساعت {d_t.hour}:{d_t.minute}'
     
-    def get_root(self, obj):                                     #we must create form like: <form method="get" action="/posts/?obj.root.slug"> .  note form must shown as link. you can put that form in above of that post.
+    def get_category(self, obj):                                     #we must create form like: <form method="get" action="/posts/?obj.category.slug"> .  note form must shown as link. you can put that form in above of that post.
         pk, slug = obj.id, obj.slug
-        name, url = (obj.root.name, f'/posts/{obj.root.slug}/') if obj.root else ('', '')       #post.root has null=True so this field can be blank like when you remove and root.
+        name, url = (obj.category.name, f'/posts/{obj.category.slug}/') if obj.category else ('', '')       #post.category has null=True so this field can be blank like when you remove and category.
         return {'name': name, 'url': url}
 
 
 
 
 class ProductDetailSerializer(serializers.ModelSerializer):       # important: for saving we should first switch to `en` language by:  django.utils.translation.activate('en').    comment_set will optained by front in other place so we deleted from here.   more description:  # all keys should save in database in `en` laguage(for showing data you can select eny language) otherwise it was problem understading which language should select to run query on them like in:  s = myserializers.ProductDetailMongoSerializer(form.instance, context={'request': request}).data['shopfilteritems']:     {'رنگ': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} it is false for saving, we should change language by  `activate('en')` and now true form for saving:  {'color': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} and query like: s['color']
-    roots = serializers.SerializerMethodField()
+    categories = serializers.SerializerMethodField()
     brand = serializers.SerializerMethodField()
     rating = serializers.SerializerMethodField()
     smallimages = SmallImageSerializer(many=True)
@@ -294,17 +294,17 @@ class ProductDetailSerializer(serializers.ModelSerializer):       # important: f
 
     class Meta:
         model = Product
-        fields = ['id', *g_t('name'), *g_t('slug'), *g_t('meta_title'), *g_t('meta_description'), *g_t('brief_description'), *g_t('detailed_description'), *g_t('price'), *g_t('available'), 'roots', 'rating', *g_t('stock'), 'brand', *g_t('weight'), 'smallimages', 'comment_count', 'shopfilteritems', 'related_products']
+        fields = ['id', *g_t('name'), *g_t('slug'), *g_t('meta_title'), *g_t('meta_description'), *g_t('brief_description'), *g_t('detailed_description'), *g_t('price'), *g_t('available'), 'categories', 'rating', *g_t('stock'), 'brand', *g_t('weight'), 'smallimages', 'comment_count', 'shopfilteritems', 'related_products']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         request = self.context.get('request')
         self.fields['smallimages'].context['request'] = request
 
-    def get_roots(self, obj):
-        root_and_fathers = get_root_and_fathers(obj.root)
-        root_and_fathers.reverse()                           #to fixing display order in front we reversed!!
-        return RootChainedSerializer(root_and_fathers, many=True).data           
+    def get_categories(self, obj):
+        category_and_fathers = get_category_and_fathers(obj.category)
+        category_and_fathers.reverse()                           #to fixing display order in front we reversed!!
+        return CategoryChainedSerializer(category_and_fathers, many=True).data
 
     def get_brand(self, obj):
         return obj.brand.name
@@ -326,11 +326,11 @@ class ProductDetailSerializer(serializers.ModelSerializer):       # important: f
 
     def get_related_products(self, obj):
         request = self.context.get('request', None)
-        related_products = Product.objects.filter(root=obj.root, visible=True).exclude(id=obj.id)[0:10] if obj.root else []
-        if len(related_products) < 5 and obj.root and obj.root.father_root:                 #we must care obj.root had father_root 
-            child_roots = obj.root.father_root.child_roots.values_list('id')      #child_roots is like [(6,) , (7,)]
-            child_roots_ids = [root[0] for root in child_roots]
-            related_products = Product.objects.filter(root_id__in=child_roots_ids, visible=True).exclude(id=obj.id)[0:10-len(related_products)]
+        related_products = Product.objects.filter(category=obj.category, visible=True).exclude(id=obj.id)[0:10] if obj.category else []
+        if len(related_products) < 5 and obj.category and obj.category.father_category:                 #we must care obj.category had father_category
+            child_categories = obj.category.father_category.child_categories.values_list('id')      #child_categories is like [(6,) , (7,)]
+            child_categories_ids = [category[0] for category in child_categories]
+            related_products = Product.objects.filter(category_id__in=child_categories_ids, visible=True).exclude(id=obj.id)[0:10-len(related_products)]
 
         related_serialized = []
         for product in related_products:

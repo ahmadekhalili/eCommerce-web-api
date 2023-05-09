@@ -24,7 +24,7 @@ from customed_files.date_convertor import MiladiToShamsi
 from users.models import User
 # note1: changing classes places may raise error when creating tables(makemigrations), for example changing Content with Post will raise error(Content use Post in its field and shuld be definded after Post)
 # note2: if you add or remove a field, you should apply it in traslation.py 'fields' if was required.
-# note3: if you make changes in Product or it's related objects (etc. Brand, Root, ...) you should apply changes to it's serialisers like ProductListSerializer, ProductDetailMongoSerializer and mongo product saving (in admin.py) if required.
+# note3: if you make changes in Product or it's related objects (etc. Brand, Category, ...) you should apply changes to it's serialisers like ProductListSerializer, ProductDetailMongoSerializer and mongo product saving (in admin.py) if required.
 
 
 group_choices = [(key, str(key)) for key in range(1, 11)]
@@ -34,7 +34,7 @@ class Filter(models.Model):
     verbose_name = models.CharField(_('verbose name'), max_length=25)     # name for showing. (to user).  for example you have two filter with names: "system amel goshi", "system amele laptop" but both of them have 'system amel' as verbose name.
     #selling = models.BooleanField(_('selling filter'), default=False)
     #filter_attributes
-    #root_set
+    #category_set
 
     class Meta:
         verbose_name = _('Filter')
@@ -49,7 +49,7 @@ class Filter(models.Model):
 class Brand(models.Model):
     name = models.CharField(_('name'), max_length=25, null=True, blank=True)
     slug = models.SlugField(_('slug'), allow_unicode=True, null=True, blank=True, db_index=False)
-    #root_set
+    #category_set
 
     class Meta:
         verbose_name = _('brand')
@@ -61,80 +61,80 @@ class Brand(models.Model):
 
 
 
-class Root(models.Model):                                  #note: supose roor2 object,  root2.father_root determine father of root2 and root2.child_roots is list of root2's childer,  root with level=1 can has eny father!
+class Category(models.Model):                                  #note: supose roor2 object,  category2.father_category determine father of category2 and category2.child_categories is list of category2's childer,  category with level=1 can has eny father!
     name = models.CharField(_('name'), unique=True, max_length=50)
     slug = models.SlugField(_('slug'), allow_unicode=True, db_index=False)
-    level = models.PositiveSmallIntegerField(_('level'), default=1, validators=[MinValueValidator(1), MaxValueValidator(6)])        #important: in main/views/ProductRootList & ProductDetail and in main/mymethods/get_posts_products_by_root   we used MaxValueValidator with its posation in validator, so validator[1] must be MaxValueValidator otherwise will raise error.
-    father_root = models.ForeignKey('self', related_name='child_roots', related_query_name='childs', null=True, blank=True, on_delete=models.CASCADE, verbose_name=_('father root'))        #if root.level>1 will force to filling this field.
-    levels_afterthis = models.PositiveSmallIntegerField(default=0, blank=True)                         #in field neshan midahad chand sath farzand darad in pedar, masalam: <root(1) digital>,  <root(2) mobail>,  <root(3) samsung> farz konid mobail pedare samsung,  digital pedare mobail ast(<root(1) digital>.level=1,  <root(2) mobail>.level=2,  <root(3) samsung>.level=3)   . bala sare digital dar in mesal 2 sath farzand mibashad( mobail va samsung pas <root(1) digital>.levels_afterthis = 2   va <root(2) mobail>.levels_afterthis=1  va <root(3) samsung>.levels_afterthis=0
-    previous_father_id = models.PositiveSmallIntegerField(null=True, blank=True)                         #supose you change root.father_root, we cant understant prevouse father was what in Root.save(ony new edited father_root is visible) so we added this field
-    filters = models.ManyToManyField(Filter, through='Root_Filters', blank=True, verbose_name=_('filters'))
-    brands = models.ManyToManyField(Brand, through='Root_Brands', blank=True, verbose_name=_('brands'))
-    all_childes_id = models.TextField(default='', blank=True)                      #list all chiles of that object in this structure: "1,2,3,4"    if this field name was chiles_id maybe raise problem with related_query_name of father_root or other.
+    level = models.PositiveSmallIntegerField(_('level'), default=1, validators=[MinValueValidator(1), MaxValueValidator(6)])        #important: in main/views/ProductCategoryList & ProductDetail and in main/mymethods/get_posts_products_by_category   we used MaxValueValidator with its posation in validator, so validator[1] must be MaxValueValidator otherwise will raise error.
+    father_category = models.ForeignKey('self', related_name='child_categories', related_query_name='childs', null=True, blank=True, on_delete=models.CASCADE, verbose_name=_('father category'))        #if category.level>1 will force to filling this field.
+    levels_afterthis = models.PositiveSmallIntegerField(default=0, blank=True)                         #in field neshan midahad chand sath farzand darad in pedar, masalam: <category(1) digital>,  <category(2) mobail>,  <category(3) samsung> farz konid mobail pedare samsung,  digital pedare mobail ast(<category(1) digital>.level=1,  <category(2) mobail>.level=2,  <category(3) samsung>.level=3)   . bala sare digital dar in mesal 2 sath farzand mibashad( mobail va samsung pas <category(1) digital>.levels_afterthis = 2   va <category(2) mobail>.levels_afterthis=1  va <category(3) samsung>.levels_afterthis=0
+    previous_father_id = models.PositiveSmallIntegerField(null=True, blank=True)                         #supose you change category.father_category, we cant understant prevouse father was what in Category.save(ony new edited father_category is visible) so we added this field
+    filters = models.ManyToManyField(Filter, through='Category_Filters', blank=True, verbose_name=_('filters'))
+    brands = models.ManyToManyField(Brand, through='Category_Brands', blank=True, verbose_name=_('brands'))
+    all_childes_id = models.TextField(default='', blank=True)                      #list all chiles of that object in this structure: "1,2,3,4"    if this field name was chiles_id maybe raise problem with related_query_name of father_category or other.
     post_product = models.CharField(_('post or product'), max_length=10, default='product')      #this should be radio button in admin panel.
-    #child_roots
+    #child_categories
     #product_set
 
     class Meta:
-        ordering = ('level',)                    #main/views/ProductList/sidebarmenu_link affect order of Root.  ('level', '-father_root_id') '-father_root_id' make in ProductRootList products order from last to first (reverse order) -father_root_id  will make childs with same father be in together. and '-' will make decending order like ordering django admin for 'order by ids' means lower ids will go to down.(tested)
-        verbose_name = _('menu')
-        verbose_name_plural = _('menus')
+        ordering = ('level',)                    #main/views/ProductList/sidebarcategory_link affect order of Category.  ('level', '-father_category_id') '-father_category_id' make in ProductCategoryList products order from last to first (reverse order) -father_category_id  will make childs with same father be in together. and '-' will make decending order like ordering django admin for 'order by ids' means lower ids will go to down.(tested)
+        verbose_name = _('category')
+        verbose_name_plural = _('categories')
     
     def __str__(self):
         return str(self.level) + ' - ' + self.name
     
     def clean_fields(self, exclude=None):
-        if self.level:                                                   #why we put this line?  answer: in adding root, self.father_root is None and raise erro if: 'self.level > 1' 
-            if self.level > 1 and not self.father_root:                  #other conditions will control by form eazy (for example if self.level==1 father_root must be None)
-                raise ValidationError({'father_root': [_('This field is required for level more than 1.')]})
+        if self.level:                                                   #why we put this line?  answer: in adding category, self.father_category is None and raise erro if: 'self.level > 1'
+            if self.level > 1 and not self.father_category:                  #other conditions will control by form eazy (for example if self.level==1 father_category must be None)
+                raise ValidationError({'father_category': [_('This field is required for level more than 1.')]})
         super().clean_fields(exclude=None)
 
     def save(self, *args, **kwargs):
-        previous_father_queryset = Root.objects.filter(id=self.previous_father_id).select_related('father_root__'*4+'father_root') if self.previous_father_id else None
-        self.previous_father_id = self.father_root_id if self.father_root_id else None
+        previous_father_queryset = Category.objects.filter(id=self.previous_father_id).select_related('father_category__'*4+'father_category') if self.previous_father_id else None
+        self.previous_father_id = self.father_category_id if self.father_category_id else None
         super().save(*args, **kwargs)
-        root_queryset = Root.objects.filter(id=self.id).select_related('father_root__'*5+'father_root')    #instead using 6 logn father_root we used more breafer format!      
+        category_queryset = Category.objects.filter(id=self.id).select_related('father_category__'*5+'father_category')    #instead using 6 logn father_category we used more breafer format!
         
-        roots_before_join, roots_after_join = set_levels_afterthis_all_childes_id(previous_father_queryset, root_queryset, Root._meta.get_field('level').validators[1].limit_value) 
-        Root.objects.bulk_update(roots_before_join, ['levels_afterthis', 'all_childes_id']) if roots_before_join else None     
-        Root.objects.bulk_update(roots_after_join, ['levels_afterthis', 'all_childes_id']) if roots_after_join else None
+        categories_before_join, categories_after_join = set_levels_afterthis_all_childes_id(previous_father_queryset, category_queryset, Category._meta.get_field('level').validators[1].limit_value)
+        Category.objects.bulk_update(categories_before_join, ['levels_afterthis', 'all_childes_id']) if categories_before_join else None
+        Category.objects.bulk_update(categories_after_join, ['levels_afterthis', 'all_childes_id']) if categories_after_join else None
 
     def delete(self, using=None, keep_parents=False):
         id = self.id
         dell = super().delete(using, keep_parents)
-        previous_father_queryset = Root.objects.filter(id=self.father_root_id).select_related('father_root__'*5+'father_root') if self.father_root_id else None
-        self.id, self.father_root, self.father_root_id = id, None, None                                               #we need self.id in list_childes_id
-        roots_before_join, roots_after_join = set_levels_afterthis_all_childes_id(previous_father_queryset, [self], Root._meta.get_field('level').validators[1].limit_value, delete=True) 
-        Root.objects.bulk_update(roots_before_join, ['levels_afterthis', 'all_childes_id']) if roots_before_join else None 
+        previous_father_queryset = Category.objects.filter(id=self.father_category_id).select_related('father_category__'*5+'father_category') if self.father_category_id else None
+        self.id, self.father_category, self.father_category_id = id, None, None                                               #we need self.id in list_childes_id
+        categories_before_join, categories_after_join = set_levels_afterthis_all_childes_id(previous_father_queryset, [self], Category._meta.get_field('level').validators[1].limit_value, delete=True)
+        Category.objects.bulk_update(categories_before_join, ['levels_afterthis', 'all_childes_id']) if categories_before_join else None
         return dell
 
 
-class Root_Filters(models.Model):
-    root = models.ForeignKey(Root, on_delete=models.CASCADE, verbose_name=_('root'))
+class Category_Filters(models.Model):
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name=_('category'))
     filter = models.ForeignKey(Filter, on_delete=models.CASCADE, verbose_name=_('filter'))
 
     class Meta:
-        verbose_name = _('Root Filter')
-        verbose_name_plural = _('Root Filters')
+        verbose_name = _('Category Filter')
+        verbose_name_plural = _('Category Filters')
 
     def __str__(self):
-        return _('Root Filters') + str(self.id)
+        return _('Category Filters') + str(self.id)
 
-Root_Filters._meta.auto_created = True                        #if you dont put this you cant use filter_horizontal in admin.py for  Filter.roots or other manytomany fields that use Filter_Roots.
+Category_Filters._meta.auto_created = True                        #if you dont put this you cant use filter_horizontal in admin.py for  Filter.categories or other manytomany fields that use Filter_Categories.
 
 
-class Root_Brands(models.Model):
-    root = models.ForeignKey(Root, on_delete=models.CASCADE, verbose_name=_('root'))
+class Category_Brands(models.Model):
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name=_('category'))
     brand = models.ForeignKey(Brand, on_delete=models.CASCADE, verbose_name=_('brand'))
 
     class Meta:
-        verbose_name = _('Root Brand')
-        verbose_name_plural = _('Root Brands')
+        verbose_name = _('Category Brand')
+        verbose_name_plural = _('Category Brands')
 
     def __str__(self):
-        return _('Root Brand') + str(self.id)
+        return _('Category Brand') + str(self.id)
 
-Root_Brands._meta.auto_created = True
+Category_Brands._meta.auto_created = True
 
 
 
@@ -208,7 +208,7 @@ class Post(models.Model):
     visible = models.BooleanField(_('delete'), default=True)
     published_date = models.DateTimeField(_('published date'), auto_now_add=True)
     image_icon = models.OneToOneField(Image_icon, on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('image icon'))
-    root = models.ForeignKey(Root, on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('root'))
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('category'))
     author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('author'))
     #comment_set                                                   #backward relation
 
@@ -247,7 +247,7 @@ class Product(models.Model):                                     #.order_by('-av
     created = models.DateTimeField(_('created date'), auto_now_add=True)
     updated = models.DateTimeField(_('updated date'), auto_now=True)
     filter_attributes = models.ManyToManyField(Filter_Attribute, through='Product_Filter_Attributes', blank=True, verbose_name=_('filter attributes'))
-    root = models.ForeignKey(Root, on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('root'))
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('category'))
     brand = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('brand'))          # brand field as CharField is not logical and should be ForeignKey why? because for example in adding product1 we may add brand "nokia" and in second product2 add "Nokia". when products increased (supose more than 100) it will raise real problems
     image_icon = models.OneToOneField(Image_icon, on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('image icon'))     #in home page(page that list of product shown) dont query product.image_set.all()[0] for showing one image of product, instead query product.image_icon   (more fster)
     rating = models.OneToOneField(Rating, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('rating'))
@@ -273,11 +273,11 @@ class Product(models.Model):                                     #.order_by('-av
     def save(self, *args, **kwargs):
         create_Rating = True if not self.pk else False                                     #when you create new object like p = product(..)  p.save()   self.pk here is None
         self.available = False if self.stock < 1 else True                                 #self.available should always folow self.stock value not reverse, means if admin select stock=0 our availlable should be False, but puting availabe false cant make our stock=0, stock has priority and its logical.
-        from main.signals import FillRootfilters_brands
+        from main.signals import FillCategoryfilters_brands
         pre_product = Product.objects.get(id=self.id) if self.id else None
-        FillRootfilters_brands.pre_root, FillRootfilters_brands.pre_brand_id = (pre_product.root, pre_product.brand_id) if pre_product else (None, None)
+        FillCategoryfilters_brands.pre_category, FillCategoryfilters_brands.pre_brand_id = (pre_product.category, pre_product.brand_id) if pre_product else (None, None)
         super().save(*args, **kwargs)
-        FillRootfilters_brands.root_brand_changed(self)
+        FillCategoryfilters_brands.category_brand_changed(self)
         if create_Rating:
             r = Rating.objects.create()
             self.rating = r
@@ -297,7 +297,7 @@ class Product_Filter_Attributes(models.Model):
 
 Product_Filter_Attributes._meta.auto_created = True
 
-from main.signals import FillRootfilters_brands         # this cause "m2m_changed.connect(filter_attributes_changed, sender=Product.filter_attributes.through)" loads here. changing Root.brands Root.filters automatically related to several fields, one of them is product.filter_attributes, we collected all related fields to one class 'FillRootfilters_bradns to clearer structure and design.
+from main.signals import FillCategoryfilters_brands         # this cause "m2m_changed.connect(filter_attributes_changed, sender=Product.filter_attributes.through)" loads here. changing Category.brands Category.filters automatically related to several fields, one of them is product.filter_attributes, we collected all related fields to one class 'FillCategoryfilters_bradns to clearer structure and design.
 
 
 

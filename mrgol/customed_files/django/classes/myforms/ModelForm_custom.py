@@ -23,8 +23,8 @@ class ProductModelForm(forms.ModelForm):
             
         if 'filter_attributes' in error:
             del error['filter_attributes']
-        if 'root' in error:
-            del error['root']
+        if 'category' in error:
+            del error['category']
             
         for field, error_list in error.items():
             if field not in self.errors:

@@ -5,7 +5,7 @@ from django.contrib.admin.widgets import AdminTextInputWidget, RelatedFieldWidge
 import json
 
 from . import myserializers
-from .models import Product, Root, Filter, Filter_Attribute
+from .models import Product, Category, Filter, Filter_Attribute
 from .mymethods import make_next
 
 
@@ -58,7 +58,7 @@ class filter_attributes_widget(forms.Select):
 
         filters = list(Filter.objects.prefetch_related('filter_attributes'))               #if dont use list, using filters again, reevaluate filters and query again to database!
         filters_attributes = []
-        for filter in filters:                 #in this part we want create dynamicly options inside <select ..> </select>  for field root.level depend on validators we define in PositiveSmallIntegerField(validators=[here]) for example if we have MinValueValidator(1) MaxValueValidator(3) we have 3 options: <option value="1"> 1 </option>   <option value="2"> 2 </option>   <option value="3"> 3 </option>                   
+        for filter in filters:                 #in this part we want create dynamicly options inside <select ..> </select>  for field category.level depend on validators we define in PositiveSmallIntegerField(validators=[here]) for example if we have MinValueValidator(1) MaxValueValidator(3) we have 3 options: <option value="1"> 1 </option>   <option value="2"> 2 </option>   <option value="3"> 3 </option>
             filters_attributes += [json.dumps([serializer for serializer in myserializers.Filter_AttributeListSerializer(filter.filter_attributes.all(), many=True).data])]
         two_select_context['filters_filters_attributes'] = list(zip(filters, filters_attributes))
         two_select_context['range_filters'] = '1:{}'.format(len(filters)) if len(filters)>=1 else '1:1'            #ff len(filter)==0  '1:0' will make error in our program.
@@ -83,33 +83,33 @@ class filter_attributes_widget(forms.Select):
 
 
 
-class product_root_widget(forms.Select):
-    template_name = 'main/widgets/product/root_two_select.html'
+class product_category_widget(forms.Select):
+    template_name = 'main/widgets/product/category_two_select.html'
     
     def get_context(self, name, value, attrs):
         two_select_context = super().get_context(name, value, attrs)
 
-        roots = list(Root.objects.all())
-        roots_level_range = list(range(roots[0].level, roots[-1].level+1)) if roots else []        #if we have not eny root in db return [].
-        roots_by_level = []
-        for i in roots_level_range:
-            same_roots = []
-            for root in roots:                             
-                if root.level == i:
-                    same_roots += [root]
-            roots_by_level += [same_roots]
-        rootsbyleveljs_levels = []
-        for same_roots in roots_by_level:
-            rootsbyleveljs_levels += [[json.dumps([serializer for serializer in myserializers.RootListSerializer(same_roots, many=True).data]), same_roots[0].level]]
-        two_select_context['roots_level_range'] = roots_level_range
-        two_select_context['rootsbyleveljs_levels'] = rootsbyleveljs_levels
-        two_select_context['range_1'] = '1:{}'.format(len(rootsbyleveljs_levels))
+        categories = list(Category.objects.all())
+        categories_level_range = list(range(categories[0].level, categories[-1].level+1)) if categories else []        #if we have not eny category in db return [].
+        categories_by_level = []
+        for i in categories_level_range:
+            same_categories = []
+            for category in categories:
+                if category.level == i:
+                    same_categories += [category]
+            categories_by_level += [same_categories]
+        categoriesbyleveljs_levels = []
+        for same_categories in categories_by_level:
+            categoriesbyleveljs_levels += [[json.dumps([serializer for serializer in myserializers.CategoryListSerializer(same_categories, many=True).data]), same_categories[0].level]]
+        two_select_context['categories_level_range'] = categories_level_range
+        two_select_context['categoriesbyleveljs_levels'] = categoriesbyleveljs_levels
+        two_select_context['range_1'] = '1:{}'.format(len(categoriesbyleveljs_levels))
         two_select_context['selected_level_range'] = -1
-        two_select_context['selected_root_id'] = -1
+        two_select_context['selected_category_id'] = -1
             
-        if value.id and value.root:
-            two_select_context['selected_level_range'] = value.root.level
-            two_select_context['selected_root_id'] = value.root.id
+        if value.id and value.category:
+            two_select_context['selected_level_range'] = value.category.level
+            two_select_context['selected_category_id'] = value.category.id
             
         return two_select_context
 
@@ -150,21 +150,21 @@ class confermer_widget(forms.widgets.Input):
 
 
 class level_widget(forms.Select):
-    template_name = 'main/widgets/root_level.html'
+    template_name = 'main/widgets/category_level.html'
 
     def get_context(self, name, value, attrs):
-        roots = list(Root.objects.all())
+        categories = list(Category.objects.all())
         context = super().get_context(name, value, attrs)
-        if roots:
-            max_level = Root._meta.get_field('level').validators[1].limit_value
-            highest_level = roots[-1].level
+        if categories:
+            max_level = Category._meta.get_field('level').validators[1].limit_value
+            highest_level = categories[-1].level
             if highest_level < max_level:
-                roots_level_range = list(range(roots[0].level, highest_level+2))           #why we choiced this type structure? supose we want add this tree: <kala barqi>(level=1)  >>  <kala digital>(level=2)  >>  <mobai>(level=3)  >>  <samsung>(level=4)   and now we added <kala barqi>(level=1) via panle admin and want add three others, panel admin in this time in level field show us 1, 2  in fact our program prevent user from creation objects with jumping level!!!
+                categories_level_range = list(range(categories[0].level, highest_level+2))           #why we choiced this type structure? supose we want add this tree: <kala barqi>(level=1)  >>  <kala digital>(level=2)  >>  <mobai>(level=3)  >>  <samsung>(level=4)   and now we added <kala barqi>(level=1) via panle admin and want add three others, panel admin in this time in level field show us 1, 2  in fact our program prevent user from creation objects with jumping level!!!
             else:
-                roots_level_range = list(range(1, max_level+1))                            #when program come to here? when you created root with latest posible level, for example if max_level=1  after creating first root program come to here or when max_level=3 after creating these: <kala digital>(level=1)  >>  <mobai>(level=2)  >>  <samsung>(level=3)    program come to this so it should list complete levels for us.
+                categories_level_range = list(range(1, max_level+1))                            #when program come to here? when you created category with latest posible level, for example if max_level=1  after creating first category program come to here or when max_level=3 after creating these: <kala digital>(level=1)  >>  <mobai>(level=2)  >>  <samsung>(level=3)    program come to this so it should list complete levels for us.
         else:
-            roots_level_range = [1]                                                        #if we have not eny root in db return [1].
-        context['roots_level_range'] = roots_level_range
+            categories_level_range = [1]                                                        #if we have not eny category in db return [1].
+        context['categories_level_range'] = categories_level_range
         context['selected_level_range'] = -1
 
         if value.id:
@@ -173,30 +173,30 @@ class level_widget(forms.Select):
         return context
 
 
-class father_root_widget(forms.Select):
-    template_name = 'main/widgets/root_father_root.html'
+class father_category_widget(forms.Select):
+    template_name = 'main/widgets/category_father_category.html'
 
     def get_context(self, name, value, attrs):
-        two_select_context = super().get_context(name, value.father_root_id, attrs)
+        two_select_context = super().get_context(name, value.father_category_id, attrs)
 
-        roots = list(Root.objects.exclude(id=value.id))
-        roots_level_range = list(range(roots[0].level, roots[-1].level+1)) if roots else []        #we we have not eny root in db return [].
-        roots_by_level = []
-        for i in roots_level_range:
-            same_roots = []
-            for root in roots:                             
-                if root.level == i:
-                    same_roots += [root]
-            if same_roots:                                                  #note it is possible empty same_roots(when  like you have not roots level=2 but roots_level_range is [1, 2, 3, 4]) and we must avoid adding empty same_roots because in like: same_roots[0] raise error.
-                roots_by_level += [same_roots]
-        rootsbyleveljs_levels = []
-        for same_roots in roots_by_level:
-            rootsbyleveljs_levels += [[json.dumps([serializer for serializer in myserializers.RootListSerializer(same_roots, many=True).data]), same_roots[0].level+1]]
-        two_select_context['rootsbyleveljs_levels'] = rootsbyleveljs_levels
-        two_select_context['selected_root_id'] = -1
+        categories = list(Category.objects.exclude(id=value.id))
+        categories_level_range = list(range(categories[0].level, categories[-1].level+1)) if categories else []        #we we have not eny category in db return [].
+        categories_by_level = []
+        for i in categories_level_range:
+            same_categories = []
+            for category in categories:
+                if category.level == i:
+                    same_categories += [category]
+            if same_categories:                                                  #note it is possible empty same_categories(when  like you have not categories level=2 but categories_level_range is [1, 2, 3, 4]) and we must avoid adding empty same_categories because in like: same_categories[0] raise error.
+                categories_by_level += [same_categories]
+        categoriesbyleveljs_levels = []
+        for same_categories in categories_by_level:
+            categoriesbyleveljs_levels += [[json.dumps([serializer for serializer in myserializers.CategoryListSerializer(same_categories, many=True).data]), same_categories[0].level+1]]
+        two_select_context['categoriesbyleveljs_levels'] = categoriesbyleveljs_levels
+        two_select_context['selected_category_id'] = -1
 
-        if value.father_root_id:
-            two_select_context['selected_root_id'] = value.father_root_id
+        if value.father_category_id:
+            two_select_context['selected_category_id'] = value.father_category_id
 
         return two_select_context
 

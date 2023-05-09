@@ -27,7 +27,7 @@ from customed_files.django.classes.custom_ModelAdmin import CustModelAdmin
 from . import myserializers
 from . import myforms
 from .models import *
-from .mymethods import make_next, get_root_and_fathers
+from .mymethods import make_next, get_category_and_fathers
 from .mycontexts import PROJECT_VERBOSE_NAME
 from .model_methods import set_levels_afterthis_all_childes_id
 
@@ -150,7 +150,7 @@ class ProductAdmin(CustModelAdmin):
     alt = g_t('alt')
     fieldsets = (
         (None, {
-            'fields': ('name', 'slug', 'brief_description', 'detailed_description', 'price', 'available', 'image', *alt, 'root', 'filter_attributes', 'rating', 'stock', 'brand', 'weight', 'get_created', 'get_updated')
+            'fields': ('name', 'slug', 'brief_description', 'detailed_description', 'price', 'available', 'image', *alt, 'category', 'filter_attributes', 'rating', 'stock', 'brand', 'weight', 'get_created', 'get_updated')
         }),
         (_('size'), {
             'classes': ('collapse',),
@@ -238,7 +238,7 @@ class ProductAdmin(CustModelAdmin):
             s = myserializers.ProductDetailMongoSerializer(form.instance, context={'request': request}).data
             content = JSONRenderer().render(s)
             stream = io.BytesIO(content)
-            data = {**JSONParser().parse(stream), **data}                           # s is like: {'id': 12, 'name': 'test2', 'slug': 'test2', ...., 'roots': [OrderedDict([('name', 'Workout'), ('slug', 'Workout')])]} and 'OrderedDict' will cease raise error when want save in mongo so we fixed it in data, so data is like:  {'id': 12, 'name': 'test', 'slug': 'test', ...., 'roots': [{'name': 'Workout', 'slug': 'Workout'}]}   note in Response(some_serializer) some_serializer will fixed auto by Response class like our way
+            data = {**JSONParser().parse(stream), **data}                           # s is like: {'id': 12, 'name': 'test2', 'slug': 'test2', ...., 'categories': [OrderedDict([('name', 'Workout'), ('slug', 'Workout')])]} and 'OrderedDict' will cease raise error when want save in mongo so we fixed it in data, so data is like:  {'id': 12, 'name': 'test', 'slug': 'test', ...., 'categories': [{'name': 'Workout', 'slug': 'Workout'}]}   note in Response(some_serializer) some_serializer will fixed auto by Response class like our way
             MDetailProduct(id=data['id'], json=data).save(using='mongo')
         else:
             s = myserializers.ProductDetailMongoSerializer(form.instance, context={'request': request}).data
@@ -263,7 +263,7 @@ class ProductAdmin(CustModelAdmin):
         selectname_filters, selectid_filters, selectname_filter_attributes, selectid_filter_attributes = [], [], [], []
         filters = list(Filter.objects.prefetch_related('filter_attributes'))               #if dont use list, using filters again, reevaluate filters and query again to database!
         filters_attributes = []
-        for filter in filters:                 #in this part we want create dynamicly options inside <select ..> </select>  for field root.level depend on validators we define in PositiveSmallIntegerField(validators=[here]) for example if we have MinValueValidator(1) MaxValueValidator(3) we have 3 options: <option value="1"> 1 </option>   <option value="2"> 2 </option>   <option value="3"> 3 </option>                   
+        for filter in filters:                 #in this part we want create dynamicly options inside <select ..> </select>  for field category.level depend on validators we define in PositiveSmallIntegerField(validators=[here]) for example if we have MinValueValidator(1) MaxValueValidator(3) we have 3 options: <option value="1"> 1 </option>   <option value="2"> 2 </option>   <option value="3"> 3 </option>
             filters_attributes += [json.dumps([serializer for serializer in myserializers.Filter_AttributeListSerializer(filter.filter_attributes.all(), many=True).data])]
         for i in range(50):
             selectname_filters += ['filters'+str(i)]
@@ -381,12 +381,12 @@ admin.site.register(Comment, CommentAdmin)
 
 
 
-class RootInline(admin.TabularInline):
-    model = Root
+class CategoryInline(admin.TabularInline):
+    model = Category
     fields = ['get_id', 'name', 'level']
     readonly_fields = ['get_id', 'name', 'level']
-    verbose_name = _('Sub menu')
-    verbose_name_plural = _('Sub menus')
+    verbose_name = _('Sub category')
+    verbose_name_plural = _('Sub categories')
     
     def has_delete_permission(self, request, obj=None):
         return False
@@ -396,8 +396,8 @@ class RootInline(admin.TabularInline):
     get_id.short_description = _('id')
 
 
-class Root_FiltersInline(admin.StackedInline):
-    model = Root_Filters
+class Category_FiltersInline(admin.StackedInline):
+    model = Category_Filters
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         #kwargs["queryset"] = models.Testrelated.objects.all()
@@ -405,13 +405,13 @@ class Root_FiltersInline(admin.StackedInline):
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
-Root_level_CHOICES = ((1,'1'), (2,'2'), (3,'3'))               #value for send is first element (here like 1) and value for showing is second (here like '1')
-class RootAdmin(TranslationAdmin):
-    inlines = [RootInline]
+Category_level_CHOICES = ((1,'1'), (2,'2'), (3,'3'))               #value for send is first element (here like 1) and value for showing is second (here like '1')
+class CategoryAdmin(TranslationAdmin):
+    inlines = [CategoryInline]
     prepopulated_fields = {'slug':('name',)}
     #exclude = ('post_product',)
     filter_horizontal = ('filters', 'brands')
-    form = myforms.RootForm
+    form = myforms.CategoryForm
     list_display = ['str_ob', 'id']
     ordering = ['id']
 
@@ -431,28 +431,28 @@ class RootAdmin(TranslationAdmin):
     str_ob.admin_order_field = 'level'
     
     def delete_queryset(self, request, queryset):
-        roots = list(queryset)
-        dict_ids = [root.id for root in roots]
+        categories = list(queryset)
+        dict_ids = [category.id for category in categories]
         queryset.delete()
         
-        for id, root in zip(dict_ids, roots):
-            previous_father_queryset = Root.objects.filter(id=root.father_root_id).select_related('father_root__'*5+'father_root') if root.father_root_id else None
-            root.id, root.father_root, root.father_root_id = id, None, None
-            roots_before_join, roots_after_join = set_levels_afterthis_all_childes_id(previous_father_queryset, [root], Root._meta.get_field('level').validators[1].limit_value, delete=True) 
-            Root.objects.bulk_update(roots_before_join, ['levels_afterthis', 'all_childes_id']) if roots_before_join else None 
+        for id, category in zip(dict_ids, categories):
+            previous_father_queryset = Category.objects.filter(id=category.father_category_id).select_related('father_category__'*5+'father_category') if category.father_category_id else None
+            category.id, category.father_category, category.father_category_id = id, None, None
+            categories_before_join, categories_after_join = set_levels_afterthis_all_childes_id(previous_father_queryset, [category], Category._meta.get_field('level').validators[1].limit_value, delete=True)
+            Category.objects.bulk_update(categories_before_join, ['levels_afterthis', 'all_childes_id']) if categories_before_join else None
 
-    def save_related(self, request, form, formsets, change):         # here update product in mongo database  (MDetailProduct.json.roots) according to Root changes. for example if <Root digital>.name changes to 'digggital'  all products with root 'digital' os children of 'digital' like 'phone' or 'smart phone' will changes like product_1 (product_1.root=<Root digital>), product_2 (product_2.root=<Root phone>), product_3 (product_3.root=<Root smart phone>):   MDetailProduct:  [{ id: 1, json: {roots: [{ name: 'digggital', slug: 'digital' }], ...}}, { id: 2, json: {roots: [{ name: 'digital', slug: 'digital' }, { name: 'phone', slug: 'phone' }], ...}}, { id: 3, json: {roots: [{ name: 'digggital', slug: 'digital' }, { name: 'phone', slug: 'phone' }, { name: 'smart phone', slug: 'smart-phone' }], ...}}]
+    def save_related(self, request, form, formsets, change):         # here update product in mongo database  (MDetailProduct.json.categories) according to Category changes. for example if <Category digital>.name changes to 'digggital'  all products with category 'digital' os children of 'digital' like 'phone' or 'smart phone' will changes like product_1 (product_1.category=<Category digital>), product_2 (product_2.category=<Category phone>), product_3 (product_3.category=<Category smart phone>):   MDetailProduct:  [{ id: 1, json: {categories: [{ name: 'digggital', slug: 'digital' }], ...}}, { id: 2, json: {categories: [{ name: 'digital', slug: 'digital' }, { name: 'phone', slug: 'phone' }], ...}}, { id: 3, json: {categories: [{ name: 'digggital', slug: 'digital' }, { name: 'phone', slug: 'phone' }, { name: 'smart phone', slug: 'smart-phone' }], ...}}]
         form.save_m2m()
         for formset in formsets:
             self.save_formset(request, form, formset, change=change)
 
         if change:
-            root = form.instance
-            children_ids = root.all_childes_id.split(',') if root.all_childes_id else []
-            root_children_ids = [root.id] + list(Root.objects.filter(id__in=children_ids).values_list('id', flat=True))   # why we need children of root?  supose we edit `digital` root in admin, we should update all products with root digital or child of `digital`.  for example: product1.root = <Smart phone...>,  product1 in mongo db: product1['json']['roots'] is like [{ name: 'digital', slug: 'digital' }, { name: 'phone', slug: 'phone'}, { name: 'smart phone', slug: 'smart_phone'}],  now if we edit digital product1 should update!
-            products_ids = list(Product.objects.filter(root_id__in=root_children_ids).values_list('id', flat=True))             # doc in Filter_AttributeAdmin.save_related
+            category = form.instance
+            children_ids = category.all_childes_id.split(',') if category.all_childes_id else []
+            category_children_ids = [category.id] + list(Category.objects.filter(id__in=children_ids).values_list('id', flat=True))   # why we need children of category?  supose we edit `digital` category in admin, we should update all products with category digital or child of `digital`.  for example: product1.category = <Smart phone...>,  product1 in mongo db: product1['json']['categories'] is like [{ name: 'digital', slug: 'digital' }, { name: 'phone', slug: 'phone'}, { name: 'smart phone', slug: 'smart_phone'}],  now if we edit digital product1 should update!
+            products_ids = list(Product.objects.filter(category_id__in=category_children_ids).values_list('id', flat=True))             # doc in Filter_AttributeAdmin.save_related
             mycol = shopdb_mongo["main_mdetailproduct"]
-            mycol.update_many({'id': {'$in': products_ids}}, {'$set': {'json.roots.$[element]': {'name': root.name, 'slug': root.slug}}}, array_filters=[{'element': {'name': form.previouse_name, 'slug': form.previouse_slug}}])
+            mycol.update_many({'id': {'$in': products_ids}}, {'$set': {'json.categories.$[element]': {'name': category.name, 'slug': category.slug}}}, array_filters=[{'element': {'name': form.previouse_name, 'slug': form.previouse_slug}}])
             del form.previouse_name
             del form.previouse_slug
     '''
@@ -492,22 +492,22 @@ class RootAdmin(TranslationAdmin):
             return super().change_view(request, object_id, form_url, extra_context)            
         
         else:
-            root = Root.objects.get(id=object_id)
-            for field in root._meta.fields:                 #in this part we want create dynamicly options inside <select ..> </select>  for field root.level depend on validators we define in PositiveSmallIntegerField(validators=[here]) for example if we have MinValueValidator(1) MaxValueValidator(3) we have 3 options: <option value="1"> 1 </option>   <option value="2"> 2 </option>   <option value="3"> 3 </option>                   
+            category = Category.objects.get(id=object_id)
+            for field in category._meta.fields:                 #in this part we want create dynamicly options inside <select ..> </select>  for field category.level depend on validators we define in PositiveSmallIntegerField(validators=[here]) for example if we have MinValueValidator(1) MaxValueValidator(3) we have 3 options: <option value="1"> 1 </option>   <option value="2"> 2 </option>   <option value="3"> 3 </option>
                 if isinstance(field, models.PositiveSmallIntegerField):
-                    level_field = field                                  #optain object PositiveSmallIntegerField of Root.level, note: root.level is not same with level_field (root.level.validators raise error) root.level is field value and some limited attributes and level_field is object PositiveSmallIntegerField created by root.level with full attrs of PositiveSmallIntegerField like validators (validators we definded in PositiveSmallIntegerFieldand argument and...)      
+                    level_field = field                                  #optain object PositiveSmallIntegerField of Category.level, note: category.level is not same with level_field (category.level.validators raise error) category.level is field value and some limited attributes and level_field is object PositiveSmallIntegerField created by category.level with full attrs of PositiveSmallIntegerField like validators (validators we definded in PositiveSmallIntegerFieldand argument and...)
             limit_value_MinValueValidator, limit_value_MaxValueValidator = level_field.validators[0].limit_value,  level_field.validators[1].limit_value
             MinValue_MaxValue_range = list(range(limit_value_MinValueValidator, limit_value_MaxValueValidator+1))   #limit_value_MinValueValidator here is 1 because in validators we definded MinValueValidator(1)  and limit_value_MaxValueValidator here is 3 because we definded MaxValueValidator(3)   
             
-            roots_seperated_by_level_jslist = []
-            all_roots = Root.objects.all()
+            categories_seperated_by_level_jslist = []
+            all_categories = Category.objects.all()
             for i in MinValue_MaxValue_range:
-                roots_seperated_by_level_jslist += [json.dumps([serializer for serializer in myserializers.RootListSerializer(all_roots, many=True).data if serializer['level']==i-1])]           #1- we dont need other fields of root (so just use __str())   2- json.dumps is in fact aray of javascript, because python list can use as javascript aray. supose: L=[1,2,3],  L cant use in javascript as list(javascript dont understand that) but in js_L=json.dumps(L) we can use js_L in javascript ez.   3- we cant use list in list in json.dumps() for example json.dumps([[1,2], [3,4]]) isnt acceptable.                  
-            return render(request, 'admin/change_root_template.html', {
-                'root': root,
-                'levelrange_roots': list(zip(MinValue_MaxValue_range, roots_seperated_by_level_jslist)),
-                'range_1': '1:{}'.format(MinValue_MaxValue_range[-1])})      #why we used range_1?  because in django template we cant refere to last index by this way: L[1:]  so this is error: {% for i, j in levelrange_roots|slice:"1:" %}  so we need find last index here and send to template (like "1:3" that 3 is last index) but note using {{ }} will make work in django template like: {{ for i, j in levelrange_roots|slice:"1:" }}    this is work without eny error(i dont know why)
-admin.site.register(Root, RootAdmin)
+                categories_seperated_by_level_jslist += [json.dumps([serializer for serializer in myserializers.CategoryListSerializer(all_categories, many=True).data if serializer['level']==i-1])]           #1- we dont need other fields of category (so just use __str())   2- json.dumps is in fact aray of javascript, because python list can use as javascript aray. supose: L=[1,2,3],  L cant use in javascript as list(javascript dont understand that) but in js_L=json.dumps(L) we can use js_L in javascript ez.   3- we cant use list in list in json.dumps() for example json.dumps([[1,2], [3,4]]) isnt acceptable.
+            return render(request, 'admin/change_category_template.html', {
+                'category': category,
+                'levelrange_categories': list(zip(MinValue_MaxValue_range, categories_seperated_by_level_jslist)),
+                'range_1': '1:{}'.format(MinValue_MaxValue_range[-1])})      #why we used range_1?  because in django template we cant refere to last index by this way: L[1:]  so this is error: {% for i, j in levelrange_categories|slice:"1:" %}  so we need find last index here and send to template (like "1:3" that 3 is last index) but note using {{ }} will make work in django template like: {{ for i, j in levelrange_categories|slice:"1:" }}    this is work without eny error(i dont know why)
+admin.site.register(Category, CategoryAdmin)
 
 
 

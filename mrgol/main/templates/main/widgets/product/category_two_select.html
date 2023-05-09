@@ -1,0 +1,36 @@
+<select name="categories_level" required="" id="id_categories_level">
+{% for level in categories_level_range %}
+	<option value="{{ level }}" {% if selected_level_range == level %}selected{% endif %}> {{ level }} </option>
+{% endfor %}
+</select>						
+<p style="display:inline">&nbsp;</p>							
+<select name="category" required="" id="id_category">
+</select> 
+							
+<script>
+function getType2() {
+  var x = document.getElementById("id_categories_level").value;
+  if (x === "{{ categoriesbyleveljs_levels.0.1 }}") {
+    items = {{ categoriesbyleveljs_levels.0.0|safe }};
+  }	
+  
+{% for categories, level in categoriesbyleveljs_levels|slice:range_1 %}
+  else if (x === "{{ level }}") {
+    items = {{ categories|safe }}    }
+{% endfor %}
+
+  else { 
+    items = [];
+  }
+  
+  var str = "";
+  var s;
+  for (var item of items) {    
+    if (item.id === {{ selected_category_id }}) {s = " selected";} else {s = "";}
+    str += "<option value="+item.id + s +">"+item.str+"</option>"
+  } 
+  document.getElementById("id_category").innerHTML = str;
+}
+document.getElementById("id_categories_level").addEventListener("change", getType2)
+getType2()
+</script> 

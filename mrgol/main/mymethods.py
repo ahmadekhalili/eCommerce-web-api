@@ -8,7 +8,7 @@ import requests
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.ssl_ import create_urllib3_context
 
-from .models import Product, Post, Root
+from .models import Product, Post, Category
 
 
 
@@ -36,50 +36,50 @@ def get_posts(first_index=None, last_index=None, queryset=None):
 
         
 '''
-def childest_root(root, childs=[]):                 
-    for child_root in root.child_roots.all():
-        childs.append(childest_root(child_root))
-    return root
-def get_childs_and_root(root, return_self=True):                    
-    childs = childest_root(root)
+def childest_category(category, childs=[]):                 
+    for child_category in category.child_categories.all():
+        childs.append(childest_category(child_category))
+    return category
+def get_childs_and_category(category, return_self=True):                    
+    childs = childest_category(category)
     if return_self:
-        return [*childs, root]
+        return [*childs, category]
     return childs
 '''
 
 
-def get_root_and_fathers(root):                    
-    root_and_fathers = [root]
-    for i in range(root.level-1):
-        root = root.father_root
-        if root:
-            root_and_fathers += [root]
-    return root_and_fathers
+def get_category_and_fathers(category):
+    category_and_fathers = [category]
+    for i in range(category.level-1):
+        category = category.father_category
+        if category:
+            category_and_fathers += [category]
+    return category_and_fathers
 
 
 
-def get_root_and_children(root):
-    for_query = [root]
-    children = [root]
+def get_category_and_children(category):
+    for_query = [category]
+    children = [category]
     while(for_query):
-        roots = list(for_query.pop(-1).father_root_set.all())
-        if roots:
-            for_query += [*roots]                 # `for_query` and `children` are not mutable
-            children += [*roots]
+        categories = list(for_query.pop(-1).father_category_set.all())
+        if categories:
+            for_query += [*categories]                 # `for_query` and `children` are not mutable
+            children += [*categories]
     return children
 
 
 
-def get_posts_products_by_root(root):   
-    if root.level < Root._meta.get_field('level').validators[1].limit_value:
-        root_children_ids = list(filter(None, root.all_childes_id.split(',')))           #why we used filter? root.all_childes_id.split(',') may return: [''] that raise error in statements like  filter(in__in=['']) so we ez remove blank str of list by filter.
-        root_children_ids = [root.id] + root_children_ids
+def get_posts_products_by_category(category):
+    if category.level < Category._meta.get_field('level').validators[1].limit_value:
+        category_children_ids = list(filter(None, category.all_childes_id.split(',')))           #why we used filter? category.all_childes_id.split(',') may return: [''] that raise error in statements like  filter(in__in=['']) so we ez remove blank str of list by filter.
+        category_children_ids = [category.id] + category_children_ids
     else:
-        root_children_ids = [root.id]
-    if root.post_product == 'product':
-        return Product.objects.filter(root__id__in=root_children_ids)
+        category_children_ids = [category.id]
+    if category.post_product == 'product':
+        return Product.objects.filter(category__id__in=category_children_ids)
     else:
-        return get_posts(queryset=Post.objects.filter(root__id__in=root_children_ids))
+        return get_posts(queryset=Post.objects.filter(category__id__in=category_children_ids))
 
 
 

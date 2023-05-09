@@ -24,7 +24,7 @@ class CartPageView(views.APIView):       #user come from 'sabad'(in header) to h
 
 
 
-class CartMenuView(views.APIView):       #'sabad'(in header)
+class CartCategoryView(views.APIView):       #'sabad'(in header)
     def get(self, request, *args, **kwargs):                                       #supose user refresh /cart/ page
         serializers, cart, total_prices, total_weight, dimensions, dimensions_fail  = [], Cart(request), Decimal(0), 0, [], False          #we sended dimensions not volume for using in future (in formols for processing carton size).
         for item in cart:
@@ -46,7 +46,7 @@ class CartAdd(views.APIView):       #user come from 'sabad'(in header) to this m
         data = request.data
         cart = Cart(request)
         cart.add(product_id=data['product_id'], quantity=data.get('quantity', 1), shopfilteritem_id=data.get('shopfilteritem_id'))    #cd['quantity'] is int but how is it because: coerce=int ? request.data['quantity'] is rest/views/CartDetail is string
-        return Response({**CartMenuView().get(request).data})
+        return Response({**CartCategoryView().get(request).data})
 
 
 
@@ -57,7 +57,7 @@ class CartMinus(views.APIView):       #reduce selected quantity of proselect by 
         data = request.data
         cart = Cart(request)
         cart.minus(product_id=data['product_id'], shopfilteritem_id=data.get('shopfilteritem_id'))
-        return Response({**CartMenuView().get(request).data})
+        return Response({**CartCategoryView().get(request).data})
 
 
 
@@ -67,4 +67,4 @@ class CartRemove(views.APIView):       #user come from 'sabad'(in header) to thi
         #CustomSessionAuthentication().enforce_csrf(request)
         cart = Cart(request)
         cart.remove(request.data.get('product_id'), request.data.get('shopfilteritem_id'))
-        return Response({**CartMenuView().get(request).data})
+        return Response({**CartCategoryView().get(request).data})

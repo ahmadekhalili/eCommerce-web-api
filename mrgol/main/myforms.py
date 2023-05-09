@@ -13,13 +13,13 @@ from users.models import User
 from . import myserializers
 from .mywidgets import *
 from .mymethods import get_mt_input_classes
-from .models import Post, Product, Root, Filter, Image, Comment, Filter_Attribute, Brand, ShopFilterItem
-# note1: if edit or add a form field exits in translation.py, like add Rootform.name field, make sure in admin panel shown correctly (in 'tabbed' mode). if not shown correctly, you have to add a widget with required modeltreanslation classes like in ProductForm.alt_fa.widget.attrs
+from .models import Post, Product, Category, Filter, Image, Comment, Filter_Attribute, Brand, ShopFilterItem
+# note1: if edit or add a form field exits in translation.py, like add Categoryform.name field, make sure in admin panel shown correctly (in 'tabbed' mode). if not shown correctly, you have to add a widget with required modeltreanslation classes like in ProductForm.alt_fa.widget.attrs
 
 
 
 class PostForm(forms.ModelForm):
-    root = forms.ModelChoiceField(queryset=Root.objects.filter(post_product='post'), label=_('root'))
+    category = forms.ModelChoiceField(queryset=Category.objects.filter(post_product='post'), label=_('category'))
 
     class Meta:
         model = Post
@@ -49,8 +49,8 @@ class ProductForm(myforms.ProductModelForm):
                 initial[f] = alts[f]
         super(). __init__(data, files, auto_id, prefix, initial, error_class, label_suffix, empty_permitted, instance, use_required_attribute, renderer)
 
-    #root = myforms.CustomChoiceField(choices=(), widget=product_root_widget, required=True, label=_('menu'))
-    root = myforms.CustomModelChoiceField(queryset=Root.objects.all(), widget=product_root_widget, required=True, label=_('menu'))
+    #category = myforms.CustomChoiceField(choices=(), widget=product_category_widget, required=True, label=_('category'))
+    category = myforms.CustomModelChoiceField(queryset=Category.objects.all(), widget=product_category_widget, required=True, label=_('category'))
     image = forms.ImageField(widget=image_icon_widget(qus_text=image_qusmark_text, input=''), required=True, label=_('image icon'))
     alt_fa = forms.CharField(max_length=55, widget=forms.TextInput(attrs={'class': get_mt_input_classes('alt_fa')}), label=_('alt'))
     alt_en = forms.CharField(max_length=55, widget=forms.TextInput(attrs={'class': get_mt_input_classes('alt_en')}), required=False, label=_('alt'))   # if you don't put required=False, this field will be required in modeltranslation tab.
@@ -62,7 +62,7 @@ class ProductForm(myforms.ProductModelForm):
 
     class Meta:                                          #take fields from admin.fiedset but this is needed for validation.
         model = Product
-        fields = ['name', 'slug', 'meta_title', 'meta_description', 'brief_description', 'detailed_description', 'price', 'available', 'visible', 'filter_attributes', 'root', 'rating', 'image', 'alt_fa', 'alt_en', 'weight_fa', 'weight_en', 'length', 'width', 'height']
+        fields = ['name', 'slug', 'meta_title', 'meta_description', 'brief_description', 'detailed_description', 'price', 'available', 'visible', 'filter_attributes', 'category', 'rating', 'image', 'alt_fa', 'alt_en', 'weight_fa', 'weight_en', 'length', 'width', 'height']
 
     def save(self, commit=True):
         length, width, height = self.cleaned_data.get('length'), self.cleaned_data.get('width'), self.cleaned_data.get('height')
@@ -83,16 +83,16 @@ class CommentForm(forms.ModelForm):
 
 
 
-class RootForm(forms.ModelForm):
+class CategoryForm(forms.ModelForm):
     level = myforms.CustomIntegerField(widget=level_widget, label=_('level'))
-    father_root = myforms.CustomModelChoiceField(queryset=Root.objects.all(), widget=father_root_widget, required=False, label=_('father root'))       #puting CustomModelChoiceField will cease: when creating new root with level 1, father root will feel auto after saving!
+    father_category = myforms.CustomModelChoiceField(queryset=Category.objects.all(), widget=father_category_widget, required=False, label=_('father category'))       #puting CustomModelChoiceField will cease: when creating new category with level 1, father category will feel auto after saving!
 
     class Meta:
-        model = Root
+        model = Category
         fields = '__all__'
 
     def is_valid(self):
-        self.previouse_name = self.instance.name            # used in main.admin.RootAdmin.save_related
+        self.previouse_name = self.instance.name            # used in main.admin.CategoryAdmin.save_related
         self.previouse_slug = self.instance.slug
         return self.is_bound and not self.errors
 

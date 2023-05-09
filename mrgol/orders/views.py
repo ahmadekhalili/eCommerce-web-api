@@ -12,7 +12,7 @@ from customed_files.date_convertor import MiladiToShamsi
 from customed_files.states_towns import list_states_towns
 from main.models import Product, ShopFilterItem
 from main.model_methods import update_product_stock
-from cart.views import CartMenuView
+from cart.views import CartCategoryView
 from cart.cart import Cart
 from payment.views import PaymentStart
 from .models import ProfileOrder, Order, OrderItem, Dispatch
@@ -131,7 +131,7 @@ class ListCreateOrderItem(views.APIView):
                 return PaymentStart().post(request, total_prices)
      
         elif price_changed or quantity_ended:
-            return Response({'price_changed': price_changed, 'quantity_ended': quantity_ended, **CartMenuView().get(request, datas_selector='products_user_csrf').data})       #redirect to cart page by front.
+            return Response({'price_changed': price_changed, 'quantity_ended': quantity_ended, **CartCategoryView().get(request, datas_selector='products_user_csrf').data})       #redirect to cart page by front.
         else:
             return Response({})
 

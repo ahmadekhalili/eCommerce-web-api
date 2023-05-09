@@ -1,4 +1,4 @@
-<select name="father_root" id="id_father_root">
+<select name="father_category" id="id_father_category">
 	<option value="">---------</option>
 </select> 
 
@@ -6,13 +6,13 @@
 <script>
 function getType3() {
   var x = document.getElementById("id_level").value;
-  if (x === "{{ rootsbyleveljs_levels.0.1 }}") {
-    items = {{ rootsbyleveljs_levels.0.0|safe }};
+  if (x === "{{ categoriesbyleveljs_levels.0.1 }}") {
+    items = {{ categoriesbyleveljs_levels.0.0|safe }};
   }	
   
-{% for roots, level in rootsbyleveljs_levels %} 
+{% for categories, level in categoriesbyleveljs_levels %}
   else if (x === "{{ level }}") {
-    items = {{ roots|safe }}    }
+    items = {{ categories|safe }}    }
 {% endfor %}
 
   else { 
@@ -22,10 +22,10 @@ function getType3() {
   var str = '<option value="">---------</option>';
   var s;
   for (var item of items) {    
-    if (item.id === {{ selected_root_id }}) {s = " selected";} else {s = "";}
+    if (item.id === {{ selected_category_id }}) {s = " selected";} else {s = "";}
     str += "<option value="+item.id + s +">"+item.str+"</option>"
   } 
-  document.getElementById("id_father_root").innerHTML = str;
+  document.getElementById("id_father_category").innerHTML = str;
 }
 document.getElementById("id_level").addEventListener("change", getType3)
 getType3()

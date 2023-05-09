@@ -1,5 +1,5 @@
 1-  DateTimeField fields are based on operation system time(operation system local time should set correctly)
-2- neghative ids must not be in objects  ids saved in database (reserved by method like: mywidgets/product_root_widget  as blank)
+2- neghative ids must not be in objects  ids saved in database (reserved by method like: mywidgets/product_category_widget  as blank)
 3- product filters limited to 50
 4- front must send 'sabad' products ids and favoriets in cookie by this way: 'products_ids': "1,2,3,4"      and    'favorite_products_ids': "1,2,3"  (accurding to cart.cart.Cart.__init__)
 5- for installing new version of django/rest_Framework you should consider translations! (you can see traslations video)

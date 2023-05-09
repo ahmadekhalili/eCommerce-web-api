@@ -1,42 +1,42 @@
-def circle_roots(root=None, previous_root=None):          #only one of root / previous_root should provide.
-    first_root = root                                     #first_root is first "root" we came to circle_roots with it.
-    first_child_roots = first_root.child_roots.all()
-    roots = []
+def circle_categories(category=None, previous_category=None):          #only one of category / previous_category should provide.
+    first_category = category                                     #first_category is first "category" we came to circle_categories with it.
+    first_child_categories = first_category.child_categories.all()
+    categories = []
     
-    if root and previous_root:     
-        root = previous_root
+    if category and previous_category:
+        category = previous_category
         ids_list = []
-        changed_root = None
+        changed_category = None
         while(True):
-            child_roots = [rot for rot in root.child_roots.all()]
-            for i in range(len(child_roots)):
-                if child_roots[i] == changed_root:
-                    child_roots[i] = changed_root
-            root.all_childes_id = ','.join(list(dict.fromkeys([s for child in child_roots for s in child.all_childes_id.split(',') if s] + [str(child.id) for child in child_roots]))) if child_roots else ''
-            changed_root = root
-            roots.append(root)
-            root = root.father_root
-            if root == first_root:
+            child_categories = [rot for rot in category.child_categories.all()]
+            for i in range(len(child_categories)):
+                if child_categories[i] == changed_category:
+                    child_categories[i] = changed_category
+            category.all_childes_id = ','.join(list(dict.fromkeys([s for child in child_categories for s in child.all_childes_id.split(',') if s] + [str(child.id) for child in child_categories]))) if child_categories else ''
+            changed_category = category
+            categories.append(category)
+            category = category.father_category
+            if category == first_category:
                 break
             
     else:
-        root = root
-        ids_list = root.all_childes_id.split(',') + [f'{root.id}']
+        category = category
+        ids_list = category.all_childes_id.split(',') + [f'{category.id}']
         while(True):
-            root = root.father_root
+            category = category.father_category
             cleared_ids_list = list(dict.fromkeys(list(filter(None, ids_list))))
-            cleared_ids_list.remove(str(root.id))
-            root.all_childes_id = ','.join(cleared_ids_list)
-            roots.append(root)
-            if root in first_child_roots:
+            cleared_ids_list.remove(str(category.id))
+            category.all_childes_id = ','.join(cleared_ids_list)
+            categories.append(category)
+            if category in first_child_categories:
                 break
          
-    return roots
+    return categories
 
 
-def is_circle(root):
-    if root and root.father_root_id:
-        if str(root.father_root_id) in root.all_childes_id.split(','):                              #str(root.father_root_id) in root.all_childes_id is worse because supose root.father_root_id=='7' now  '7' in '17,19,20' return return true!!!
+def is_circle(category):
+    if category and category.father_category_id:
+        if str(category.father_category_id) in category.all_childes_id.split(','):                              #str(category.father_category_id) in category.all_childes_id is worse because supose category.father_category_id=='7' now  '7' in '17,19,20' return return true!!!
             return True
         else:
             return False
@@ -44,59 +44,59 @@ def is_circle(root):
         return False
 
         
-def set_levels_afterthis_all_childes_id(previous_father_queryset, root_queryset, max_limit_value, delete=False):            
-    root = root_queryset[0]
-    previous_root = previous_father_queryset[0] if previous_father_queryset else None              #if previous_father_queryset, previous_father_queryset[0] raise error.  dont change previous_root variabe name, "recursive effect".
-    if root:                        #for example in creating firt root.
-        list_childes_id = [root.all_childes_id + f',{root.id}' if root.all_childes_id else f'{root.id}'][0].split(',')
-        previous_roots, roots  = [], []
-        if previous_root:
-            updated_to_1level_root = True if root.level==1 and previous_root.level>1 else False                  #this will true when supose you have a root with level=4, now convert it to level=1, now root.root.father_root is None so we should handle program with this instead "previous_root.id != root.father_root.id"
-            if delete or updated_to_1level_root or previous_root.id != root.father_root.id:                  #updated_to_1level_root must be before previous_root.id != root.father_root.id otherwise raise error
-                if is_circle(previous_root):
-                    previous_roots = circle_roots(root=root, previous_root=previous_root)
+def set_levels_afterthis_all_childes_id(previous_father_queryset, category_queryset, max_limit_value, delete=False):
+    category = category_queryset[0]
+    previous_category = previous_father_queryset[0] if previous_father_queryset else None              #if previous_father_queryset, previous_father_queryset[0] raise error.  dont change previous_category variabe name, "recursive effect".
+    if category:                        #for example in creating firt category.
+        list_childes_id = [category.all_childes_id + f',{category.id}' if category.all_childes_id else f'{category.id}'][0].split(',')
+        previous_categories, categories  = [], []
+        if previous_category:
+            updated_to_1level_category = True if category.level==1 and previous_category.level>1 else False                  #this will true when supose you have a category with level=4, now convert it to level=1, now category.category.father_category is None so we should handle program with this instead "previous_category.id != category.father_category.id"
+            if delete or updated_to_1level_category or previous_category.id != category.father_category.id:                  #updated_to_1level_category must be before previous_category.id != category.father_category.id otherwise raise error
+                if is_circle(previous_category):
+                    previous_categories = circle_categories(category=category, previous_category=previous_category)
                 else:
-                    upper_root_levels_afterthis, changed_root = root.levels_afterthis, root            
+                    upper_category_levels_afterthis, changed_category = category.levels_afterthis, category
                     while(True):
-                        previous_root.all_childes_id = ','.join([s for s in previous_root.all_childes_id.split(',') if s and s not in list_childes_id])
-                        if previous_root.levels_afterthis == upper_root_levels_afterthis + 1:
-                            childs = previous_root.child_roots.all().values('id', 'levels_afterthis')
+                        previous_category.all_childes_id = ','.join([s for s in previous_category.all_childes_id.split(',') if s and s not in list_childes_id])
+                        if previous_category.levels_afterthis == upper_category_levels_afterthis + 1:
+                            childs = previous_category.child_categories.all().values('id', 'levels_afterthis')
                             for child in childs:
-                                if child['id'] == changed_root.id:
-                                    child['levels_afterthis'] = changed_root.levels_afterthis
+                                if child['id'] == changed_category.id:
+                                    child['levels_afterthis'] = changed_category.levels_afterthis
                             levels_afterthis_list = sorted([c['levels_afterthis'] for c in childs], reverse=True)
                             biggest_levels_afterthis = levels_afterthis_list[0]+1 if levels_afterthis_list else 0
-                            upper_root_levels_afterthis = previous_root.levels_afterthis                                   #why we used previous_root_father_levels_afterthis and upper_root together? and dont remove previous_root_father_levels_afterthis? because in upper_root = previous_root  objects are mutable and upper_root.levels_afterthis will change after changing previous_root.levels_afterthis
-                            previous_root.levels_afterthis = biggest_levels_afterthis
-                            changed_root = previous_root
+                            upper_category_levels_afterthis = previous_category.levels_afterthis                                   #why we used previous_category_father_levels_afterthis and upper_category together? and dont remove previous_category_father_levels_afterthis? because in upper_category = previous_category  objects are mutable and upper_category.levels_afterthis will change after changing previous_category.levels_afterthis
+                            previous_category.levels_afterthis = biggest_levels_afterthis
+                            changed_category = previous_category
 
-                        previous_roots += [previous_root]
-                        previous_root = previous_root.father_root                                                                                #note: select_related doesnt lost in recursive and work completly fine(doesnt run additional query)
-                        if not previous_root:
+                        previous_categories += [previous_category]
+                        previous_category = previous_category.father_category                                                                                #note: select_related doesnt lost in recursive and work completly fine(doesnt run additional query)
+                        if not previous_category:
                             break    
 
         
-        first_root_id = root.id         
-        if root.father_root:                                                                           #if creating a root failed, we have not root and we dont want showing erros of set_levels_afterthis_all_childes_id   (we want show error of model Root)
-            if is_circle(root):
-                roots = circle_roots(root=root)
+        first_category_id = category.id
+        if category.father_category:                                                                           #if creating a category failed, we have not category and we dont want showing erros of set_levels_afterthis_all_childes_id   (we want show error of model Category)
+            if is_circle(category):
+                categories = circle_categories(category=category)
                 
             else:
-                adder = root.levels_afterthis+1
-                non_dublicate_childes_id = [s for s in list_childes_id if s not in root.father_root.all_childes_id.split(',')]       #if we dont put non_dublicate_childes_id, in every saving of root objects, all_childes_id of that root will increase repitly with same ids in every saving!!  like this(after several blank saving in admin panel): in '1,3,4,1,3,4,1,3,4,1,3,4,1,3,4,1,3,4,'
+                adder = category.levels_afterthis+1
+                non_dublicate_childes_id = [s for s in list_childes_id if s not in category.father_category.all_childes_id.split(',')]       #if we dont put non_dublicate_childes_id, in every saving of category objects, all_childes_id of that category will increase repitly with same ids in every saving!!  like this(after several blank saving in admin panel): in '1,3,4,1,3,4,1,3,4,1,3,4,1,3,4,1,3,4,'
                 if non_dublicate_childes_id:
                     while(True):
-                        child = root
-                        root = root.father_root
-                        if root:
-                            root.all_childes_id = ','.join(list(dict.fromkeys(list(filter(None, root.all_childes_id.split(',') + list_childes_id)))))               #list(dict.fromkeys(L)) remove dublicates of list L  and list(filter(None, ['', '1', '2'])) remove empty str and none from list convert to >> ['1', '2']   note: root.all_childes_id.split(',') if was blank produce [''] that ','.join([''] + ['1', '2']) is like '1,2,' !!
-                            if child.levels_afterthis >= root.levels_afterthis:
-                                root.levels_afterthis = adder
+                        child = category
+                        category = category.father_category
+                        if category:
+                            category.all_childes_id = ','.join(list(dict.fromkeys(list(filter(None, category.all_childes_id.split(',') + list_childes_id)))))               #list(dict.fromkeys(L)) remove dublicates of list L  and list(filter(None, ['', '1', '2'])) remove empty str and none from list convert to >> ['1', '2']   note: category.all_childes_id.split(',') if was blank produce [''] that ','.join([''] + ['1', '2']) is like '1,2,' !!
+                            if child.levels_afterthis >= category.levels_afterthis:
+                                category.levels_afterthis = adder
                                 adder += 1
-                            roots += [root]                    
+                            categories += [category]
                         else:
                             break
-        return [previous_roots, roots]
+        return [previous_categories, categories]
     return [None, None]
 
 
@@ -141,26 +141,26 @@ def update_product_stock(self, product, saving):         # self is ShopFilterIte
 '''
 note:deprecated method find_levels_afterthis
 def find_levels_afterthis(previous_father_queryset, max_limit_value):  #this method find lelevls_afterthis handy
-    prefetch_query = 'child_roots'
+    prefetch_query = 'child_categories'
     for i in range(max_limit_value-1):
-        prefetch_query += 'child_roots'
-    root = previous_father_queryset.prefetch_related(prefetch_query)[0]
+        prefetch_query += 'child_categories'
+    category = previous_father_queryset.prefetch_related(prefetch_query)[0]
     x = 0
-    for root in root.child_roots.all():
+    for category in category.child_categories.all():
         x = 1 if x<=1 else x                     #when program return from post loops(lop haie badi) to here with upper x value (like 5) we must dont change x value to lower like 1!!!
-        for root in root.child_roots.all():
+        for category in category.child_categories.all():
             x = 2 if x<=2 else x
-            for root in root.child_roots.all():
+            for category in category.child_categories.all():
                 x = 3 if x<=3 else x
-                for root in root.child_roots.all():
+                for category in category.child_categories.all():
                     x = 4 if x<=4 else x
-                    for root in root.child_roots.all():
+                    for category in category.child_categories.all():
                         x = 5 if x<=5 else x
-                        for root in root.child_roots.all():
+                        for category in category.child_categories.all():
                             x = 6 if x<=6 else x
-                            for root in root.child_roots.all():
+                            for category in category.child_categories.all():
                                 x = 7 if x<=7 else x
-                                for root in root.child_roots.all():
+                                for category in category.child_categories.all():
                                     x = 8
     return x
 
