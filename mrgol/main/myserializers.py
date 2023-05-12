@@ -219,9 +219,7 @@ class PostListSerializer(serializers.ModelSerializer):
         return url
 
     def get_published_date(self, obj):
-        d_t = obj.published_date
-        shamsi_date = jdatetime.datetime.fromgregorian(datetime=d_t).strftime('%Y %B %-d').split()
-        return f'{shamsi_date[2]} {shamsi_date[1]} {shamsi_date[0]}، ساعت {d_t.hour}:{d_t.minute}'
+        return str(jdatetime.datetime.fromgregorian(datetime=obj.published_date))
     
     def get_category(self, obj):                                        #we must create form like: <form method="get" action="/posts/?obj.category.slug"> .  note form must shown as link.
         pk, slug = obj.id, obj.slug
@@ -270,9 +268,7 @@ class PostDetailSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def get_published_date(self, obj):
-        d_t = obj.published_date
-        shamsi_date = jdatetime.datetime.fromgregorian(datetime=d_t).strftime('%Y %B %-d').split()
-        return f'{shamsi_date[2]} {shamsi_date[1]} {shamsi_date[0]}، ساعت {d_t.hour}:{d_t.minute}'
+        return str(jdatetime.datetime.fromgregorian(datetime=obj.published_date))
     
     def get_category(self, obj):                                     #we must create form like: <form method="get" action="/posts/?obj.category.slug"> .  note form must shown as link. you can put that form in above of that post.
         pk, slug = obj.id, obj.slug
