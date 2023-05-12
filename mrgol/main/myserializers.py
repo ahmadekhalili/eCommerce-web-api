@@ -20,14 +20,14 @@ from users.mymethods import user_name_shown
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    #author = UserNameSerializer()                                #puting author here we cant write comment like this: c=CommentSerializer(data={'content': 'aaaaa', 'author': 1, 'confermer': 1, 'product_id': 1}) c.is_valid() c.save()    so we put this field only in reading show by puting that in method to_representation
+    published_date = serializers.SerializerMethodField()
+    author = UserNameSerializer(read_only=True)                                # this field must be read_only otherwise can't save like: c=CommentSerializer(data={'content': 'aaaaa', 'author': 1, 'confermer': 1, 'product_id': 1}) c.is_valid() c.save()
     class Meta:
         model = Comment
         fields = '__all__'
-        
-    def to_representation(self, obj):
-        self.fields['author'] = UserNameSerializer(read_only=True)                
-        return super().to_representation(obj)
+
+    def get_published_date(self, obj):
+        return str(jdatetime.datetime.fromgregorian(datetime=obj.published_date))
     
 class RatingSerializer(serializers.ModelSerializer):
     class Meta:
