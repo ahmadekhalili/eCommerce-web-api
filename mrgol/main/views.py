@@ -281,7 +281,7 @@ class PostDetail(views.APIView):
         output a post depend on pk you specify.
         '''
         #permission_classes = [permissions.IsAuthenticated]
-        post = Post.objects.filter(id=kwargs['pk']).select_related('author', 'category').prefetch_related('content_set', 'comment_set')
+        post = Post.objects.filter(id=kwargs['pk']).select_related('author', 'category').prefetch_related('comment_set')
         serializer = myserializers.PostDetailSerializer(post, many=True).data
         sessionid = request.session.session_key
         return Response({'sessionid': sessionid, **serializer[0]})               #serializer is list (because of many=True)    serializer[0] is dict
