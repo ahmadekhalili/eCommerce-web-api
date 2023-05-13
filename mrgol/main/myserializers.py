@@ -289,7 +289,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):       # important: f
 
     class Meta:
         model = Product
-        fields = ['id', *g_t('name'), *g_t('slug'), *g_t('meta_title'), *g_t('meta_description'), *g_t('brief_description'), *g_t('detailed_description'), *g_t('price'), *g_t('available'), 'categories', 'rating', *g_t('stock'), 'brand', *g_t('weight'), 'smallimages', 'comment_count', 'shopfilteritems', 'related_products']
+        fields = ['id', *g_t('name'), *g_t('slug'), *g_t('meta_title'), *g_t('meta_description'), *g_t('brief_description'), *g_t('detailed_description'), *g_t('price'), *g_t('available'), 'categories', 'brand', 'rating', *g_t('stock'), *g_t('weight'), 'smallimages', 'comment_count', 'shopfilteritems', 'related_products']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
