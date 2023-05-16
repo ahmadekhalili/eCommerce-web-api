@@ -350,7 +350,7 @@ class ProductCategoryDetail(generics.RetrieveAPIView):
 
 
 
-class ProductCommentCreate(generics.RetrieveAPIView):
+class ProductCommentCreate(views.APIView):
     def post(self, request, *args, **kwargs):                
         if request.user.is_authenticated:
             try:
@@ -358,9 +358,9 @@ class ProductCommentCreate(generics.RetrieveAPIView):
                 comment = Comment.objects.create(content=data['content'], author=request.user, product_id=data['product_id'])
                 return Response({'status': 'نظر شما با موفقيت ثبت شد.'})
             except:
-                return Response({'status': 'اطلاعات جهت ثبت نظر کا في نيست.'})
+                return Response({'status': 'اطلاعات جهت ثبت نظر کافي نيست.'}, status=400)
         else:
-            return Response({'user': request.user})
+            return Response({'user': request.user}, status=401)
 
 
 
