@@ -76,7 +76,6 @@ class SupporterDatasSerializer(views.APIView):     #important: you can use class
         if 'csrf' in datas_selector:
             request_csrf_token, csrf_token= get_token(request), get_token(request) if "CSRF_COOKIE" not in request.META else ''
             datas = {**datas, **{'csrfmiddlewaretoken': get_token(request), 'csrftoken': get_token(request)}}
-        return datas
 
         if 'sessionid' in datas_selector:
             datas = {**datas, 'sessionid': request.session.session_key}
