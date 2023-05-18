@@ -23,8 +23,9 @@ from customed_files.django.classes import model_fields_custom
 from customed_files.date_convertor import MiladiToShamsi
 from users.models import User
 # note1: changing classes places may raise error when creating tables(makemigrations), for example changing Content with Post will raise error(Content use Post in its field and shuld be definded after Post)
-# note2: if you add or remove a field, you should apply it in traslation.py 'fields' if was required.
-# note3: if you make changes in Product or it's related objects (etc. Brand, Category, ...) you should apply changes to it's serialisers like ProductListSerializer, ProductDetailMongoSerializer and mongo product saving (in admin.py) if required.
+# note2: if you add or remove a field, you have to apply it in translation.py 'fields' if was required.
+# note3: if you make changes Product or it's related objects (etc. Brand, Category, ...) you have to apply changes to it's serialisers like ProductListSerializer, ProductDetailMongoSerializer and mongo product saving (in admin.py) if required.
+# note4: if you make changes in a model, you have to apply changes to it's serializers if needed.
 
 
 group_choices = [(key, str(key)) for key in range(1, 11)]

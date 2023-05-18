@@ -10,6 +10,8 @@ from customed_files.django.classes import model_fields_custom
 from customed_files.states_towns import list_states_towns
 from main.models import Product, ShopFilterItem, State, Town
 from users.models import User
+# note1: if you add or remove a field, you have to apply it in translation.py 'fields' if was required.
+# note2: if you make changes in a model, you have to apply changes to it's serializers if needed.
 
 
 def validate_postal_code(date):
