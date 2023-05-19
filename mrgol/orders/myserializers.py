@@ -46,14 +46,10 @@ class OrderSerializer(serializers.ModelSerializer):
         return obj.get_order_status_display()
 
     def get_delivery_date(self, obj):
-        d_t = obj.delivery_date
-        shamsi_date = jdatetime.datetime.fromgregorian(datetime=d_t).strftime('%Y %B %-d').split() if d_t else None
-        return f'{shamsi_date[2]} {shamsi_date[1]} {shamsi_date[0]}، ساعت {d_t.hour}:{d_t.minute}' if d_t else None
+        return str(jdatetime.datetime.fromgregorian(datetime=obj.delivery_date))
 
     def get_created(self, obj):
-        d_t = obj.created
-        shamsi_date = jdatetime.datetime.fromgregorian(datetime=d_t).strftime('%Y %B %-d').split()
-        return f'{shamsi_date[2]} {shamsi_date[1]} {shamsi_date[0]}، ساعت {d_t.hour}:{d_t.minute}'
+        return str(jdatetime.datetime.fromgregorian(datetime=obj.created))
 
 
 
