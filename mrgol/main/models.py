@@ -210,7 +210,7 @@ class Post(models.Model):
     published_date = models.DateTimeField(_('published date'), auto_now_add=True)
     image_icon = models.OneToOneField(Image_icon, on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('image icon'))
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('category'))
-    author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('author'))
+    author = models.ForeignKey(User, related_name='written_posts', on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('author'))
     #comment_set                                                   #backward relation
 
     class Meta:
@@ -399,11 +399,11 @@ post_save.connect(save_smallimage, sender=Image)
 
 statuses = [('1', _('not checked')), ('2', _('confirmed')), ('3', _('not confirmed')), ('4', _('deleted'))]
 class Comment(models.Model):
-    confirm_status = models.CharField(_('confirm status'), default='1', max_length=1, choices=statuses)               #confirm site comments by admin and show comment in site if confirmed, '1' = confirmed     '2' = not checked(admin should check comment to confirm or not)      '3' = not confirmed(admin can confirm afters if want)    '4' = deleted
+    status = models.CharField(_('status'), default='1', max_length=1, choices=statuses)               # review site comments by admin and show comment in site if confirmed, '1' = confirmed     '2' = not checked(admin should check comment to confirm or not)      '3' = not confirmed(admin can confirm afters if want)    '4' = deleted
     published_date = models.DateTimeField(_('published date'), auto_now_add=True)           # published_date should translate in front. for example comment1 (1390/1/27) can translate like: comment1 (2016/4/16)
     content = models.TextField(_('content'), validators=[MaxLengthValidator(500)])
-    author = models.ForeignKey(User, related_name='comment_set_author', related_query_name='comments_author', on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('author'))
-    confermer = models.ForeignKey(User, related_name='comment_set_confermer', related_query_name='comments_confermer', on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('confermer'))
+    author = models.ForeignKey(User, related_name='written_comments', related_query_name='comments_author', on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('author'))
+    reviewer = models.ForeignKey(User, related_name='reviewed_comments', related_query_name='comments_reviewer', on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('reviewer'))        # reviewer is last admin changed comment.status
     post = models.ForeignKey(Post, on_delete=models.CASCADE, blank=True, null=True, verbose_name=_('post'))
     product = models.ForeignKey(Product, on_delete=models.CASCADE, blank=True, null=True, verbose_name=_('product'))
 

@@ -9,7 +9,7 @@ urlpatterns = [
     path('logout/', django_views.LogoutView.as_view(), name='logout'),       #this is exatly like rest_framework/urls
     path('signup/', views.SignUp.as_view(), name='signupview'),
     path('userchange/', views.UserChange.as_view(), name='user-change'),
-    #path('profile/<user_id>/',  , name=''),
+    path('profile/<user_id>/',  views.UserProfile.as_view(), name='user-profile'),
     path('profile/admin/<id>/',  views.AdminProfile.as_view(), name='admin-profile'),     #we used this url for main/myserializers/PostListSerializer/get_author()
 ]
 

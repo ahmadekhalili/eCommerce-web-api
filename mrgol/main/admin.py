@@ -42,8 +42,8 @@ shopdb_mongo = pymongo.MongoClient("mongodb://localhost:27017/")['shop']
 
 class CommentInline(admin.TabularInline):
     model = Comment
-    fields = ('content', 'author', 'confermer', 'confirm_status', 'get_published_date')
-    readonly_fields = ('content', 'author', 'confermer', 'confirm_status', 'get_published_date')
+    fields = ('content', 'author', 'reviewer', 'status', 'get_published_date')
+    readonly_fields = ('content', 'author', 'reviewer', 'status', 'get_published_date')
     
     def get_published_date(self, obj):                                       #auto_now_add and auto_now fields must be in read_only otherwise raise error (fill by django not user) and you cant control output of read_only fields with widget (from its form) so for this fiels you cant specify eny widget!!
         ymd = jdatetime.datetime.fromgregorian(datetime=obj.published_date).strftime('%Y %B %-d').split()         # this is like ['1388', 'Esfand', '1']
@@ -328,13 +328,13 @@ admin.site.register(Product, ProductAdmin)
 
 
 class CommentAdmin(admin.ModelAdmin):
-    list_display = ['id', 'author', 'get_published_date', 'confirm_status']
-    #fields = ('confirm_status', 'content', 'author', 'confermer')
-    #readonly_fields = ('author', 'confermer', 'get_published_date')
+    list_display = ['id', 'author', 'get_published_date', 'status']
+    #fields = ('status', 'content', 'author', 'reviewer')
+    #readonly_fields = ('author', 'reviewer', 'get_published_date')
     #form = myforms.CommentForm
 
     def get_queryset(self, request):
-        queryset = Comment.objects.exclude(confirm_status='4')
+        queryset = Comment.objects.exclude(status='4')
         return queryset
     
     def get_published_date(self, obj):                                       #auto_now_add and auto_now fields must be in read_only otherwise raise error (fill by django not user) and you cant control output of read_only fields with widget (from its form) so for this fiels you cant specify eny widget!!
@@ -349,19 +349,19 @@ class CommentAdmin(admin.ModelAdmin):
 
     def save_form(self, request, form, change):
         try:
-            current_confirm_status = form.instance.confirm_status                       #this is just for change page and in adding new comment this raise error so need try except.
-            saved_confirm_status = Comment.objects.get(id=form.instance.id).confirm_status
-            if current_confirm_status != saved_confirm_status and current_confirm_status != '2' and current_confirm_status != '4':
-                form.instance.confermer = request.user
+            status = form.instance.status                       #this is just for change page and in adding new comment this raise error so need try except.
+            saved_status = Comment.objects.get(id=form.instance.id).status
+            if status != saved_status and status != '2' and status != '4':
+                form.instance.reviewer = request.user
         except:
             pass
         return form.save(commit=False)
 
     def delete_model(self, request, obj):
-        obj.confirm_status = '4'
+        obj.status = '4'
         obj.save()
 
-    def save_related(self, request, form, formsets, change):         # here update product in mongo database  (MDetailProduct.json.comment_set) according to Comment changes. for example if we have comment_1 (comment_1.product=<Product (1)>)   comment_1.content changes to 'another_content'  MDetailProduct:  [{id: 1, json: {comment_set: [{ id: 2, confirm_status: '1', published_date: '2022-08-07T17:33:38.724203', content: 'another_content', author: { id: 1, user_name: 'ادمین' }, confermer: null, post: null, product: 12 }], ...}}, {id: 2, ...}]
+    def save_related(self, request, form, formsets, change):         # here update product in mongo database  (MDetailProduct.json.comment_set) according to Comment changes. for example if we have comment_1 (comment_1.product=<Product (1)>)   comment_1.content changes to 'another_content'  MDetailProduct:  [{id: 1, json: {comment_set: [{ id: 2, status: '1', published_date: '2022-08-07T17:33:38.724203', content: 'another_content', author: { id: 1, user_name: 'ادمین' }, reviewer: null, post: null, product: 12 }], ...}}, {id: 2, ...}]
         form.save_m2m()
         for formset in formsets:
             self.save_formset(request, form, formset, change=change)

@@ -363,15 +363,15 @@ msgid "deleted"
 msgstr "حذف شده"
 
 #: main/models.py:401 main/myforms.py:75
-msgid "confirm status"
-msgstr "وضعيت تاييد"
+msgid "status"
+msgstr "وضعيت"
 
 #: main/models.py:403
 msgid "content"
 msgstr "محتوا"
 
 #: main/models.py:405
-msgid "confermer"
+msgid "reviewer"
 msgstr "تایید/رد کننده"
 
 #: main/models.py:406

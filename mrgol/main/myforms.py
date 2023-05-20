@@ -72,9 +72,9 @@ class ProductForm(myforms.ProductModelForm):
 
 
 class CommentForm(forms.ModelForm):
-    confirm_status = myforms.CustomField(widget=confirm_status_widget, required=True, label=_('confirm status'))
+    status = myforms.CustomField(widget=status_widget, required=True, label=_('status'))
     #published_date = CustomField(disabled=True, widget=published_date_widget, label=_('published date'))
-    confermer = myforms.CustomField(widget=confermer_widget, label='confermer')           # can use choicefield, problem in saving that.
+    reviewer = myforms.CustomField(widget=reviewer_widget, label='reviewer')           # can use choicefield, problem in saving that.
     
     class Meta:
         model = Comment

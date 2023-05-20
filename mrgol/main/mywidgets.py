@@ -120,8 +120,8 @@ class image_icon_widget(QuestionMark, forms.widgets.FileInput):
 
 
 
-class confirm_status_widget(forms.Select):
-    template_name = 'main/widgets/comment_confirm_status.html'
+class status_widget(forms.Select):
+    template_name = 'main/widgets/comment_status.html'
     
     def get_context(self, name, value, attrs):
         context = super().get_context(name, value, attrs)
@@ -138,8 +138,8 @@ class published_date_widget(forms.widgets.Input):
         return context
 
 
-class confermer_widget(forms.widgets.Input):
-    template_name = 'main/widgets/comment_confermer.html'
+class reviewer_widget(forms.widgets.Input):
+    template_name = 'main/widgets/comment_reviewer.html'
     
     def get_context(self, name, value, attrs):
         context = super().get_context(name, value, attrs)

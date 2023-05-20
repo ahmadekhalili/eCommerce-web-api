@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
             name='Comment',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('confirm_status', models.CharField(choices=[('1', 'not checked'), ('2', 'confirmed'), ('3', 'not confirmed'), ('4', 'deleted')], default='1', max_length=1, verbose_name='confirm status')),
+                ('confirm_status', models.CharField(choices=[('1', 'not checked'), ('2', 'confirmed'), ('3', 'not confirmed'), ('4', 'deleted')], default='1', max_length=1, verbose_name='status')),
                 ('published_date', models.DateTimeField(auto_now_add=True, verbose_name='published date')),
                 ('content', models.TextField(validators=[django.core.validators.MaxLengthValidator(500)], verbose_name='content')),
             ],

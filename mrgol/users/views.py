@@ -12,8 +12,8 @@ from .mymethods import login_validate
 from .models import User
 from cart.views import CartCategoryView
 from cart.cart import Cart
-from orders.models import ProfileOrder
-from orders.myserializers import ProfileOrderSerializer
+from orders.models import ProfileOrder, Order
+from orders.myserializers import ProfileOrderSerializer, OrderSerializer
 from customed_files.rest_framework.rest_framework_customed_classes.custom_rest_authentication import CustomSessionAuthentication
 from main.models import Post, Comment
 from main.myserializers import CommentSerializer, PostListSerializer
@@ -109,6 +109,20 @@ class UserChange(views.APIView):
             return Response(dict([(key, serializer.data.get(key)) for key in request.data if serializer.data.get(key)]))             #{**CartCategoryView().get(request, datas_selector='user').data}
         else:
             return Response(serializer.errors)
+
+
+
+
+class UserProfile(views.APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request, *args, **kwargs):
+        profileorders = request.user.profileorders.select_related('town__state')
+        profileorders_serialized = ProfileOrderSerializer(profileorders, many=True).data
+        orders = Order.objects.filter(profile_order__user=request.user)
+        orders_serialized = OrderSerializer(orders, many=True, context={'request': request}).data
+        comments_serialized = CommentSerializer(request.user.written_comments.all(), many=True).data
+        user_serialized = UserSerializer(request.user).data
+        return Response({'profileorders': profileorders_serialized, 'orders': orders_serialized, 'comments': comments_serialized, 'user': user_serialized})
 
 
 

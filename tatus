@@ -14,7 +14,7 @@
  from . import myforms[m
  from .models import *[m
 [36m@@ -35,8 +36,8 @@[m [mclass CommentInline(admin.TabularInline):[m
-     readonly_fields = ('content', 'author', 'confermer', 'confirm_status', 'get_published_date')[m
+     readonly_fields = ('content', 'author', 'reviewer', 'status', 'get_published_date')[m
      [m
      def get_published_date(self, obj):                                       #auto_now_add and auto_now fields must be in read_only otherwise raise error (fill by django not user) and you cant control output of read_only fields with widget (from its form) so for this fiels you cant specify eny widget!![m
 [31m-        date = MiladiToShamsi(obj.published_date.year, obj.published_date.month, obj.published_date.day).result(month_name=True)[m

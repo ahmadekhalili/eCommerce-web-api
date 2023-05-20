@@ -21,7 +21,7 @@ from users.mymethods import user_name_shown
 
 class CommentSerializer(serializers.ModelSerializer):
     published_date = serializers.SerializerMethodField()
-    author = UserNameSerializer(read_only=True)                                # this field must be read_only otherwise can't save like: c=CommentSerializer(data={'content': 'aaaaa', 'author': 1, 'confermer': 1, 'product_id': 1}) c.is_valid() c.save()
+    author = UserNameSerializer(read_only=True)                                # this field must be read_only otherwise can't save like: c=CommentSerializer(data={'content': 'aaaaa', 'author': 1, 'reviewer': 1, 'product_id': 1}) c.is_valid() c.save()
     class Meta:
         model = Comment
         fields = '__all__'
