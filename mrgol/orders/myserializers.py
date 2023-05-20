@@ -17,7 +17,7 @@ class ProfileOrderSerializer(serializers.ModelSerializer):
 
     def to_representation(self, obj):
         self.fields['phone'] = serializers.SerializerMethodField()
-        self.fields['state'] = StateSerializer(read_only=True)
+        self.fields['state'] = serializers.SerializerMethodField()
         self.fields['town'] = TownSerializer(read_only=True)
         self.fields['user'] = UserNameSerializer(read_only=True)
         fields =  super().to_representation(obj)
@@ -26,6 +26,8 @@ class ProfileOrderSerializer(serializers.ModelSerializer):
     def get_phone(self, obj):
         return f'{obj.phone.national_number}'
 
+    def get_state(self, obj):
+        return StateSerializer(obj.town.state, read_only=True).data
 
 
 

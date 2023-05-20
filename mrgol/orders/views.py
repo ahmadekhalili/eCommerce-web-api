@@ -27,8 +27,6 @@ class ListCreateProfileOrder(views.APIView):
         profileorders = request.user.profileorders.select_related('town__state')
         total_prices = Cart(request).get_total_prices()
         if profileorders:
-            for profileorder in profileorders:
-                profileorder.state = profileorder.town.state             #profileorder.state needed in ProfileOrderSerializer
             return Response({'total_prices': str(total_prices), 'profileorders': ProfileOrderSerializer(profileorders, many=True).data})
         else:
             return Response({'total_prices': str(total_prices), 'profileorders': None})         #after this front side must create blank ProfileOrder Form with action refrenced to ListCreateProfileOrder.post. (you can create form and its html elements by django modelform and say to front html elements)    
