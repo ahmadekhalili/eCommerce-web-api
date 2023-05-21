@@ -46,11 +46,10 @@ class LogIn(views.APIView):
 from rest_framework import serializers
 from rest_framework.exceptions import ErrorDetail, ValidationError, ErrorDetail
 class SignUp(views.APIView):
-
     def post(self, request, *args, **kwargs):
         '''
-        input in POST = {"csrfmiddlewaretoken": "...", "email": "...", "password1": "...", "password2": "..."}__________
-        input in header = {"csrftoken": "..."}
+        input in POST = {"csrfmiddlewaretoken": "...", "phone": "...", "password1": "...", "password2": "..."}__________
+        input in header cookie = {"csrftoken": "..."}
         '''
         CustomSessionAuthentication().enforce_csrf(request)
         phone, password1, password2 = request.data.get('phone'), request.data.get('password1'), request.data.get('password2')
