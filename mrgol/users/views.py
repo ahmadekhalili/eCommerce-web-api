@@ -46,18 +46,6 @@ class LogIn(views.APIView):
 from rest_framework import serializers
 from rest_framework.exceptions import ErrorDetail, ValidationError, ErrorDetail
 class SignUp(views.APIView):
-    def get(self, request, *args, **kwargs):
-        '''
-        output = {"csrfmiddlewaretoken": "...",  "csrftoken": "..."}
-        '''
-        #email, password1, password2 = request.GET.get('email'), request.GET.get('password1'), request.GET.get('password2')
-        ##'email':'', 'password': password1, 'password2': password2
-        #serializer.is_valid(raise_exception=True)
-        #serializer.save()
-        #serializer = Test4Serializer(data={'field_1': 'aaaaaaa'})
-        #serializer.is_valid(raise_exception=True)
-        return Response({})       
-        #return Response({**CartCategoryView().get(request, datas_selector='csrf').data})
 
     def post(self, request, *args, **kwargs):
         '''
@@ -65,12 +53,11 @@ class SignUp(views.APIView):
         input in header = {"csrftoken": "..."}
         '''
         CustomSessionAuthentication().enforce_csrf(request)
-        phone, password1, password2 = request.POST.get('phone'), request.POST.get('password1'), request.POST.get('password2')
-        serializer = UserSerializer(data={'phone':phone, 'password1': password1, 'password2': password2})
-        serializer.is_valid(raise_exception=True)
+        phone, password1, password2 = request.data.get('phone'), request.data.get('password1'), request.data.get('password2')
+        serializer = UserSerializer(data={'phone': phone, 'password': password1})
+        serializer.is_valid(raise_exception=True)                           # raise errors better than User.objects.create_user(...) forr example creating user with dublicate phone, create_user raise error:  duplicate key value violates unique constraint "users_user_phone_key"...     while is_valid raise: "unique": "کاربر با این شماره تلفن از قبل موجود است."
         serializer.save()
-
-        return Response(serializer)
+        return Response(serializer.data)
 
 
 

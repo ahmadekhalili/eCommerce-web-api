@@ -28,7 +28,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = super().to_representation(obj)
         [fields.pop(key, None) for key in ['groups', 'password', 'user_permissions', 'visible']]        #fields.pop(key, None)  this None means if dont find key for removing dont raise error return None instead.
         return fields
-    
+
     def is_valid(self, raise_exception=False):
         assert hasattr(self, 'initial_data'), (
             'Cannot call `.is_valid()` as no `data=` keyword argument was '
@@ -42,16 +42,16 @@ class UserSerializer(serializers.ModelSerializer):
                 self._validated_data = {}
                 self._errors = exc.detail
 
-                
+
                 errors_dic = exc.detail.copy()
                 for field_name in exc.detail:
-                    for i in range(len(exc.detail[field_name])):         
+                    for i in range(len(exc.detail[field_name])):
                         details_list = exc.detail[field_name].copy()          #exc.detail[field_name] is list and mutable with details, su we use .copy to stop changing exc.detail
                         details_list[i] = {exc.detail[field_name][i].code: exc.detail[field_name][i]}   #exc.detail[field_name][i] is object of ErrorDetail class
                     errors_dic[field_name] = details_list
                 self._errors = {'error': exc.detail}
 
-      
+
             else:
                 self._errors = {}
 
@@ -67,7 +67,8 @@ class UserSerializer(serializers.ModelSerializer):
         return str(jdatetime.datetime.fromgregorian(datetime=obj.date_joined))
 
     def get_last_login(self, obj):
-        return str(jdatetime.datetime.fromgregorian(datetime=obj.last_login))
+        if obj.last_login:                              # in first of user creation is None
+            return str(jdatetime.datetime.fromgregorian(datetime=obj.last_login))
 
     def get_postal_code(self, obj):
         request = self.context.get('request', None)
