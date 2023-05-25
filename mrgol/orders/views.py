@@ -39,9 +39,9 @@ class ListCreateProfileOrder(views.APIView):
         serializer  = ProfileOrderSerializer(data=data)
         if serializer.is_valid():
             profileorder = serializer.save()
-            get = request.GET.copy()
-            get.setlist('profileorder_id', str(profileorder.id))
-            request.GET = get
+            # get = request.GET.copy()
+            # get.setlist('profileorder_id', str(profileorder.id))
+            # request.GET = get
             return Response(ProfileOrderSerializer(profileorder).data)    #why dont use like: OrderSerializer(order).data?   answer: may user create second order, so we need alwayes use user.orders.all() .
         else:
             return Response(serializer.errors)
@@ -81,7 +81,7 @@ class ListCreateOrderItem(views.APIView):
         orders = Order.objects.filter(profile_order__user=request.user).select_related('profile_order').prefetch_related('items__product__image_icon', 'items__product__rating').order_by('-created')#OrderItem.objects.filter(order__profile_order__user=request.user, order__paid=True).select_related('order__profile_order').order_by('-order__created')
         return Response({'orders': OrderSerializer(orders, many=True, context={'request': request}).data})
     
-    def post(self, request, *args, **kwargs):                           #here created orderitems.  come here from class ProfileOrderDetail.get (cart.session['shipping_price'] initialized in this class)     connect here with utl: http http://192.168.114.21:8000/orders/orderitems/ cookie:"sessionid=..." profile_order_id=1 paid_type=cod shipping_type=personal_dispatch  or post
+    def post(self, request, *args, **kwargs):                           #here created orderitems.  come here from class ProfileOrderDetail.get (cart.session['shipping_price'] initialized in that class)     connect here with utl: http http://192.168.114.21:8000/orders/orderitems/ cookie:"sessionid=..." profile_order_id=1 paid_type=cod shipping_type=personal_dispatch  or post
         cart, data, total_prices, price_changed, quantity_ended = Cart(request), request.data, Decimal(0), False, False
         paid_type, shipping_type = data.get('paid_type', 'online'), data.get('shipping_type')              #important: if website have cod and online front should create 2 chekbox for thats.
         orderitems, products, shopfilteritems, lists = [], [], [], []

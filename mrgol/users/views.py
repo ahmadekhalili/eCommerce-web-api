@@ -12,6 +12,7 @@ from .mymethods import login_validate
 from .models import User
 from cart.views import CartCategoryView
 from cart.cart import Cart
+from orders.views import ListCreateOrderItem
 from orders.models import ProfileOrder, Order
 from orders.myserializers import ProfileOrderSerializer, OrderSerializer
 from customed_files.rest_framework.rest_framework_customed_classes.custom_rest_authentication import CustomSessionAuthentication
@@ -63,18 +64,10 @@ class SignUp(views.APIView):
 
 class UserChange(views.APIView):
     permission_classes = [IsAuthenticated]
-    def get(self, request, *args, **kwargs):
-        '''
-        input, output = None__________
-        method get is done in front, front create a userchangeform and request url /supporter_datas/user/ to optain user datas for prepopulate fields.__________
-        for decide which user fields should provide in userchangeform, you can see User table in /static/app1/mrgol_visualized.png/
-        '''
-        return Response({**CartCategoryView().get(request, datas_selector='user_csrf').data})
-
     def put(self, request, *args, **kwargs):                #connect like this:   http PUT http://192.168.114.21:3000/users/userchange/ cookie:"sessionid=87y70z4bnj6kj9698qbpas1a0w3ncfpx; csrftoken=SSp1m9eJ7mHuIncE88iEwF2VzspDFi7uOWlXamzNjd1vDZT9YjxrFgNjyDUIs7wQ" first_name="تچیز" csrfmiddlewaretoken=KZNz210BMpQLjRurCxxMtDnILetmQxMDG3JvQelFYgaMetbWsIMzCe86KpYrDmbZ        important: if you dont pot partial=True always raise error 
         '''
-        input = submited userchangeform should sent here (/userchange/) like <from action="domain.com/users/userchange/" ...>__________
-        output(in success) = front should request user (/supporter_datas/user/) to optain user with new changes.__________
+        input = submited userchangeform must sent here (/userchange/) like <from action="domain.com/users/userchange/" ...>__________
+        output(in success) = front must request user (/supporter_datas/user/) to optain user with new changes.__________
         output(in failure) = {"is_superuser": ["Must be a valid boolean."],"email": ["Enter a valid email address."]}
         '''
         if request.data.get('postal_code'):
@@ -104,11 +97,9 @@ class UserProfile(views.APIView):
     def get(self, request, *args, **kwargs):
         profileorders = request.user.profileorders.select_related('town__state')
         profileorders_serialized = ProfileOrderSerializer(profileorders, many=True).data
-        orders = Order.objects.filter(profile_order__user=request.user)
-        orders_serialized = OrderSerializer(orders, many=True, context={'request': request}).data
         comments_serialized = CommentSerializer(request.user.written_comments.all(), many=True).data
         user_serialized = UserSerializer(request.user).data
-        return Response({'profileorders': profileorders_serialized, 'orders': orders_serialized, 'comments': comments_serialized, 'user': user_serialized})
+        return Response({'profileorders': profileorders_serialized, **ListCreateOrderItem().get(request).data, 'comments': comments_serialized, 'user': user_serialized})
 
 
 

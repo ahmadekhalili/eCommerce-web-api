@@ -42,7 +42,7 @@ class CartCategoryView(views.APIView):       #'sabad'(in header)
 
 class CartAdd(views.APIView):       #user come from 'sabad'(in header) to this method.  add id in front, just front must car add current_item + cart_cookie in add. #set_fingers and remove  is in front 
     def post(self, request, *args, **kwargs):
-        #CustomSessionAuthentication().enforce_csrf(request)
+        #CustomSessionAuthentication().enforce_csrf(request)                        # this enable csrf checks for unauthenticated user (for loged in user, DEFAULT_AUTHENTICATION_CLASSES in settings.py cause csrf checks.
         data = request.data
         cart = Cart(request)
         cart.add(product_id=data['product_id'], quantity=data.get('quantity', 1), shopfilteritem_id=data.get('shopfilteritem_id'))    #cd['quantity'] is int but how is it because: coerce=int ? request.data['quantity'] is rest/views/CartDetail is string
