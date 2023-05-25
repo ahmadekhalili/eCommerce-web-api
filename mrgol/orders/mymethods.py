@@ -3,6 +3,8 @@ from cart.views import CartCategoryView
 from cart.cart import Cart
 from .models import ProfileOrder, Shipping
 
+from decimal import Decimal
+
 
 def profile_order_detail(request, pk):
     profileorder = ProfileOrder.objects.filter(id=pk).select_related('town__state')[0]
@@ -11,8 +13,10 @@ def profile_order_detail(request, pk):
         return None
     cart = Cart(request)
     shipping = Shipping.objects.first()
-    post_price = PostDispatchPrice(cart_category['total_weight'],  cart_category['dimensions']).get_price(shipping.town.state.key, shipping.town.key, profileorder.town.state.key, profileorder.town.key)
+    #post_price = PostDispatchPrice(cart_category['total_weight'],  cart_category['dimensions']).get_price(shipping.town.state.key, shipping.town.key, profileorder.town.state.key, profileorder.town.key)
     # note: post_price can be decimal or str (when post website, return error instead price post_price is str) like: post_price = 'ارسال مرسوله با توجه به شرایط انتخابی و نرخنامه پستی امکان پذیر نمی باشد'
+    post_price = Decimal('13920')
+    # note2: service: 'https://parcelprice.post.ir' is inactive. so we can't compute post prices by PostDispatchPrice.get_price()  so for computing post price, we received last 'نرخ نامه' poblished in 1401, from post.ir to add static post price manually.
     post_price += shipping.fee if type(post_price) != str else ''                       # we didn't import additional class decimal
     for dispatch in shipping.dispatch_set.all():
         if dispatch.town == profileorder.town:
