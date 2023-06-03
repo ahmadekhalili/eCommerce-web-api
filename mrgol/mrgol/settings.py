@@ -167,6 +167,12 @@ LANGUAGES = (
     ('en', gettext('English')),
 )                                             # main/management/createstates use 'fa' as default. it is important put default language in first (use in mymethods.conf_questwidget_class).
 
+'''
+"gregorian" or "jalali". in gregorian images saves like: products_images/2023/06/03  in jalali like:
+products_images/1402/03/12. unlike LANGUAGE_CODE, you should change IMAGES_PATH_TYPE in first project production starts.
+'''
+IMAGES_PATH_TYPE = 'jalali'
+
 PHONENUMBER_DEFAULT_REGION = 'IR'
 PHONENUMBER_DB_FORMAT = 'NATIONAL'
 

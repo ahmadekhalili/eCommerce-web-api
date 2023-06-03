@@ -18,9 +18,10 @@ from PIL import Image as PilImage
 from djongo import models as djongo_models
 from ckeditor_uploader.fields import RichTextUploadingField
 
+import jdatetime
+
 from .model_methods import set_levels_afterthis_all_childes_id, update_product_stock
 from customed_files.django.classes import model_fields_custom
-from customed_files.date_convertor import MiladiToShamsi
 from users.models import User
 # note1: changing classes places may raise error when creating tables(makemigrations), for example changing Content with Post will raise error(Content use Post in its field and shuld be definded after Post)
 # note2: if you add or remove a field, you have to apply it in translation.py 'fields' if was required.
@@ -173,13 +174,15 @@ class Rating(models.Model):                                                   #m
 
 
 
-def path_selector(instance, filename):                        #note: if you use method in upload_to, strftime ("%Y/%m/%d/") dont work and should provided manualy.
-    now = datetime.now()
-    y, m, d = MiladiToShamsi(now.year, now.month, now.day).result()
-    return f'{instance.path}_images/icons/{y}/{m}/{d}/{filename}'                         
+def icon_path_selector(instance, filename):                        #note: if you use method in upload_to, strftime ("%Y/%m/%d/") dont work and should provided manualy.
+    if settings.IMAGES_PATH_TYPE == 'jalali':
+        date = jdatetime.datetime.fromgregorian(date=datetime.now()).strftime('%Y %-m %-d').split()
+    else:
+        date = datetime.now().strftime('%Y %-m %-d').split()
+    return f'{instance.path}_images/icons/{date[0]}/{date[1]}/{date[2]}/{filename}'  # instance.path == Image_icon.path
 
 class Image_icon(models.Model):
-    image = models.FileField(_('image'), upload_to=path_selector)
+    image = models.FileField(_('image'), upload_to=icon_path_selector)
     alt = models.CharField(_('alt'), max_length=55, unique=True, null=True, default='')    # alt should not be dublicate because we used alt instead image_icon id in def __str__(self)
     path = models.CharField(_('path'), max_length=20, default='products')                  # can be value like: "products"  or  "posts" ....    
 
@@ -353,9 +356,15 @@ class ShopFilterItem(models.Model):
 
 
 
+def image_path_selector(instance, filename):                        #note: if you use method in upload_to, strftime ("%Y/%m/%d/") dont work and should provided manualy.
+    if settings.IMAGES_PATH_TYPE == 'jalali':
+        date = jdatetime.datetime.fromgregorian(date=datetime.now()).strftime('%Y %-m %-d').split()
+    else:
+        date = datetime.now().strftime('%Y %-m %-d').split()
+    return f'products_images/{date[0]}/{date[1]}/{date[2]}/{filename}'
 
 class Image(models.Model):
-    image = models.ImageField(_('image'), upload_to='products_images/%Y/%m/%d/')
+    image = models.ImageField(_('image'), upload_to=image_path_selector)
     alt = models.CharField(_('alt'), max_length=55, unique=True, null=True, default='')                    # alt should not be dublicate because we used alt instead image id in def __str__(self)
     product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name=_('product'))
 
@@ -369,8 +378,15 @@ class Image(models.Model):
 
 
 
+def small_path_selector(instance, filename):                        #note: if you use method in upload_to, strftime ("%Y/%m/%d/") dont work and should provided manualy.
+    if settings.IMAGES_PATH_TYPE == 'jalali':
+        date = jdatetime.datetime.fromgregorian(date=datetime.now()).strftime('%Y %-m %-d').split()
+    else:
+        date = datetime.now().strftime('%Y %-m %-d').split()
+    return f'products_images/{date[0]}/{date[1]}/{date[2]}/smallimages/{filename}'
+
 class SmallImage(models.Model):
-    image = models.ImageField(_('image'), upload_to='products_images/%Y/%m/%d/smallimages/')
+    image = models.ImageField(_('image'), upload_to=small_path_selector)
     alt = models.CharField(_('alt'), max_length=55, blank=True, default='')
     father = models.OneToOneField(Image, on_delete=models.CASCADE, verbose_name=_('father'))
     product = models.ForeignKey(Product, related_name='smallimages', on_delete=models.CASCADE, verbose_name=_('product'))
@@ -389,7 +405,7 @@ def save_smallimage(sender, **kwargs):
         smallimage.image.save(os.path.basename(image.image.path), File(open(image.image.path, 'rb')))                         #why save image handy and dont save like SmallImage.objects.create(image=image.image, ....)?  is worse because directory creating(like /media/2020/5/2/small/) and url of that image you expected by "upload_to" copied from image.image and dont see do SmallImage.image at all!!!. so why? because  you're assigning an image directly not uploading file(for saving image Image.image we upload its image by a form) so note upload_to and creating directory you specefid in it will done just when you upload image or save handi that image!!!!   
         smallimage.save()
         file = PilImage.open(smallimage.image.path)
-        resized = file.resize((100, 100))
+        resized = file.resize((160, 160))
         resized.save(smallimage.image.path)
 
 post_save.connect(save_smallimage, sender=Image)
