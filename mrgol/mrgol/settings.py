@@ -201,6 +201,8 @@ CORS_ALLOW_HEADERS = []       # add custom headers here
 #SESSION_COOKIE_SAMESITE = 'None'
 #SESSION_COOKIE_SECURE = True
 
+#CSRF_TRUSTED_ORIGINS = ['http://192.168.114.100:3000', 'http://192.168.114.152:8000']
+
 CART_SESSION_ID = 'cart'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'

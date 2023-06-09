@@ -26,5 +26,5 @@ urlpatterns = [
     path('comments/products/create/', views.ProductCommentCreate.as_view(), name='comments_products_create'),
     path('states/', views.States.as_view(), name='states'),
     path('states/<key>/', views.TownsByState.as_view(), name='towns-by-state'),
+    path('upload/', views.UploadImage.as_view(), name='upload-image'),
 ]
-

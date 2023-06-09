@@ -1,3 +1,5 @@
+import json
+
 from django.db.models import Sum, F, Case, When, Q
 from django.db.models.functions import Coalesce
 from django.http import HttpResponse
@@ -10,9 +12,15 @@ from django.middleware.csrf import get_token
 
 from rest_framework import viewsets
 from rest_framework import generics
-from rest_framework import permissions, authentication
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework import views
+
+import io
+import os
+import jdatetime
+from pathlib import Path
+from PIL import Image as PilImage
 
 from . import myserializers, myforms
 from .mymethods import get_products, get_posts, get_posts_products_by_category, make_next
@@ -90,7 +98,6 @@ class SupporterDatasSerializer(views.APIView):     #important: you can use class
 
 
 
-from rest_framework.permissions import IsAuthenticated
 class HomePage(views.APIView):
     #permission_classes = [IsAuthenticated]
     def get(self, request, *args, **kwargs):
@@ -152,7 +159,7 @@ class PostList(views.APIView):
             pk, slug = post.id, post.slug
             serializer = serializers[count]
             serializer['url'] = f'{pk}/{slug}/'
-            #serializer['image_icon'] = request.build_absolute_uri(post.image_icon) 
+            #serializer['main_image'] = request.build_absolute_uri(post.main_image) 
             count += 1
         return Response(serializers)    
 
@@ -177,6 +184,13 @@ class PostList(views.APIView):
         serializers = {'posts': myserializers.PostListSerializer(posts, many=True, context={'request': request}).data}             #you must put context={'request': request} in PostListSerializer argument for working request.build_absolute_uri  in PostListSerializer, otherwise request will be None in PostListSerializer and raise error 
         sessionid = request.session.session_key
         return Response({'sessionid': sessionid, **serializers})
+
+    def post(self, request, *args, **kwargs):
+        form = myforms.PostForm(request.POST, request.FILES)
+        if form.is_valid():
+            instance = form.save()
+            return Response(myserializers.PostDetailSerializer(instance, context={'request': request}).data)
+        return Response(form.errors)
 
 
 
@@ -279,7 +293,7 @@ class PostDetail(views.APIView):
         input receive from /posts/ like posts0.url = "3/یسشی/"__________
         output a post depend on pk you specify.
         '''
-        #permission_classes = [permissions.IsAuthenticated]
+        #permission_classes = [IsAuthenticated]
         post = Post.objects.filter(id=kwargs['pk']).select_related('author', 'category').prefetch_related('comment_set')
         serializer = myserializers.PostDetailSerializer(post, many=True).data
         sessionid = request.session.session_key
@@ -379,3 +393,26 @@ class TownsByState(views.APIView):
                 return Response(L[1])
     '''
 
+
+class UploadImage(views.APIView):
+    #permission_classes = [IsAdminUser]
+    def post(self, request, *args, **kwargs):
+        # request.data['file'] sended by front is InMemoryUploadedFile object, like data sended by <input type="file"..>
+        filename, file_data = request.data['file'].name, request.data['file'].read()
+        if settings.IMAGES_PATH_TYPE == 'jalali':
+            date = jdatetime.datetime.fromgregorian(date=datetime.now()).strftime('%Y %-m %-d').split()
+        else:
+            date = datetime.now().strftime('%Y %-m %-d').split()
+        base_path = str(Path(__file__).resolve().parent.parent)     # is like: /home/akh/eCommerce-web-api/mrgol
+        path = f'/media/posts_images/{date[0]}/{date[1]}/{date[2]}/'
+        smallimage_path = f'/media/posts_images/{date[0]}/{date[1]}/{date[2]}/smallimages/'
+        if not os.path.exists(base_path + path):
+            os.makedirs(base_path + path)
+        if not os.path.exists(base_path + smallimage_path):
+            os.makedirs(base_path + smallimage_path)
+        stream = io.BytesIO(file_data)   #.encode().decode('unicode_escape').encode("raw_unicode_escape")
+        image = PilImage.open(stream)
+        image.save(base_path + path + filename)
+        resized = image.resize((160, 160))
+        resized.save(base_path + smallimage_path + filename)
+        return Response({'default': path + filename, '160': smallimage_path + filename})

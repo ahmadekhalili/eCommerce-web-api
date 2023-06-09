@@ -27,7 +27,7 @@ class CommentSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def get_published_date(self, obj):
-        return str(jdatetime.datetime.fromgregorian(datetime=obj.published_date))
+        return round(jdatetime.datetime.fromgregorian(datetime=obj.published_date).timestamp())
     
 class RatingSerializer(serializers.ModelSerializer):
     class Meta:
@@ -201,26 +201,27 @@ class BrandSerializer(serializers.ModelSerializer):
 
 class PostListSerializer(serializers.ModelSerializer):
     published_date = serializers.SerializerMethodField()
-    image_icon = Image_iconSerializer()
+    tags = serializers.ListField(child=serializers.CharField(max_length=30))
+    main_image = Image_iconSerializer()
     category = serializers.SerializerMethodField()
     author = serializers.SerializerMethodField()
-    url = serializers.SerializerMethodField()                                 #showing solo str datas like 'url' before dict/list type datas like image_icone, category, author  is more readable and clear.
+    url = serializers.SerializerMethodField()                                 #showing solo str datas like 'url' before dict/list type datas like main_image, category, author  is more readable and clear.
 
     class Meta:
         model = Post
-        fields = ['id', *g_t('title'), *g_t('slug'), *g_t('meta_title'), *g_t('meta_description'), *g_t('brief_description'), 'published_date', 'image_icon', 'category', 'author', 'url']
+        fields = ['id', *g_t('title'), *g_t('slug'), *g_t('meta_title'), *g_t('meta_description'), *g_t('brief_description'), 'published_date', 'tags', 'main_image', 'category', 'author', 'url']
 
-    def get_image_icon(self, obj):
+    def get_main_image(self, obj):
         request = self.context.get('request', None)
         try:
-            url = request.build_absolute_uri(obj.image_icon.image.url)               
+            url = request.build_absolute_uri(obj.main_image.image.url)
         except:
             url = ''                                                         
         return url
 
     def get_published_date(self, obj):
-        return str(jdatetime.datetime.fromgregorian(datetime=obj.published_date))
-    
+        return round(jdatetime.datetime.fromgregorian(datetime=obj.published_date).timestamp())
+
     def get_category(self, obj):                                        #we must create form like: <form method="get" action="/posts/?obj.category.slug"> .  note form must shown as link.
         pk, slug = obj.id, obj.slug
         name, url = (obj.category.name, f'/posts/{obj.category.slug}/') if obj.category else ('', '')       #post.category has null=True so this field can be blank like when you remove and category.
@@ -258,17 +259,23 @@ class ProductListSerializer(serializers.ModelSerializer):
 
 
 class PostDetailSerializer(serializers.ModelSerializer):
-    published_date = serializers.SerializerMethodField() 
-    author = UserNameSerializer()
-    category = serializers.SerializerMethodField()
+    published_date = serializers.SerializerMethodField(read_only=True)
+    tags = serializers.ListField(child=serializers.CharField(max_length=30))
+    main_image = Image_iconSerializer()
     comment_set = CommentSerializer(read_only=True, many=True)
 
     class Meta:
         model = Post
         fields = '__all__'
 
+    def to_representation(self, obj):
+        fields = super().to_representation(obj)
+        fields['author'] = UserNameSerializer(obj.author).data
+        fields['category'] = self.get_category(obj)
+        return fields
+
     def get_published_date(self, obj):
-        return str(jdatetime.datetime.fromgregorian(datetime=obj.published_date))
+        return round(jdatetime.datetime.fromgregorian(datetime=obj.published_date).timestamp())
     
     def get_category(self, obj):                                     #we must create form like: <form method="get" action="/posts/?obj.category.slug"> .  note form must shown as link. you can put that form in above of that post.
         pk, slug = obj.id, obj.slug

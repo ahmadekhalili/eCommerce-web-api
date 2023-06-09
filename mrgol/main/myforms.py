@@ -4,8 +4,10 @@ from django.core.validators import MaxLengthValidator
 from django.forms.utils import ErrorList
 from django import forms
 from django.conf import settings
-import json
+from django.core.files import File
 
+import json
+import uuid
 from modeltranslation.utils import get_translation_fields as g_t
 
 from customed_files.django.classes import myforms
@@ -13,7 +15,7 @@ from users.models import User
 from . import myserializers
 from .mywidgets import *
 from .mymethods import get_mt_input_classes
-from .models import Post, Product, Category, Filter, Image, Comment, Filter_Attribute, Brand, ShopFilterItem
+from .models import Post, Product, Category, Filter, Image, Comment, Filter_Attribute, Brand, ShopFilterItem, Image_icon
 # note1: if edit or add a form field exits in translation.py, like add Categoryform.name field, make sure in admin panel shown correctly (in 'tabbed' mode). if not shown correctly, you have to add a widget with required modeltreanslation classes like in ProductForm.alt_fa.widget.attrs
 
 
@@ -24,6 +26,13 @@ class PostForm(forms.ModelForm):
     class Meta:
         model = Post
         fields = '__all__'
+
+    def save(self, commit=True):
+        image_icon = Image_icon(alt=self.data.get('alt', uuid.uuid4().hex[:6]), path='posts')
+        image_icon.image = File(self.files['main_image'])
+        image_icon.save()
+        self.instance.main_image_id = image_icon.id
+        return super().save(commit)
 
 
 

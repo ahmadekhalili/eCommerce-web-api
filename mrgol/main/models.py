@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.core.files import File
 from django.db import models
-
+from django.contrib.postgres import fields as postgre_fields
 from rest_framework.renderers import JSONRenderer
 from rest_framework.parsers import JSONParser
 
@@ -183,7 +183,7 @@ def icon_path_selector(instance, filename):                        #note: if you
 
 class Image_icon(models.Model):
     image = models.FileField(_('image'), upload_to=icon_path_selector)
-    alt = models.CharField(_('alt'), max_length=55, unique=True, null=True, default='')    # alt should not be dublicate because we used alt instead image_icon id in def __str__(self)
+    alt = models.CharField(_('alt'), max_length=55, unique=True, null=True, default=None)    # alt should not be dublicate because we used alt instead image_icon id in def __str__(self)
     path = models.CharField(_('path'), max_length=20, default='products')                  # can be value like: "products"  or  "posts" ....    
 
     class Meta:
@@ -208,10 +208,11 @@ class Post(models.Model):
     meta_title = models.CharField(_('meta title'), max_length=60, blank=True, default='')
     meta_description = models.TextField(_('meta description'), validators=[MaxLengthValidator(160)], blank=True, default='')    
     brief_description = models.TextField(_('brief description'), validators=[MaxLengthValidator(1000)])
-    detailed_description = RichTextUploadingField(_('detailed description'), blank=True)
+    detailed_description = models.TextField(_('detailed description'), blank=True)    # ckeditor implemented in front, here only saved html content sended from front end.
     visible = models.BooleanField(_('delete'), default=True)
     published_date = models.DateTimeField(_('published date'), auto_now_add=True)
-    image_icon = models.OneToOneField(Image_icon, on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('image icon'))
+    tags = postgre_fields.ArrayField(models.CharField(max_length=30, blank=True))
+    main_image = models.OneToOneField(Image_icon, on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('main image'))        # this image used in top of post page (in 1200px) and also for post icon (in 160px).
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('category'))
     author = models.ForeignKey(User, related_name='written_posts', on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('author'))
     #comment_set                                                   #backward relation

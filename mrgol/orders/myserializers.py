@@ -48,10 +48,10 @@ class OrderSerializer(serializers.ModelSerializer):
         return obj.get_order_status_display()
 
     def get_delivery_date(self, obj):
-        return str(jdatetime.datetime.fromgregorian(datetime=obj.delivery_date))
+        return round(jdatetime.datetime.fromgregorian(datetime=obj.delivery_date).timestamp())
 
     def get_created(self, obj):
-        return str(jdatetime.datetime.fromgregorian(datetime=obj.created))
+        return round(jdatetime.datetime.fromgregorian(datetime=obj.created).timestamp())
 
 
 

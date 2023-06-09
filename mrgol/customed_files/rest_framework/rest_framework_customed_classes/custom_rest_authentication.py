@@ -5,7 +5,8 @@ from rest_framework import exceptions
 
 class CustomSessionAuthentication(SessionAuthentication):            
     def enforce_csrf(self, request):
-        if request.method == 'POST' or request.method == 'PUT':
+        pass
+        '''if request.method == 'POST' or request.method == 'PUT':
             try:
                 request_csrf_token = request.data['csrfmiddlewaretoken']
                 csrf_token = request.COOKIES['csrftoken']                                     #puting like request.COOKIES.get will make running except TypeError when csrf_token or request_csrf_token is none.  except TypeError "unexpected value' should raise only when csrf_token or request_csrf_token have value but in failed type.
@@ -23,3 +24,4 @@ class CustomSessionAuthentication(SessionAuthentication):
                 raise exceptions.PermissionDenied({'CustomSessionAuthentication': 'CSRF not provided'})                       #this line run when request.data['csrfmiddlewaretoken'] or request.COOKIES['csrftoken']  arent provided.
             except:                                                                           #bool_compared = False     
                 raise exceptions.PermissionDenied({'CustomSessionAuthentication': 'CSRF provided, but Failed'})
+'''
