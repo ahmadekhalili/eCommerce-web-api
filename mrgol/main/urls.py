@@ -16,6 +16,7 @@ urlpatterns = [
     path('index/', views.index, name='index'),
     path('postsmap/', views.PostMap.as_view(), name='posts-map'),
     path('products/', views.ProductList.as_view(), name='products'),
+    path('posts/', views.PostList.as_view(), name='posts'),
     path('posts/<page>/', views.PostList.as_view(), name='posts'),
     path('posts/<page>/<category>/', views.PostList.as_view(), name='post_list'),
     path('products/<category>/', views.ProductList.as_view(), name='product_list'),

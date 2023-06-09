@@ -231,7 +231,7 @@ class PostList(views.APIView):
         output 12 last created posts(visible=True)
         '''
         category_slug = kwargs.get('category')
-        page = int(kwargs.get('page'))
+        page = int(kwargs.get('page', 1))
         step = 6               # 6 means you will see 6 post in every page, used in page_count in rang
         if category_slug:
             category = get_object_or_404(Category, slug=category_slug)
