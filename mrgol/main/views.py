@@ -164,33 +164,14 @@ class PostList(views.APIView):
         return Response(serializers)    
 
 '''
-
-
-
-
-class PostList(views.APIView):
+class PostMap(views.APIView):
     def get(self, request, *args, **kwargs):
         '''
         output 12 last created posts(visible=True)
         '''
-        category_slug = kwargs.get('category')
-        if category_slug:
-            category = get_object_or_404(Category, slug=category_slug)
-            posts = get_posts_products_by_category(category)
-            sessionid = request.session.session_key
-            serializers = {'posts': myserializers.PostListSerializer(posts, many=True, context={'request': request}).data}             #you must put context={'request': request} in PostListSerializer argument for working request.build_absolute_uri  in PostListSerializer, otherwise request will be None in PostListSerializer and raise error 
-            return Response({'sessionid': sessionid, **serializers})   
-        posts = get_posts(0, 8).select_related('category')
-        serializers = {'posts': myserializers.PostListSerializer(posts, many=True, context={'request': request}).data}             #you must put context={'request': request} in PostListSerializer argument for working request.build_absolute_uri  in PostListSerializer, otherwise request will be None in PostListSerializer and raise error 
+        posts = Post.objects.values('id', 'slug')
         sessionid = request.session.session_key
-        return Response({'sessionid': sessionid, **serializers})
-
-    def post(self, request, *args, **kwargs):
-        form = myforms.PostForm(request.POST, request.FILES)
-        if form.is_valid():
-            instance = form.save()
-            return Response(myserializers.PostDetailSerializer(instance, context={'request': request}).data)
-        return Response(form.errors)
+        return Response({'sessionid': sessionid, 'posts': list(posts)})
 
 
 
@@ -244,6 +225,33 @@ class ProductList(views.APIView):
 
 
 
+class PostList(views.APIView):
+    def get(self, request, *args, **kwargs):
+        '''
+        output 12 last created posts(visible=True)
+        '''
+        category_slug = kwargs.get('category')
+        page = int(kwargs.get('page'))
+        step = 6               # 6 means you will see 6 post in every page, used in page_count in rang
+        if category_slug:
+            category = get_object_or_404(Category, slug=category_slug)
+            posts = get_posts_products_by_category(category)
+            sessionid = request.session.session_key
+            serializers = {'posts': myserializers.PostListSerializer(posts, many=True, context={'request': request}).data}             #you must put context={'request': request} in PostListSerializer argument for working request.build_absolute_uri  in PostListSerializer, otherwise request will be None in PostListSerializer and raise error
+            return Response({'sessionid': sessionid, **serializers})
+        rang = (page * step - step, page * step)
+        posts = get_posts(*rang).select_related('category')
+        serializers = {'posts': myserializers.PostListSerializer(posts, many=True, context={'request': request}).data}             #you must put context={'request': request} in PostListSerializer argument for working request.build_absolute_uri  in PostListSerializer, otherwise request will be None in PostListSerializer and raise error
+        sessionid = request.session.session_key
+        page_count = int(Post.objects.count() / step) + 1
+        return Response({'sessionid': sessionid, **serializers, 'pages': page_count})
+
+    def post(self, request, *args, **kwargs):
+        form = myforms.PostForm(request.POST, request.FILES)
+        if form.is_valid():
+            instance = form.save()
+            return Response(myserializers.PostDetailSerializer(instance, context={'request': request}).data)
+        return Response(form.errors)
 '''
 output is same like ProductList(views.APIView) but can work without context={'request': request} initializing in serializer(ListAPIView put request auto).
 class ProductList(generics.ListAPIView):
@@ -258,35 +266,6 @@ class ProductList(generics.ListAPIView):
 
 
 
-class PostCategoryList(views.APIView):
-    def get(self, request, *args, **kwargs):
-        '''
-        output all posts categories objects.
-        '''          
-        post_categories = Category.objects.filter(post_product='post', level=1)
-        serializers = {'post_categories': myserializers.CategoryListSerializer(post_categories, many=True).data}
-        sessionid = request.session.session_key
-        return Response({'sessionid': sessionid, **serializers})
-
-
-
-
-class ProductCategoryList(views.APIView):
-    def get(self, request, *args, **kwargs):
-        '''
-        output all Products categories objects.
-        '''
-        prefetch_query = 'child_categories'
-        for i in range(Category._meta.get_field('level').validators[1].limit_value-2):
-            prefetch_query += '__child_categories'
-        product_prant_categories = Category.objects.filter(post_product='product', level=1).prefetch_related(prefetch_query)
-        serializers = {'product_categories': myserializers.CategoryListSerializer(product_prant_categories, many=True).data}
-        #sessionid = request.session.session_key
-        return Response({'sessionid': '', **serializers})
-
-
-
-    
 class PostDetail(views.APIView):
     def get(self, request, *args, **kwargs):                #dont need define like serializer = {'post': myserializers.PostDetailSerializer(product_categories).data} because myserializers.PostDetailSerializer(product_categories).data dont has many=True so is dict not list and dont raise error when putin in Reaponse
         '''
@@ -302,7 +281,7 @@ class PostDetail(views.APIView):
 
 
 
-    
+
 class ProductDetail(views.APIView):
     def get(self, request, *args, **kwargs):                #dont need define like serializer = {'post': myserializers.PostDetailSerializer(product_categories).data} because myserializers.PostDetailSerializer(product_categories).data dont has many=True so is dict not list and dont raise error when putin in Reaponse
         '''
@@ -331,6 +310,31 @@ class ProductDetail(views.APIView):
 
 
 
+class PostCategoryList(views.APIView):
+    def get(self, request, *args, **kwargs):
+        '''
+        output all posts categories objects.
+        '''
+        post_categories = Category.objects.filter(post_product='post', level=1)
+        serializers = {'post_categories': myserializers.CategoryListSerializer(post_categories, many=True).data}
+        sessionid = request.session.session_key
+        return Response({'sessionid': sessionid, **serializers})
+
+
+
+
+class ProductCategoryList(views.APIView):
+    def get(self, request, *args, **kwargs):
+        '''
+        output all Products categories objects.
+        '''
+        prefetch_query = 'child_categories'
+        for i in range(Category._meta.get_field('level').validators[1].limit_value-2):
+            prefetch_query += '__child_categories'
+        product_prant_categories = Category.objects.filter(post_product='product', level=1).prefetch_related(prefetch_query)
+        serializers = {'product_categories': myserializers.CategoryListSerializer(product_prant_categories, many=True).data}
+        #sessionid = request.session.session_key
+        return Response({'sessionid': '', **serializers})
 '''
 generics.RetrieveAPIView
 queryset = Post_Category.objects.all()
