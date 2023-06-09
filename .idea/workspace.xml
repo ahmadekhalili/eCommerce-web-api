@@ -1,0 +1,817 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="7b69a780-01c9-4eb8-bca4-c0f997313a78" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/mrgol/main/migrations/0003_remove_post_image_icon_post_main_image_and_more.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/mrgol/main/migrations/0004_remove_post_main_image_en_remove_post_main_image_fa_and_more.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/mrgol/main/migrations/0005_remove_post_tags.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/mrgol/main/migrations/0006_post_tags.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/mrgol/main/migrations/0007_alter_image_icon_alt_alter_image_icon_alt_en_and_more.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/.idea/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/.idea/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/.idea/mrgol.iml" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/.idea/mrgol.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/cart/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/cart/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/cart/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/cart/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/cart/apps.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/cart/apps.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/cart/cart.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/cart/cart.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/cart/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/cart/migrations/0001_initial.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/cart/migrations/0002_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/cart/migrations/0002_initial.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/cart/migrations/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/cart/migrations/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/cart/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/cart/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/cart/myserializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/cart/myserializers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/cart/templates/cart/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/cart/templates/cart/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/cart/tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/cart/tests.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/cart/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/cart/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/cart/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/cart/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/configs.txt" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/configs.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/customed_files/date_convertor.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/customed_files/date_convertor.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/customed_files/django/classes/custom_ModelAdmin.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/customed_files/django/classes/custom_ModelAdmin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/customed_files/django/classes/helpers_custom.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/customed_files/django/classes/helpers_custom.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/customed_files/django/classes/model_fields_custom.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/customed_files/django/classes/model_fields_custom.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/customed_files/django/classes/myforms/BoundField_custom.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/customed_files/django/classes/myforms/BoundField_custom.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/customed_files/django/classes/myforms/ModelForm_custom.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/customed_files/django/classes/myforms/ModelForm_custom.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/customed_files/django/classes/myforms/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/customed_files/django/classes/myforms/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/customed_files/django/classes/myforms/form_fields_custom.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/customed_files/django/classes/myforms/form_fields_custom.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/customed_files/rest_framework/rest_framework_customed_classes/custom_rest_authentication.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/customed_files/rest_framework/rest_framework_customed_classes/custom_rest_authentication.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/customed_files/states_towns.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/customed_files/states_towns.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/locale/fa/LC_MESSAGES/django.mo" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/locale/fa/LC_MESSAGES/django.mo" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/locale/fa/LC_MESSAGES/django.po" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/locale/fa/LC_MESSAGES/django.po" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/locale/fa/LC_MESSAGES/djangojs.mo" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/locale/fa/LC_MESSAGES/djangojs.mo" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/locale/fa/LC_MESSAGES/djangojs.po" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/locale/fa/LC_MESSAGES/djangojs.po" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/locale/fa/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/locale/fa/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/locale/fa/formats.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/locale/fa/formats.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/apps.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/apps.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/db_router.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/db_router.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/management/commands/createstates.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/management/commands/createstates.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/middleware/custom_debug.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/middleware/custom_debug.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/middleware/live_chat.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/middleware/live_chat.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/migrations/0001_initial.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/migrations/0002_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/migrations/0002_initial.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/migrations/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/migrations/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/model_methods.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/model_methods.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/mycontexts.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/mycontexts.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/myforms.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/myforms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/mymethods.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/mymethods.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/myserializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/myserializers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/mywidgets.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/mywidgets.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/signals.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/signals.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templates/admin/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templates/admin/base.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templates/admin/change_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templates/admin/change_list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templates/admin/edit_inline/product_filter_attributes_stacked.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templates/admin/edit_inline/product_filter_attributes_stacked.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templates/admin/edit_inline/stacked.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templates/admin/edit_inline/stacked.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templates/admin/help.txt" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templates/admin/help.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templates/admin/includes/product_filter_attributes_fieldset.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templates/admin/includes/product_filter_attributes_fieldset.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templates/admin/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templates/admin/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templates/admin/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templates/admin/login.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templates/admin/main/filter/change_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templates/admin/main/filter/change_list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templates/admin/main/filter/change_list_results.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templates/admin/main/filter/change_list_results.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templates/admin/main/filter/help.txt" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templates/admin/main/filter/help.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templates/admin/main/filter_attribute/change_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templates/admin/main/filter_attribute/change_list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templates/admin/main/filter_attribute/change_list_results.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templates/admin/main/filter_attribute/change_list_results.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templates/admin/main/filter_attribute/help.txt" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templates/admin/main/filter_attribute/help.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templates/admin/main/product/change_form.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templates/admin/main/product/change_form.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templates/admin/main/product/filter_attribute_filter_custom.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templates/admin/main/product/filter_attribute_filter_custom.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templates/admin/main/shopfilteritem/change_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templates/admin/main/shopfilteritem/change_list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templates/admin/main/shopfilteritem/change_list_results.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templates/admin/main/shopfilteritem/change_list_results.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templates/admin/main/shopfilteritem/help.txt" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templates/admin/main/shopfilteritem/help.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templates/admin/object_history.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templates/admin/object_history.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templates/main/category_two_select2.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templates/main/category_two_select2.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templates/main/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templates/main/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templates/main/index2.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templates/main/index2.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templates/main/widgets/category_father_category.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templates/main/widgets/category_father_category.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templates/main/widgets/category_level.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templates/main/widgets/category_level.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templates/main/widgets/comment_published_date.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templates/main/widgets/comment_published_date.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templates/main/widgets/comment_reviewer.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templates/main/widgets/comment_reviewer.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templates/main/widgets/comment_status.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templates/main/widgets/comment_status.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templates/main/widgets/field_question_mark.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templates/main/widgets/field_question_mark.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templates/main/widgets/filter_attributes_two_select.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templates/main/widgets/filter_attributes_two_select.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templates/main/widgets/image_file.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templates/main/widgets/image_file.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templates/main/widgets/product/category_two_select.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templates/main/widgets/product/category_two_select.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templates/main/widgets/product/image_icon_file.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templates/main/widgets/product/image_icon_file.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templates/registration/logged_out.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templates/registration/logged_out.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templatetags/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templatetags/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templatetags/admin/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templatetags/admin/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templatetags/admin/main/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templatetags/admin/main/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templatetags/admin/main/filter/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templatetags/admin/main/filter/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templatetags/admin/main/filter/admin_list.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templatetags/admin/main/filter/admin_list.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templatetags/admin/main/filter/help.txt" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templatetags/admin/main/filter/help.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templatetags/admin/main/filter_attribute/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templatetags/admin/main/filter_attribute/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templatetags/admin/main/filter_attribute/admin_list.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templatetags/admin/main/filter_attribute/admin_list.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templatetags/admin/main/filter_attribute/help.txt" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templatetags/admin/main/filter_attribute/help.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templatetags/admin/main/shopfilteritem/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templatetags/admin/main/shopfilteritem/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templatetags/admin/main/shopfilteritem/admin_list.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templatetags/admin/main/shopfilteritem/admin_list.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/templatetags/admin/main/shopfilteritem/help.txt" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templatetags/admin/main/shopfilteritem/help.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/tests.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/translation.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/translation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/manage.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/manage.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/mrgol/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/mrgol/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/mrgol/asgi.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/mrgol/asgi.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/mrgol/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/mrgol/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/mrgol/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/mrgol/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/mrgol/wsgi.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/mrgol/wsgi.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/my_project_visualized.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/my_project_visualized.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/notes.txt" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/notes.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/orders/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/orders/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/orders/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/orders/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/orders/apps.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/orders/apps.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/orders/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/orders/forms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/orders/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/orders/migrations/0001_initial.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/orders/migrations/0002_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/orders/migrations/0002_initial.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/orders/migrations/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/orders/migrations/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/orders/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/orders/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/orders/mymethods.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/orders/mymethods.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/orders/myserializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/orders/myserializers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/orders/tasks.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/orders/tasks.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/orders/templates/admin/edit_inline/dispatch_tabular.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/orders/templates/admin/edit_inline/dispatch_tabular.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/orders/templates/admin/state_filter_custom.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/orders/templates/admin/state_filter_custom.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/orders/templates/orders/widgets/shipping_town_select.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/orders/templates/orders/widgets/shipping_town_select.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/orders/tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/orders/tests.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/orders/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/orders/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/orders/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/orders/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/orders/widgets.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/orders/widgets.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/packages.txt" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/packages.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/payment/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/payment/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/payment/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/payment/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/payment/apps.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/payment/apps.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/payment/migrations/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/payment/migrations/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/payment/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/payment/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/payment/tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/payment/tests.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/payment/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/payment/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/payment/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/payment/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/remembers.txt" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/remembers.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/css/autocomplete.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/css/autocomplete.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/css/base.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/css/base.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/css/changelists.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/css/changelists.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/css/dashboard.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/css/dashboard.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/css/fonts.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/css/fonts.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/css/forms.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/css/forms.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/css/login.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/css/login.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/css/nav_sidebar.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/css/nav_sidebar.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/css/responsive.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/css/responsive.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/css/responsive_rtl.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/css/responsive_rtl.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/css/rtl.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/css/rtl.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/css/vendor/select2/LICENSE-SELECT2.md" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/css/vendor/select2/LICENSE-SELECT2.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/css/vendor/select2/select2.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/css/vendor/select2/select2.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/css/vendor/select2/select2.min.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/css/vendor/select2/select2.min.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/css/widgets.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/css/widgets.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/fonts/LICENSE.txt" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/fonts/LICENSE.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/fonts/README.txt" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/fonts/README.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/fonts/Roboto-Bold-webfont.woff" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/fonts/Roboto-Bold-webfont.woff" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/fonts/Roboto-Light-webfont.woff" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/fonts/Roboto-Light-webfont.woff" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/fonts/Roboto-Regular-webfont.woff" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/fonts/Roboto-Regular-webfont.woff" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/img/LICENSE" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/img/LICENSE" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/img/README.txt" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/img/README.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/img/calendar-icons.svg" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/img/calendar-icons.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/img/gis/move_vertex_off.svg" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/img/gis/move_vertex_off.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/img/gis/move_vertex_on.svg" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/img/gis/move_vertex_on.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/img/icon-addlink.svg" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/img/icon-addlink.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/img/icon-alert.svg" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/img/icon-alert.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/img/icon-calendar.svg" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/img/icon-calendar.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/img/icon-changelink.svg" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/img/icon-changelink.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/img/icon-clock.svg" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/img/icon-clock.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/img/icon-deletelink.svg" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/img/icon-deletelink.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/img/icon-no.svg" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/img/icon-no.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/img/icon-unknown-alt.svg" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/img/icon-unknown-alt.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/img/icon-unknown.svg" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/img/icon-unknown.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/img/icon-viewlink.svg" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/img/icon-viewlink.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/img/icon-yes.svg" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/img/icon-yes.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/img/inline-delete.svg" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/img/inline-delete.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/img/search.svg" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/img/search.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/img/selector-icons.svg" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/img/selector-icons.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/img/sorting-icons.svg" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/img/sorting-icons.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/img/tooltag-add.svg" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/img/tooltag-add.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/img/tooltag-arrowright.svg" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/img/tooltag-arrowright.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/SelectBox.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/SelectBox.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/SelectFilter2.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/SelectFilter2.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/actions.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/actions.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/admin/DateTimeShortcuts.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/admin/DateTimeShortcuts.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/admin/RelatedObjectLookups.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/admin/RelatedObjectLookups.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/autocomplete.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/autocomplete.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/calendar.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/calendar.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/cancel.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/cancel.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/change_form.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/change_form.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/collapse.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/collapse.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/core.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/core.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/inlines.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/inlines.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/jquery.init.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/jquery.init.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/nav_sidebar.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/nav_sidebar.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/popup_response.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/popup_response.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/prepopulate.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/prepopulate.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/prepopulate_init.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/prepopulate_init.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/urlify.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/urlify.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/jquery/LICENSE.txt" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/jquery/LICENSE.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/jquery/jquery.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/jquery/jquery.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/jquery/jquery.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/jquery/jquery.min.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/LICENSE.md" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/LICENSE.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/af.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/af.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/ar.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/ar.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/az.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/az.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/bg.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/bg.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/bn.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/bn.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/bs.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/bs.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/ca.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/ca.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/cs.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/cs.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/da.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/da.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/de.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/de.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/dsb.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/dsb.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/el.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/el.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/en.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/en.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/es.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/es.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/et.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/et.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/eu.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/eu.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/fa.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/fa.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/fi.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/fi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/fr.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/fr.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/gl.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/gl.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/he.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/he.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/hi.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/hi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/hr.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/hr.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/hsb.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/hsb.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/hu.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/hu.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/hy.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/hy.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/id.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/id.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/is.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/is.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/it.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/it.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/ja.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/ja.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/ka.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/ka.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/km.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/km.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/ko.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/ko.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/lt.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/lt.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/lv.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/lv.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/mk.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/mk.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/ms.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/ms.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/nb.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/nb.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/ne.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/ne.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/nl.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/nl.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/pl.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/pl.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/ps.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/ps.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/pt-BR.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/pt-BR.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/pt.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/pt.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/ro.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/ro.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/ru.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/ru.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/sk.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/sk.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/sl.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/sl.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/sq.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/sq.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/sr-Cyrl.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/sr-Cyrl.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/sr.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/sr.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/sv.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/sv.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/th.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/th.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/tk.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/tk.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/tr.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/tr.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/uk.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/uk.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/vi.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/vi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/zh-CN.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/zh-CN.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/zh-TW.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/i18n/zh-TW.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/select2.full.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/select2.full.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/select2.full.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/select2/select2.full.min.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/xregexp/LICENSE.txt" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/xregexp/LICENSE.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/xregexp/xregexp.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/xregexp/xregexp.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/xregexp/xregexp.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/admin/js/vendor/xregexp/xregexp.min.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/CHANGES.md" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/CHANGES.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/LICENSE.md" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/LICENSE.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/SECURITY.md" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/SECURITY.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/bender-runner.config.json" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/bender-runner.config.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/contents.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/contents.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/a11yhelp/dialogs/lang/_translationstatus.txt" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/a11yhelp/dialogs/lang/_translationstatus.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/about/dialogs/hidpi/logo_ckeditor.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/about/dialogs/hidpi/logo_ckeditor.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/about/dialogs/logo_ckeditor.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/about/dialogs/logo_ckeditor.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/icons/codesnippet.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/icons/codesnippet.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/icons/hidpi/codesnippet.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/icons/hidpi/codesnippet.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/CHANGES.md" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/CHANGES.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/LICENSE" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/LICENSE" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/README.ru.md" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/README.ru.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/arta.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/arta.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/ascetic.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/ascetic.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/atelier-dune.dark.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/atelier-dune.dark.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/atelier-dune.light.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/atelier-dune.light.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/atelier-forest.dark.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/atelier-forest.dark.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/atelier-forest.light.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/atelier-forest.light.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/atelier-heath.dark.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/atelier-heath.dark.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/atelier-heath.light.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/atelier-heath.light.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/atelier-lakeside.dark.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/atelier-lakeside.dark.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/atelier-lakeside.light.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/atelier-lakeside.light.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/atelier-seaside.dark.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/atelier-seaside.dark.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/atelier-seaside.light.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/atelier-seaside.light.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/brown_paper.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/brown_paper.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/brown_papersq.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/brown_papersq.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/dark.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/dark.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/default.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/default.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/docco.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/docco.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/far.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/far.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/foundation.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/foundation.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/github.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/github.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/googlecode.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/googlecode.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/idea.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/idea.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/ir_black.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/ir_black.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/magula.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/magula.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/mono-blue.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/mono-blue.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/monokai.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/monokai.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/monokai_sublime.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/monokai_sublime.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/obsidian.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/obsidian.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/paraiso.dark.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/paraiso.dark.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/paraiso.light.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/paraiso.light.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/pojoaque.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/pojoaque.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/pojoaque.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/pojoaque.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/railscasts.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/railscasts.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/rainbow.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/rainbow.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/school_book.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/school_book.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/school_book.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/school_book.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/solarized_dark.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/solarized_dark.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/solarized_light.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/solarized_light.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/sunburst.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/sunburst.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/tomorrow-night-blue.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/tomorrow-night-blue.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/tomorrow-night-bright.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/tomorrow-night-bright.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/tomorrow-night-eighties.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/tomorrow-night-eighties.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/tomorrow-night.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/tomorrow-night.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/tomorrow.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/tomorrow.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/vs.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/vs.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/xcode.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/xcode.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/zenburn.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/zenburn.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/colordialog/dialogs/colordialog.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/colordialog/dialogs/colordialog.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/copyformatting/cursors/cursor-disabled.svg" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/copyformatting/cursors/cursor-disabled.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/copyformatting/cursors/cursor.svg" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/copyformatting/cursors/cursor.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/copyformatting/styles/copyformatting.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/copyformatting/styles/copyformatting.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/devtools/lang/_translationstatus.txt" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/devtools/lang/_translationstatus.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/dialog/styles/dialog.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/dialog/styles/dialog.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/docprops/icons/docprops-rtl.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/docprops/icons/docprops-rtl.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/docprops/icons/docprops.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/docprops/icons/docprops.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/docprops/icons/hidpi/docprops-rtl.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/docprops/icons/hidpi/docprops-rtl.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/docprops/icons/hidpi/docprops.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/docprops/icons/hidpi/docprops.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/embed/icons/embed.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/embed/icons/embed.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/embed/icons/hidpi/embed.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/embed/icons/hidpi/embed.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/embedbase/lang/pt-br.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/embedbase/lang/pt-br.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/embedbase/lang/ru.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/embedbase/lang/ru.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/embedsemantic/icons/embedsemantic.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/embedsemantic/icons/embedsemantic.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/embedsemantic/icons/hidpi/embedsemantic.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/embedsemantic/icons/hidpi/embedsemantic.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/CHANGELOG.md" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/CHANGELOG.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/LICENSE.md" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/LICENSE.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/configfilename.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/configfilename.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/configfilename.md" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/configfilename.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/emptyeditor.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/emptyeditor.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/emptyeditor.md" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/emptyeditor.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/integration.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/integration.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/integration.md" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/integration.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/integrations/easyimage.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/integrations/easyimage.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/integrations/easyimage.md" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/integrations/easyimage.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/notifications.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/notifications.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/notifications.md" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/notifications.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/notificationsasync.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/notificationsasync.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/notificationsasync.md" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/notificationsasync.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/paperformat.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/paperformat.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/paperformat.md" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/paperformat.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/readonly.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/readonly.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/readonly.md" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/readonly.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/stylesheets.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/stylesheets.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/stylesheets.md" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/stylesheets.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/tokenfetching.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/tokenfetching.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/tokenfetching.md" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/tokenfetching.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/tokentwoeditorscorrect.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/tokentwoeditorscorrect.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/tokentwoeditorscorrect.md" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/tokentwoeditorscorrect.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/tokentwoeditorswrong.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/tokentwoeditorswrong.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/tokentwoeditorswrong.md" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/tokentwoeditorswrong.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/tokenwithouturl.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/tokenwithouturl.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/tokenwithouturl.md" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/tokenwithouturl.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/wrongendpoint.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/wrongendpoint.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/wrongendpoint.md" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/exportpdf/tests/manual/wrongendpoint.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/flash/images/placeholder.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/flash/images/placeholder.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/forms/images/hiddenfield.gif" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/forms/images/hiddenfield.gif" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/icons.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/icons.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/icons_hidpi.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/icons_hidpi.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/iframe/images/placeholder.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/iframe/images/placeholder.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/image/images/noimage.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/image/images/noimage.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/image2/icons/hidpi/image.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/image2/icons/hidpi/image.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/image2/icons/image.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/image2/icons/image.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/language/icons/hidpi/language.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/language/icons/hidpi/language.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/language/icons/language.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/language/icons/language.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/link/images/anchor.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/link/images/anchor.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/link/images/hidpi/anchor.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/link/images/hidpi/anchor.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/magicline/images/hidpi/icon-rtl.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/magicline/images/hidpi/icon-rtl.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/magicline/images/hidpi/icon.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/magicline/images/hidpi/icon.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/magicline/images/icon-rtl.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/magicline/images/icon-rtl.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/magicline/images/icon.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/magicline/images/icon.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/mathjax/icons/hidpi/mathjax.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/mathjax/icons/hidpi/mathjax.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/mathjax/icons/mathjax.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/mathjax/icons/mathjax.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/mathjax/images/loader.gif" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/mathjax/images/loader.gif" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/pagebreak/images/pagebreak.gif" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/pagebreak/images/pagebreak.gif" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/placeholder/icons/hidpi/placeholder.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/placeholder/icons/hidpi/placeholder.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/placeholder/icons/placeholder.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/placeholder/icons/placeholder.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/preview/images/pagebreak.gif" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/preview/images/pagebreak.gif" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/preview/preview.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/preview/preview.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/preview/styles/screen.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/preview/styles/screen.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/scayt/CHANGELOG.md" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/scayt/CHANGELOG.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/scayt/LICENSE.md" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/scayt/LICENSE.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/scayt/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/scayt/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/scayt/dialogs/dialog.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/scayt/dialogs/dialog.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/scayt/dialogs/toolbar.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/scayt/dialogs/toolbar.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/scayt/skins/moono-lisa/scayt.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/scayt/skins/moono-lisa/scayt.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/showblocks/images/block_address.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/showblocks/images/block_address.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/showblocks/images/block_blockquote.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/showblocks/images/block_blockquote.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/showblocks/images/block_div.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/showblocks/images/block_div.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/showblocks/images/block_h1.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/showblocks/images/block_h1.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/showblocks/images/block_h2.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/showblocks/images/block_h2.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/showblocks/images/block_h3.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/showblocks/images/block_h3.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/showblocks/images/block_h4.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/showblocks/images/block_h4.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/showblocks/images/block_h5.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/showblocks/images/block_h5.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/showblocks/images/block_h6.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/showblocks/images/block_h6.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/showblocks/images/block_p.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/showblocks/images/block_p.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/showblocks/images/block_pre.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/showblocks/images/block_pre.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/angel_smile.gif" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/angel_smile.gif" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/angel_smile.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/angel_smile.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/angry_smile.gif" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/angry_smile.gif" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/angry_smile.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/angry_smile.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/broken_heart.gif" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/broken_heart.gif" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/broken_heart.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/broken_heart.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/confused_smile.gif" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/confused_smile.gif" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/confused_smile.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/confused_smile.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/cry_smile.gif" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/cry_smile.gif" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/cry_smile.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/cry_smile.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/devil_smile.gif" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/devil_smile.gif" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/devil_smile.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/devil_smile.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/embaressed_smile.gif" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/embaressed_smile.gif" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/embarrassed_smile.gif" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/embarrassed_smile.gif" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/embarrassed_smile.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/embarrassed_smile.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/envelope.gif" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/envelope.gif" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/envelope.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/envelope.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/heart.gif" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/heart.gif" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/heart.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/heart.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/kiss.gif" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/kiss.gif" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/kiss.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/kiss.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/lightbulb.gif" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/lightbulb.gif" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/lightbulb.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/lightbulb.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/omg_smile.gif" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/omg_smile.gif" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/omg_smile.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/omg_smile.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/regular_smile.gif" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/regular_smile.gif" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/regular_smile.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/regular_smile.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/sad_smile.gif" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/sad_smile.gif" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/sad_smile.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/sad_smile.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/shades_smile.gif" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/shades_smile.gif" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/shades_smile.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/shades_smile.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/teeth_smile.gif" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/teeth_smile.gif" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/teeth_smile.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/teeth_smile.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/thumbs_down.gif" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/thumbs_down.gif" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/thumbs_down.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/thumbs_down.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/thumbs_up.gif" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/thumbs_up.gif" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/thumbs_up.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/thumbs_up.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/tongue_smile.gif" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/tongue_smile.gif" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/tongue_smile.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/tongue_smile.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/tounge_smile.gif" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/tounge_smile.gif" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/whatchutalkingabout_smile.gif" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/whatchutalkingabout_smile.gif" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/whatchutalkingabout_smile.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/whatchutalkingabout_smile.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/wink_smile.gif" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/wink_smile.gif" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/wink_smile.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/smiley/images/wink_smile.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/sourcedialog/icons/hidpi/sourcedialog-rtl.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/sourcedialog/icons/hidpi/sourcedialog-rtl.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/sourcedialog/icons/hidpi/sourcedialog.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/sourcedialog/icons/hidpi/sourcedialog.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/sourcedialog/icons/sourcedialog-rtl.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/sourcedialog/icons/sourcedialog-rtl.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/sourcedialog/icons/sourcedialog.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/sourcedialog/icons/sourcedialog.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/specialchar/dialogs/lang/_translationstatus.txt" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/specialchar/dialogs/lang/_translationstatus.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/tableselection/styles/tableselection.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/tableselection/styles/tableselection.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/tabletools/dialogs/tableCell.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/tabletools/dialogs/tableCell.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/templates/dialogs/templates.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/templates/dialogs/templates.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/templates/templates/images/template1.gif" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/templates/templates/images/template1.gif" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/templates/templates/images/template2.gif" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/templates/templates/images/template2.gif" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/templates/templates/images/template3.gif" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/templates/templates/images/template3.gif" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/uicolor/icons/hidpi/uicolor.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/uicolor/icons/hidpi/uicolor.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/uicolor/icons/uicolor.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/uicolor/icons/uicolor.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/uicolor/lang/_translationstatus.txt" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/uicolor/lang/_translationstatus.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/uicolor/yui/assets/hue_bg.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/uicolor/yui/assets/hue_bg.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/uicolor/yui/assets/hue_thumb.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/uicolor/yui/assets/hue_thumb.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/uicolor/yui/assets/picker_mask.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/uicolor/yui/assets/picker_mask.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/uicolor/yui/assets/picker_thumb.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/uicolor/yui/assets/picker_thumb.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/uicolor/yui/assets/yui.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/uicolor/yui/assets/yui.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/widget/images/handle.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/widget/images/handle.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/widget/lang/pt.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/widget/lang/pt.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/wsc/LICENSE.md" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/wsc/LICENSE.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/wsc/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/wsc/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/wsc/dialogs/ciframe.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/wsc/dialogs/ciframe.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/wsc/dialogs/tmpFrameset.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/wsc/dialogs/tmpFrameset.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/wsc/dialogs/wsc.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/wsc/dialogs/wsc.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/wsc/icons/hidpi/spellchecker.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/wsc/icons/hidpi/spellchecker.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/wsc/icons/spellchecker.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/wsc/icons/spellchecker.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/wsc/skins/moono-lisa/wsc.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/plugins/wsc/skins/moono-lisa/wsc.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono-lisa/dialog.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono-lisa/dialog.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono-lisa/dialog_ie.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono-lisa/dialog_ie.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono-lisa/dialog_ie8.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono-lisa/dialog_ie8.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono-lisa/dialog_iequirks.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono-lisa/dialog_iequirks.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono-lisa/editor.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono-lisa/editor.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono-lisa/editor_gecko.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono-lisa/editor_gecko.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono-lisa/editor_ie.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono-lisa/editor_ie.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono-lisa/editor_ie8.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono-lisa/editor_ie8.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono-lisa/editor_iequirks.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono-lisa/editor_iequirks.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono-lisa/icons.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono-lisa/icons.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono-lisa/icons_hidpi.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono-lisa/icons_hidpi.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono-lisa/images/arrow.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono-lisa/images/arrow.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono-lisa/images/close.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono-lisa/images/close.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono-lisa/images/hidpi/close.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono-lisa/images/hidpi/close.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono-lisa/images/hidpi/lock-open.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono-lisa/images/hidpi/lock-open.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono-lisa/images/hidpi/lock.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono-lisa/images/hidpi/lock.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono-lisa/images/hidpi/refresh.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono-lisa/images/hidpi/refresh.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono-lisa/images/lock-open.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono-lisa/images/lock-open.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono-lisa/images/lock.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono-lisa/images/lock.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono-lisa/images/refresh.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono-lisa/images/refresh.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono-lisa/images/spinner.gif" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono-lisa/images/spinner.gif" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono-lisa/readme.md" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono-lisa/readme.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/dialog.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/dialog.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/dialog_ie.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/dialog_ie.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/dialog_ie7.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/dialog_ie7.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/dialog_ie8.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/dialog_ie8.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/dialog_iequirks.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/dialog_iequirks.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/editor.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/editor.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/editor_gecko.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/editor_gecko.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/editor_ie.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/editor_ie.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/editor_ie7.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/editor_ie7.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/editor_ie8.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/editor_ie8.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/editor_iequirks.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/editor_iequirks.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/icons.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/icons.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/icons_hidpi.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/icons_hidpi.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/images/arrow.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/images/arrow.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/images/close.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/images/close.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/images/hidpi/close.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/images/hidpi/close.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/images/hidpi/lock-open.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/images/hidpi/lock-open.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/images/hidpi/lock.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/images/hidpi/lock.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/images/hidpi/refresh.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/images/hidpi/refresh.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/images/lock-open.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/images/lock-open.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/images/lock.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/images/lock.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/images/refresh.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/images/refresh.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/images/spinner.gif" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/images/spinner.gif" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/readme.md" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/ckeditor/skins/moono/readme.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/file-icons/doc.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/file-icons/doc.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/file-icons/file.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/file-icons/file.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/file-icons/pdf.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/file-icons/pdf.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/file-icons/ppt.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/file-icons/ppt.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/file-icons/swf.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/file-icons/swf.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/file-icons/txt.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/file-icons/txt.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/file-icons/xls.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/file-icons/xls.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/galleriffic/css/basic.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/galleriffic/css/basic.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/galleriffic/css/black.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/galleriffic/css/black.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/galleriffic/css/caption.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/galleriffic/css/caption.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/galleriffic/css/galleriffic-1.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/galleriffic/css/galleriffic-1.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/galleriffic/css/galleriffic-2.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/galleriffic/css/galleriffic-2.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/galleriffic/css/galleriffic-3.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/galleriffic/css/galleriffic-3.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/galleriffic/css/galleriffic-4.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/galleriffic/css/galleriffic-4.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/galleriffic/css/galleriffic-5.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/galleriffic/css/galleriffic-5.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/galleriffic/css/jush.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/galleriffic/css/jush.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/galleriffic/css/loader.gif" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/galleriffic/css/loader.gif" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/galleriffic/css/loaderWhite.gif" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/galleriffic/css/loaderWhite.gif" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/galleriffic/css/nextPageArrow.gif" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/galleriffic/css/nextPageArrow.gif" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/galleriffic/css/nextPageArrowWhite.gif" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/galleriffic/css/nextPageArrowWhite.gif" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/galleriffic/css/prevPageArrow.gif" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/galleriffic/css/prevPageArrow.gif" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/galleriffic/css/prevPageArrowWhite.gif" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/galleriffic/css/prevPageArrowWhite.gif" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/ckeditor/galleriffic/css/white.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/ckeditor/galleriffic/css/white.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/debug_toolbar/css/print.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/debug_toolbar/css/print.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/debug_toolbar/css/toolbar.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/debug_toolbar/css/toolbar.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/debug_toolbar/js/history.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/debug_toolbar/js/history.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/debug_toolbar/js/redirect.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/debug_toolbar/js/redirect.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/debug_toolbar/js/timer.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/debug_toolbar/js/timer.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/debug_toolbar/js/toolbar.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/debug_toolbar/js/toolbar.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/debug_toolbar/js/utils.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/debug_toolbar/js/utils.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/django_extensions/css/jquery.autocomplete.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/django_extensions/css/jquery.autocomplete.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/django_extensions/img/indicator.gif" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/django_extensions/img/indicator.gif" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/django_extensions/js/jquery.ajaxQueue.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/django_extensions/js/jquery.ajaxQueue.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/django_extensions/js/jquery.autocomplete.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/django_extensions/js/jquery.autocomplete.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/django_extensions/js/jquery.bgiframe.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/django_extensions/js/jquery.bgiframe.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/django_tinymce/init_tinymce.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/django_tinymce/init_tinymce.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/rest_framework/css/bootstrap-theme.min.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/rest_framework/css/bootstrap-theme.min.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/rest_framework/css/bootstrap-tweaks.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/rest_framework/css/bootstrap-tweaks.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/rest_framework/css/bootstrap.min.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/rest_framework/css/bootstrap.min.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/rest_framework/css/default.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/rest_framework/css/default.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/rest_framework/css/font-awesome-4.0.3.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/rest_framework/css/font-awesome-4.0.3.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/rest_framework/css/prettify.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/rest_framework/css/prettify.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/rest_framework/docs/css/base.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/rest_framework/docs/css/base.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/rest_framework/docs/css/highlight.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/rest_framework/docs/css/highlight.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/rest_framework/docs/css/jquery.json-view.min.css" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/rest_framework/docs/css/jquery.json-view.min.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/rest_framework/docs/img/favicon.ico" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/rest_framework/docs/img/favicon.ico" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/rest_framework/docs/img/grid.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/rest_framework/docs/img/grid.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/rest_framework/docs/js/api.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/rest_framework/docs/js/api.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/rest_framework/docs/js/highlight.pack.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/rest_framework/docs/js/highlight.pack.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/rest_framework/docs/js/jquery.json-view.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/rest_framework/docs/js/jquery.json-view.min.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/rest_framework/fonts/fontawesome-webfont.eot" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/rest_framework/fonts/fontawesome-webfont.eot" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/rest_framework/fonts/fontawesome-webfont.svg" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/rest_framework/fonts/fontawesome-webfont.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/rest_framework/fonts/fontawesome-webfont.ttf" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/rest_framework/fonts/fontawesome-webfont.ttf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/rest_framework/fonts/fontawesome-webfont.woff" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/rest_framework/fonts/fontawesome-webfont.woff" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/rest_framework/fonts/glyphicons-halflings-regular.eot" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/rest_framework/fonts/glyphicons-halflings-regular.eot" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/rest_framework/fonts/glyphicons-halflings-regular.svg" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/rest_framework/fonts/glyphicons-halflings-regular.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/rest_framework/fonts/glyphicons-halflings-regular.ttf" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/rest_framework/fonts/glyphicons-halflings-regular.ttf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/rest_framework/fonts/glyphicons-halflings-regular.woff" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/rest_framework/fonts/glyphicons-halflings-regular.woff" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/rest_framework/fonts/glyphicons-halflings-regular.woff2" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/rest_framework/fonts/glyphicons-halflings-regular.woff2" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/rest_framework/img/glyphicons-halflings-white.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/rest_framework/img/glyphicons-halflings-white.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/rest_framework/img/glyphicons-halflings.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/rest_framework/img/glyphicons-halflings.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/rest_framework/img/grid.png" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/rest_framework/img/grid.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/rest_framework/js/ajax-form.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/rest_framework/js/ajax-form.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/rest_framework/js/bootstrap.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/rest_framework/js/bootstrap.min.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/rest_framework/js/coreapi-0.1.1.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/rest_framework/js/coreapi-0.1.1.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/rest_framework/js/csrf.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/rest_framework/js/csrf.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/rest_framework/js/default.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/rest_framework/js/default.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/rest_framework/js/jquery-3.5.1.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/rest_framework/js/jquery-3.5.1.min.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/static/rest_framework/js/prettify-min.js" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/static/rest_framework/js/prettify-min.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/users/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/users/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/users/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/users/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/users/apps.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/users/apps.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/users/backends.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/users/backends.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/users/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/users/forms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/users/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/users/migrations/0001_initial.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/users/migrations/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/users/migrations/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/users/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/users/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/users/mymethods.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/users/mymethods.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/users/myserializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/users/myserializers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/users/templates/app1/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/users/templates/app1/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/users/tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/users/tests.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/users/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/users/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/users/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/users/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tatus" beforeDir="false" afterPath="$PROJECT_DIR$/tatus" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="DjangoConsoleOptions" custom-start-script="import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)">
+    <option name="myCustomStartScript" value="import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+        <option value="HTML File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitSEFilterConfiguration">
+    <file-type-list>
+      <filtered-out-file-type name="LOCAL_BRANCH" />
+      <filtered-out-file-type name="REMOTE_BRANCH" />
+      <filtered-out-file-type name="TAG" />
+      <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
+    </file-type-list>
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/mrgol/main/mywidgets.py" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../.virtualenvs/venv/lib/python3.10/site-packages/django/contrib/admin/options.py" root0="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/mrgol/main/mymethods.py" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/mrgol/main/views.py" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/mrgol/main/translation.py" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/mrgol/main/models.py" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../.virtualenvs/venv/lib/python3.10/site-packages/django/contrib/admin/views/main.py" root0="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/mrgol/main/admin.py" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/mrgol/main/templates/main/widgets/field_question_mark.html" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/mrgol/main/myforms.py" root0="FORCE_HIGHLIGHTING" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="2LfrGVeoOHNbLln4DQ52wsF0lh7" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="DefaultHtmlFileTemplate" value="HTML File" />
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/mrgol/main" />
+    <property name="settings.editor.selected.configurable" value="editor.preferences.smartKeys" />
+  </component>
+  <component name="RunManager" selected="Django Server.shop">
+    <configuration name="Test: cart.tests.CartTestCase.test_cart_iter" type="DjangoTestsConfigurationType" temporary="true">
+      <module name="eCommerce-web-api" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="TARGET" value="cart.tests.CartTestCase.test_cart_iter" />
+      <option name="SETTINGS_FILE" value="" />
+      <option name="CUSTOM_SETTINGS" value="false" />
+      <option name="USE_OPTIONS" value="false" />
+      <option name="OPTIONS" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="shop" type="Python.DjangoServer" factoryName="Django server">
+      <module name="eCommerce-web-api" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+        <env name="DJANGO_SETTINGS_MODULE" value="mrgol.settings" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="launchJavascriptDebuger" value="false" />
+      <option name="port" value="8000" />
+      <option name="host" value="0.0.0.0" />
+      <option name="additionalOptions" value="" />
+      <option name="browserUrl" value="" />
+      <option name="runTestServer" value="false" />
+      <option name="runNoReload" value="false" />
+      <option name="useCustomRunCommand" value="false" />
+      <option name="customRunCommand" value="" />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Django Server.shop" />
+      <item itemvalue="Django tests.Test: cart.tests.CartTestCase.test_cart_iter" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Django tests.Test: cart.tests.CartTestCase.test_cart_iter" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="7b69a780-01c9-4eb8-bca4-c0f997313a78" name="Changes" comment="" />
+      <created>1676272885188</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1676272885188</updated>
+      <workItem from="1676272889465" duration="4000" />
+      <workItem from="1676273333163" duration="13000" />
+      <workItem from="1676273456052" duration="15251000" />
+      <workItem from="1676344663175" duration="37531000" />
+      <workItem from="1676621697928" duration="64452000" />
+      <workItem from="1676931879733" duration="12287000" />
+      <workItem from="1677119961671" duration="6612000" />
+      <workItem from="1677150520242" duration="17657000" />
+      <workItem from="1677241258505" duration="105267000" />
+      <workItem from="1677674524974" duration="19474000" />
+      <workItem from="1677762130708" duration="230000" />
+      <workItem from="1677762467642" duration="24746000" />
+      <workItem from="1677850095629" duration="8799000" />
+      <workItem from="1677940474300" duration="14094000" />
+      <workItem from="1678036761810" duration="11289000" />
+      <workItem from="1678129295244" duration="1740000" />
+      <workItem from="1678225344413" duration="5912000" />
+      <workItem from="1678418107671" duration="22263000" />
+      <workItem from="1678505721376" duration="86341000" />
+      <workItem from="1679639675381" duration="875000" />
+      <workItem from="1679641700620" duration="1901000" />
+      <workItem from="1679644306916" duration="3832000" />
+      <workItem from="1679652164118" duration="8170000" />
+      <workItem from="1679682156209" duration="16767000" />
+      <workItem from="1679782077621" duration="20716000" />
+      <workItem from="1679871631542" duration="702000" />
+      <workItem from="1679903106719" duration="7048000" />
+      <workItem from="1680038340160" duration="4879000" />
+      <workItem from="1680140188068" duration="171514000" />
+      <workItem from="1681676121373" duration="4000" />
+      <workItem from="1682083441908" duration="11000" />
+      <workItem from="1682106974538" duration="10000" />
+      <workItem from="1682202727454" duration="890000" />
+      <workItem from="1682213414184" duration="26391000" />
+      <workItem from="1682301017388" duration="23954000" />
+      <workItem from="1682898108742" duration="17432000" />
+      <workItem from="1682990974818" duration="20903000" />
+      <workItem from="1683078645424" duration="16808000" />
+      <workItem from="1683167162341" duration="20248000" />
+      <workItem from="1683258390288" duration="10706000" />
+      <workItem from="1683391541097" duration="3930000" />
+      <workItem from="1683575302693" duration="35855000" />
+      <workItem from="1683879462131" duration="696000" />
+      <workItem from="1683882216192" duration="258534000" />
+      <workItem from="1684988737849" duration="20565000" />
+      <workItem from="1685076354696" duration="25635000" />
+      <workItem from="1685625626162" duration="8520000" />
+      <workItem from="1685713842051" duration="66321000" />
+      <workItem from="1685981513928" duration="9547000" />
+      <workItem from="1686049498950" duration="1998000" />
+      <workItem from="1686056128144" duration="53150000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="UnknownFeatures">
+    <option featureType="com.intellij.fileTypeFactory" implementationName="requirements.txt" />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/eCommerce_web_api$Test__cart_tests_CartTestCase_test_cart_iter.coverage" NAME="Test: cart.tests.CartTestCase.test_cart_iter Coverage Results" MODIFIED="1680520626985" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
+  </component>
+</project>
