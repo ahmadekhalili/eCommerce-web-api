@@ -3,14 +3,11 @@
 <script src="https://cdn.jsdelivr.net/npm/@mdi/font@6.4.95/css/materialdesignicons.min.css"></script>
 </head><body>
 
-<form action="http://127.0.0.1:8000/index/" method="post">
-{% csrf_token %}
-  <input type="text" id="fname" name="fname" value="John"><br>
-  <input type="text" id="lname" name="lname" value="Doe"><br><br>
-  <input type="submit" value="Submit">
-</form>
 
-<p> {{ a }} </p>
+<form action="http://127.0.0.1:8000/posts/" method="post" enctype="multipart/form-data">
+    {{ a.as_p }}
+    <input type="submit" value="Submit">
+</form>
 <p> {{ b }} </p>
 
 

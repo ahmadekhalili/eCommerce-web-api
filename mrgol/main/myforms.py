@@ -5,6 +5,7 @@ from django.forms.utils import ErrorList
 from django import forms
 from django.conf import settings
 from django.core.files import File
+from django.utils.text import slugify
 
 import json
 import uuid
@@ -21,19 +22,36 @@ from .models import Post, Product, Category, Filter, Image, Comment, Filter_Attr
 
 
 class PostForm(forms.ModelForm):
+    def __init__(self, data=None, files=None, auto_id='id_%s', prefix=None, initial=None, error_class=ErrorList, label_suffix=None, empty_permitted=False, instance=None, use_required_attribute=None, renderer=None, **kwargs):
+        initial = initial if initial else {}
+        if instance:
+            initial = {**initial, 'main_image': instance.main_image.image, 'alt': instance.main_image.alt}
+        self.request = kwargs.get('request')
+        super(). __init__(data, files, auto_id, prefix, initial, error_class, label_suffix, empty_permitted, instance, use_required_attribute, renderer)
+
+    slug = forms.SlugField(required=False, label=_('slug'))                      # we don't want front add slug field in writing post, it should adds in backend
+    main_image = forms.ImageField(label=_('main image'))
+    alt_fa = forms.CharField(max_length=55, required=False, widget=forms.TextInput(attrs={'class': get_mt_input_classes('alt_fa')}), label=_('alt'))
+    alt_en = forms.CharField(max_length=55, required=False, widget=forms.TextInput(attrs={'class': get_mt_input_classes('alt_en')}), label=_('alt'))
     category = forms.ModelChoiceField(queryset=Category.objects.filter(post_product='post'), label=_('category'))
+    author = forms.ModelChoiceField(queryset=User.objects.all(), required=False, label=_('author'))
 
     class Meta:
         model = Post
-        fields = '__all__'
+        exclude = ['main_image']
+        fields = '__all__'#['title', 'slug', 'meta_title', 'meta_description', 'brief_description', 'detailed_description', 'instagram_link', 'tags', 'main_image', 'alt', 'category', 'author']
 
     def save(self, commit=True):
+        self.instance.slug = slugify(self.data['title'], allow_unicode=True)
+        self.instance.author = self.request.user
+        self.instance.visible = True
+        instance = super().save(commit)
         image_icon = Image_icon(alt=self.data.get('alt', uuid.uuid4().hex[:6]), path='posts')
         image_icon.image = File(self.files['main_image'])
         image_icon.save()
-        self.instance.main_image_id = image_icon.id
-        return super().save(commit)
-
+        instance.main_image = image_icon
+        instance.save()
+        return instance
 
 
 image_qusmark_text = _('Image rate should be 1:1')

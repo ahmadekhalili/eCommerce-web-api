@@ -35,7 +35,7 @@ translator.register(Image_icon, Image_iconTranslation)
 
 
 class PostTranslation(TranslationOptions):
-    exclude = ['id', 'visible', 'published_date', 'tags', 'main_image', 'category', 'author']    # 'id' mustn't be in fields otherwise raise error. published_date tranlating should implement in future.
+    exclude = ['id', 'visible', 'published_date', 'instagram_link', 'tags', 'main_image', 'category', 'author']    # 'id' mustn't be in fields otherwise raise error. published_date tranlating should implement in future.
     all_fields = [field.name for field in Post._meta.fields] + [field.name for field in Post._meta.many_to_many]
 
     def fields_generator(exclude, all_fields):       # we can't use exclude and product_fields in list comprehence without this method.

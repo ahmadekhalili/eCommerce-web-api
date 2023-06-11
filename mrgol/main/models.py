@@ -203,15 +203,16 @@ class Image_icon(models.Model):
 
 
 class Post(models.Model):
-    title = models.CharField(_('title'), max_length=60)
+    title = models.CharField(_('title'), max_length=255)
     slug = models.SlugField(_('slug'), allow_unicode=True, db_index=False)   #default db_index=True
     meta_title = models.CharField(_('meta title'), max_length=60, blank=True, default='')
     meta_description = models.TextField(_('meta description'), validators=[MaxLengthValidator(160)], blank=True, default='')    
     brief_description = models.TextField(_('brief description'), validators=[MaxLengthValidator(1000)])
     detailed_description = models.TextField(_('detailed description'), blank=True)    # ckeditor implemented in front, here only saved html content sended from front end.
+    instagram_link = models.CharField(_('instagram link'), max_length=255, blank=True, default='')        # instagram link of specefied post (for every post we have one associated post)
     visible = models.BooleanField(_('delete'), default=True)
     published_date = models.DateTimeField(_('published date'), auto_now_add=True)
-    tags = postgre_fields.ArrayField(models.CharField(max_length=30, blank=True))
+    tags = postgre_fields.ArrayField(models.CharField(max_length=150, blank=True), blank=True)
     main_image = models.OneToOneField(Image_icon, on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('main image'))        # this image used in top of post page (in 1200px) and also for post icon (in 160px).
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('category'))
     author = models.ForeignKey(User, related_name='written_posts', on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('author'))
@@ -240,7 +241,7 @@ class ProductManager(models.Manager):                             #we have two s
         return product
 
 class Product(models.Model):                                     #.order_by('-available') shoud be done in views and in admin hasndy
-    name = models.CharField(_('name'), max_length=60)
+    name = models.CharField(_('name'), max_length=150)
     slug = models.SlugField(_('slug'), allow_unicode=True, db_index=False)             #default db_index of slug is True
     meta_title = models.CharField(_('meta title'), max_length=60, blank=True, default='')
     meta_description = models.TextField(_('meta description'), validators=[MaxLengthValidator(160)], blank=True, default='')
@@ -416,6 +417,8 @@ post_save.connect(save_smallimage, sender=Image)
 
 statuses = [('1', _('not checked')), ('2', _('confirmed')), ('3', _('not confirmed')), ('4', _('deleted'))]
 class Comment(models.Model):
+    name = models.CharField(max_length=30, blank=True)
+    email = models.EmailField(blank=True)
     status = models.CharField(_('status'), default='1', max_length=1, choices=statuses)               # review site comments by admin and show comment in site if confirmed, '1' = confirmed     '2' = not checked(admin should check comment to confirm or not)      '3' = not confirmed(admin can confirm afters if want)    '4' = deleted
     published_date = models.DateTimeField(_('published date'), auto_now_add=True)           # published_date should translate in front. for example comment1 (1390/1/27) can translate like: comment1 (2016/4/16)
     content = models.TextField(_('content'), validators=[MaxLengthValidator(500)])

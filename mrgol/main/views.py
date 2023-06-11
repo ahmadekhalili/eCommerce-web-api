@@ -18,9 +18,11 @@ from rest_framework import views
 
 import io
 import os
+import uuid
 import jdatetime
 from pathlib import Path
 from PIL import Image as PilImage
+from math import ceil
 
 from . import myserializers, myforms
 from .mymethods import get_products, get_posts, get_posts_products_by_category, make_next
@@ -119,51 +121,6 @@ class HomePage(views.APIView):
 
 
 
-'''
-@api_view(['GET', 'POST'])
-def product_list(request):
-    """
-    List all products, or create a new product.
-    """
-    if request.method == 'GET':
-        products = Product.objects.filter(id__lt=100).select_related('rating').prefetch_related('comments', 'image_set')
-        serializer = myserializers.ProductDetailSerializer(products, many=True)
-        return Response(serializer.data)
-    
-    elif request.method == 'POST':
-        serializer = myserializers.ProductDetailSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-#.prefetch_related('comments__author')
-class ProductList(generics.ListAPIView):
-
-    def list(self, request, *args, **kwargs):
-        super().list(request, *args, **kwargs)
-        serializer = p(queryset, many=True, context={'request': request})
-        return Response(serializer.data)  
-    queryset = Product.objects.filter(id__lt=100).select_related('rating').prefetch_related('comments', 'image_set')
-    serializer_class = myserializers.ProductDetailSerializer
-    #permission_classes = [permissions.IsAuthenticated]
-
-
-why this desing expired?
-class PostList(views.APIView):                                                              
-    def get(self, request):
-        count = 0
-        posts = Post.objects.filter(id__in=[1, 2, 3, 4, 5])
-        serializers = myserializers.PostListSerializer(posts, many=True, context={'request': request}).data              #you must put context={'request': request} in PostListSerializer argument for working request.build_absolute_uri  in PostListSerializer, otherwise request will be None in PostListSerializer and raise error 
-        for post in posts:
-            pk, slug = post.id, post.slug
-            serializer = serializers[count]
-            serializer['url'] = f'{pk}/{slug}/'
-            #serializer['main_image'] = request.build_absolute_uri(post.main_image) 
-            count += 1
-        return Response(serializers)    
-
-'''
 class PostMap(views.APIView):
     def get(self, request, *args, **kwargs):
         '''
@@ -243,11 +200,11 @@ class PostList(views.APIView):
         posts = get_posts(*rang).select_related('category')
         serializers = {'posts': myserializers.PostListSerializer(posts, many=True, context={'request': request}).data}             #you must put context={'request': request} in PostListSerializer argument for working request.build_absolute_uri  in PostListSerializer, otherwise request will be None in PostListSerializer and raise error
         sessionid = request.session.session_key
-        page_count = int(Post.objects.count() / step) + 1
+        page_count = ceil(Post.objects.count() / step)        # round up number, like: ceil(2.2)==3 ceil(3)==3
         return Response({'sessionid': sessionid, **serializers, 'pages': page_count})
 
     def post(self, request, *args, **kwargs):
-        form = myforms.PostForm(request.POST, request.FILES)
+        form = myforms.PostForm(request.POST, request.FILES, request=request)
         if form.is_valid():
             instance = form.save()
             return Response(myserializers.PostDetailSerializer(instance, context={'request': request}).data)
@@ -364,6 +321,19 @@ class ProductCategoryDetail(generics.RetrieveAPIView):
         sessionid = request.session.session_key
         return Response({'sessionid': sessionid, **serializers})
 '''
+class PostCommentCreate(views.APIView):
+    def post(self, request, *args, **kwargs):
+        pk = int(kwargs['pk'])
+        if Post.objects.filter(id=pk).exists():
+            try:
+                data = request.data
+                user = None if not request.user.is_authenticated else request.user
+                comment = Comment.objects.create(name=data.get('name', ''), email=data.get('email', ''), content=data['content'], author=user, post_id=pk)
+                return Response({'status': 'نظر شما با موفقيت ثبت شد.'})
+            except:
+                return Response({'status': 'اطلاعات جهت ثبت نظر کافي نيست.'}, status=400)
+        else:
+            return Response({'user': request.user}, status=401)
 
 
 
@@ -397,7 +367,6 @@ class TownsByState(views.APIView):
                 return Response(L[1])
     '''
 
-
 class UploadImage(views.APIView):
     #permission_classes = [IsAdminUser]
     def post(self, request, *args, **kwargs):
@@ -409,14 +378,19 @@ class UploadImage(views.APIView):
             date = datetime.now().strftime('%Y %-m %-d').split()
         base_path = str(Path(__file__).resolve().parent.parent)     # is like: /home/akh/eCommerce-web-api/mrgol
         path = f'/media/posts_images/{date[0]}/{date[1]}/{date[2]}/'
-        smallimage_path = f'/media/posts_images/{date[0]}/{date[1]}/{date[2]}/smallimages/'
         if not os.path.exists(base_path + path):
             os.makedirs(base_path + path)
-        if not os.path.exists(base_path + smallimage_path):
-            os.makedirs(base_path + smallimage_path)
-        stream = io.BytesIO(file_data)   #.encode().decode('unicode_escape').encode("raw_unicode_escape")
+        stream = io.BytesIO(file_data)   # .encode().decode('unicode_escape').encode("raw_unicode_escape")
         image = PilImage.open(stream)
-        image.save(base_path + path + filename)
-        resized = image.resize((160, 160))
-        resized.save(base_path + smallimage_path + filename)
-        return Response({'default': path + filename, '160': smallimage_path + filename})
+        width, height = image.size
+        aspect_ratio = width / height
+        name = uuid.uuid4().hex[:12]     # generate random unique string (length 12)
+        image.save(base_path + path + f'{name}-default' + f'.{image.format}')
+        sizes, paths = [240, 420, 640, 720, 960, 1280], {}
+        for i in sizes:
+            image = PilImage.open(stream)
+            resized = image.resize((i, int(i/aspect_ratio)))
+            resized.save(base_path + path + f'{name}-{i}' + f'.{image.format}')
+            # path is like: /media/posts_images/1402/3/20/qwer43asd2e4-720.JPG
+            paths[i] = path + f'{name}-{i}' + f'.{image.format}'
+        return Response({'default': path + f'{name}-default' + f'.{image.format}', **paths})
