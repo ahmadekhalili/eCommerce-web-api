@@ -214,10 +214,10 @@ class PostListSerializer(serializers.ModelSerializer):
         fields = ['id', *g_t('title'), *g_t('slug'), *g_t('meta_title'), *g_t('meta_description'), *g_t('brief_description'), 'published_date', 'tags', 'image_icons', 'category', 'author', 'url']
 
     def get_image_icons(self, obj):                                     #we must create form like: <form method="get" action="/posts/?obj.category.slug"> .  note form must shown as link. you can put that form in above of that post.
-        base_path, result = str(Path(__file__).resolve().parent.parent), {}
+        result = {}
         for image_icon in obj.image_icon_set.all():
-            size = re.split('[.-]', image_icon.image.path)[-2]
-            result[size] = {'image': image_icon.image.path, 'alt': image_icon.alt}
+            size = re.split('[.-]', image_icon.image.url)[-2]
+            result[size] = {'image': image_icon.image.url, 'alt': image_icon.alt}
         return result
 
     def get_published_date(self, obj):
@@ -249,10 +249,10 @@ class ProductListSerializer(serializers.ModelSerializer):
         fields = ['id', *g_t('name'), *g_t('slug'), *g_t('meta_title'), *g_t('meta_description'), *g_t('brief_description'), *g_t('price'), *g_t('available'), 'image_icons', 'rating', 'url']       #visible, filter_attributes, category are filtered(removed) here.
 
     def get_image_icons(self, obj):                                     #we must create form like: <form method="get" action="/posts/?obj.category.slug"> .  note form must shown as link. you can put that form in above of that post.
-        base_path, result = str(Path(__file__).resolve().parent.parent), {}
+        result = {}
         for image_icon in obj.image_icon_set.all():
-            size = re.split('[.-]', image_icon.image.path)[-2]
-            result[size] = {'image': image_icon.image.path, 'alt': image_icon.alt}
+            size = re.split('[.-]', image_icon.image.url)[-2]
+            result[size] = {'image': image_icon.image.url, 'alt': image_icon.alt}
         return result
 
     def get_rating(self, obj):
@@ -291,10 +291,10 @@ class PostDetailSerializer(serializers.ModelSerializer):
         return {'name': name, 'url': url}
 
     def get_image_icons(self, obj):                                     #we must create form like: <form method="get" action="/posts/?obj.category.slug"> .  note form must shown as link. you can put that form in above of that post.
-        base_path, result = str(Path(__file__).resolve().parent.parent), {}
+        result = {}
         for image_icon in obj.image_icon_set.all():
-            size = re.split('[.-]', image_icon.image.path)[-2]
-            result[size] = {'image': image_icon.image.path, 'alt': image_icon.alt}
+            size = re.split('[.-]', image_icon.image.url)[-2]
+            result[size] = {'image': image_icon.image.url, 'alt': image_icon.alt}
         return result
 
 
