@@ -51,9 +51,14 @@ class CommentInline(admin.TabularInline):
     get_published_date.short_description = _('published date')
 
 
+class ImageIconInline(admin.TabularInline):
+    model = Image_icon
+    fields = ('image', 'alt', 'path')
+
+
 class PostAdmin(TranslationAdmin):
     prepopulated_fields = {'slug':('title',)}
-    inlines = [CommentInline]
+    inlines = [CommentInline, ImageIconInline]
     readonly_fields = ('get_published_date',)
     form = myforms.PostForm
 
@@ -137,6 +142,11 @@ class ImageInline(admin.StackedInline):
     form = myforms.ImageForm
 
 
+class ImageIconInline(admin.TabularInline):
+    model = Image_icon
+    fields = ('image', 'alt', 'path')
+
+
 class ProductAdmin(CustModelAdmin):
     search_fields = ['id', 'name__contains', 'slug', 'brand']                            #important: update manualy js file searchbar_help_text_product in class media.
     list_display = ['id', 'name', 'price', 'stock', 'rating', 'get_created_brief', 'get_updated_brief']                 #this line is for testing mode!!!
@@ -144,13 +154,12 @@ class ProductAdmin(CustModelAdmin):
     exclude = ('visible',)
     prepopulated_fields = {'slug':('name',)}
     filter_horizontal = ('filter_attributes',)
-    inlines = [ImageInline, CommentInline]   
+    inlines = [ImageInline, CommentInline, ImageIconInline]
     readonly_fields = ('rating', 'get_created', 'get_updated')
     form = myforms.ProductForm
-    alt = g_t('alt')
     fieldsets = (
         (None, {
-            'fields': ('name', 'slug', 'brief_description', 'detailed_description', 'price', 'available', 'image', *alt, 'category', 'filter_attributes', 'rating', 'stock', 'brand', 'weight', 'get_created', 'get_updated')
+            'fields': ('name', 'slug', 'brief_description', 'detailed_description', 'price', 'available', 'category', 'filter_attributes', 'rating', 'stock', 'brand', 'weight', 'get_created', 'get_updated')
         }),
         (_('size'), {
             'classes': ('collapse',),
@@ -194,20 +203,6 @@ class ProductAdmin(CustModelAdmin):
         return format_html('{} {}&rlm; {}، ساعت {}:{}'.format(date[2], _(date[1]), date[0], obj.published_date.minute, obj.published_date.hour))
     get_updated.allow_tags = True
     get_updated.short_description = _('updated date')
-
-    def save_form(self, request, form, change):
-        instance = form.save(commit=False)       
-        if not instance.image_icon:             #in new product adding
-            image_icon = Image_icon.objects.create(image=request.FILES.get('image'), alt=request.POST.get('alt'))
-            instance.image_icon = image_icon
-        else:                                   # 'image' and 'alt' are not fields of Product, so we should save it manually.
-            if request.FILES.get('image'):
-                instance.image_icon.image = request.FILES.get('image')
-            for f in g_t('alt'):
-                if request.POST.get(f):
-                    instance.image_icon.alt = request.POST.get(f)
-            instance.image_icon.save()                                    #you must save image_icone seperatly, otherwise dont saved changes!!!
-        return instance
 
     def get_queryset(self, request):
         queryset = Product.objects.exclude(visible=False)

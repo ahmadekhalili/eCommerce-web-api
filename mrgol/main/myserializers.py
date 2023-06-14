@@ -7,7 +7,9 @@ from rest_framework import serializers
 
 from modeltranslation.utils import get_translation_fields as g_t
 from datetime import datetime
+from pathlib import Path
 import jdatetime
+import re
 
 from .models import *
 from .mymethods import get_category_and_fathers
@@ -202,22 +204,21 @@ class BrandSerializer(serializers.ModelSerializer):
 class PostListSerializer(serializers.ModelSerializer):
     published_date = serializers.SerializerMethodField()
     tags = serializers.ListField(child=serializers.CharField(max_length=30))
-    main_image = Image_iconSerializer()
+    image_icons = serializers.SerializerMethodField(read_only=True)
     category = serializers.SerializerMethodField()
     author = serializers.SerializerMethodField()
-    url = serializers.SerializerMethodField()                                 #showing solo str datas like 'url' before dict/list type datas like main_image, category, author  is more readable and clear.
+    url = serializers.SerializerMethodField()                                 #showing solo str datas like 'url' before dict/list type datas like image_icons, category, author  is more readable and clear.
 
     class Meta:
         model = Post
-        fields = ['id', *g_t('title'), *g_t('slug'), *g_t('meta_title'), *g_t('meta_description'), *g_t('brief_description'), 'published_date', 'tags', 'main_image', 'category', 'author', 'url']
+        fields = ['id', *g_t('title'), *g_t('slug'), *g_t('meta_title'), *g_t('meta_description'), *g_t('brief_description'), 'published_date', 'tags', 'image_icons', 'category', 'author', 'url']
 
-    def get_main_image(self, obj):
-        request = self.context.get('request', None)
-        try:
-            url = request.build_absolute_uri(obj.main_image.image.url)
-        except:
-            url = ''                                                         
-        return url
+    def get_image_icons(self, obj):                                     #we must create form like: <form method="get" action="/posts/?obj.category.slug"> .  note form must shown as link. you can put that form in above of that post.
+        base_path, result = str(Path(__file__).resolve().parent.parent), {}
+        for image_icon in obj.image_icon_set.all():
+            size = re.split('[.-]', image_icon.image.path)[-2]
+            result[size] = {'image': image_icon.image.path, 'alt': image_icon.alt}
+        return result
 
     def get_published_date(self, obj):
         return round(jdatetime.datetime.fromgregorian(datetime=obj.published_date).timestamp())
@@ -239,13 +240,20 @@ class PostListSerializer(serializers.ModelSerializer):
 
 
 class ProductListSerializer(serializers.ModelSerializer):
-    image_icon = Image_iconSerializer()
+    image_icons = serializers.SerializerMethodField(read_only=True)
     rating = serializers.SerializerMethodField()                                        #RatingSerializer(read_only=True)
     url = serializers.SerializerMethodField()
     
     class Meta:
         model = Product
-        fields = ['id', *g_t('name'), *g_t('slug'), *g_t('meta_title'), *g_t('meta_description'), *g_t('brief_description'), *g_t('price'), *g_t('available'), 'image_icon', 'rating', 'url']       #visible, filter_attributes, category are filtered(removed) here.
+        fields = ['id', *g_t('name'), *g_t('slug'), *g_t('meta_title'), *g_t('meta_description'), *g_t('brief_description'), *g_t('price'), *g_t('available'), 'image_icons', 'rating', 'url']       #visible, filter_attributes, category are filtered(removed) here.
+
+    def get_image_icons(self, obj):                                     #we must create form like: <form method="get" action="/posts/?obj.category.slug"> .  note form must shown as link. you can put that form in above of that post.
+        base_path, result = str(Path(__file__).resolve().parent.parent), {}
+        for image_icon in obj.image_icon_set.all():
+            size = re.split('[.-]', image_icon.image.path)[-2]
+            result[size] = {'image': image_icon.image.path, 'alt': image_icon.alt}
+        return result
 
     def get_rating(self, obj):
         rate = obj.rating.rate
@@ -261,8 +269,8 @@ class ProductListSerializer(serializers.ModelSerializer):
 class PostDetailSerializer(serializers.ModelSerializer):
     published_date = serializers.SerializerMethodField(read_only=True)
     tags = serializers.ListField(child=serializers.CharField(max_length=30))
-    main_image = Image_iconSerializer()
     comment_set = CommentSerializer(read_only=True, many=True)
+    image_icons = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Post
@@ -282,7 +290,12 @@ class PostDetailSerializer(serializers.ModelSerializer):
         name, url = (obj.category.name, f'/posts/{obj.category.slug}/') if obj.category else ('', '')       #post.category has null=True so this field can be blank like when you remove and category.
         return {'name': name, 'url': url}
 
-
+    def get_image_icons(self, obj):                                     #we must create form like: <form method="get" action="/posts/?obj.category.slug"> .  note form must shown as link. you can put that form in above of that post.
+        base_path, result = str(Path(__file__).resolve().parent.parent), {}
+        for image_icon in obj.image_icon_set.all():
+            size = re.split('[.-]', image_icon.image.path)[-2]
+            result[size] = {'image': image_icon.image.path, 'alt': image_icon.alt}
+        return result
 
 
 class ProductDetailSerializer(serializers.ModelSerializer):       # important: for saving we should first switch to `en` language by:  django.utils.translation.activate('en').    comment_set will optained by front in other place so we deleted from here.   more description:  # all keys should save in database in `en` laguage(for showing data you can select eny language) otherwise it was problem understading which language should select to run query on them like in:  s = myserializers.ProductDetailMongoSerializer(form.instance, context={'request': request}).data['shopfilteritems']:     {'رنگ': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} it is false for saving, we should change language by  `activate('en')` and now true form for saving:  {'color': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} and query like: s['color']

@@ -1,12 +1,19 @@
 from django.db.models import Max, Min
 from django.conf import settings
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 import copy
+import os
+import io
+import uuid
 from decimal import Decimal
 from bs4 import BeautifulSoup
 import requests
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.ssl_ import create_urllib3_context
+from PIL import Image as PilImage
+from pathlib import Path
+from itertools import cycle
 
 from .models import Product, Post, Category
 
@@ -188,3 +195,45 @@ class make_next:                             #for adding next to list you shold 
             nex = []
         return nex
 
+
+class ImageCreation:
+    def __init__(self, name=None):      # it's not good idea name of file be same with alt (alt هس like: "food-vegetables-healthy"(
+        self.base_path = str(Path(__file__).resolve().parent.parent)  # is like: /home/akh/eCommerce-web-api/mrgol
+        self.name = name if name else uuid.uuid4().hex[:12]  # generate random unique string (length 12)
+
+    def _save_image(self, opened_image, full_path, full_name, instance, att_name):
+        # full_path is like: '/home/akh/.../mrgol/media/picture1.jpg'  fullname: 'picture1.jpg
+        if isinstance(opened_image, PilImage.Image):
+            if instance:           # save image to hard by image field
+                buffer = io.BytesIO()
+                opened_image.save(buffer, format=self.format)
+                setattr(instance, att_name, SimpleUploadedFile(full_name, buffer.getvalue()))
+            else:                  # save image to hard by pillow.sav()
+                opened_image.save(full_path + f'{full_name}')
+
+    def create_images(self, opened_image, path, sizes, instances=None, att_name='image'):
+        '''
+        create 'opened_image' in different sizes and save them in 'path'. returned value is like:
+        {'default': '/media/../..7a0-default.JPEG', 240: '/media/../..7a0-240.JPEG', ...}. if you specify instances,
+        image creation will done by model field(instance.att_name.save()) instead of PilImage.save()
+        '''
+        iter_instances = cycle(instances) if instances else None
+        if isinstance(opened_image, PilImage.Image):
+            paths, self.format = {}, opened_image.format              # opened_image.format is like: "JPG"
+            if not os.path.exists(self.base_path + path):
+                os.makedirs(self.base_path + path)
+            width, height = opened_image.size                 # opened_image.size is like: (1080, 1920)
+            aspect_ratio = width / height
+            for width in sizes:
+                resized = opened_image.resize((width, int(width / aspect_ratio))) if isinstance(width, int) else opened_image
+                full_path, full_name = self.base_path + path, f'{self.name}-{width}' + f'.{self.format}'
+                instance = next(iter_instances) if instances else None
+                self._save_image(resized, full_path, full_name, instance, att_name)
+                # path is like: /media/posts_images/1402/3/20/qwer43asd2e4-720.JPG
+                paths[width] = path + full_name
+            return (paths, instances)
+
+        elif isinstance(opened_image, io.BufferedReader):      # open image by built-in function open()
+            pass
+        else:
+            raise Exception('opened_image is not object of PilImage or python built in .open()')

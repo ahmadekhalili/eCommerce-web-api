@@ -22,36 +22,24 @@ from .models import Post, Product, Category, Filter, Image, Comment, Filter_Attr
 
 
 class PostForm(forms.ModelForm):
-    def __init__(self, data=None, files=None, auto_id='id_%s', prefix=None, initial=None, error_class=ErrorList, label_suffix=None, empty_permitted=False, instance=None, use_required_attribute=None, renderer=None, **kwargs):
-        initial = initial if initial else {}
-        if instance:
-            initial = {**initial, 'main_image': instance.main_image.image, 'alt': instance.main_image.alt}
-        self.request = kwargs.get('request')
-        super(). __init__(data, files, auto_id, prefix, initial, error_class, label_suffix, empty_permitted, instance, use_required_attribute, renderer)
-
-    slug = forms.SlugField(required=False, label=_('slug'))                      # we don't want front add slug field in writing post, it should adds in backend
-    main_image = forms.ImageField(label=_('main image'))
-    alt_fa = forms.CharField(max_length=55, required=False, widget=forms.TextInput(attrs={'class': get_mt_input_classes('alt_fa')}), label=_('alt'))
-    alt_en = forms.CharField(max_length=55, required=False, widget=forms.TextInput(attrs={'class': get_mt_input_classes('alt_en')}), label=_('alt'))
+    slug_fa = forms.SlugField(required=False, widget=forms.TextInput(attrs={'class': get_mt_input_classes('slug_fa')}), label=_('slug'))                      # we don't want front add slug field in writing post, it should adds in backend
+    slug_en = forms.SlugField(required=False, widget=forms.TextInput(attrs={'class': get_mt_input_classes('slug_en')}), label=_('slug'))
     category = forms.ModelChoiceField(queryset=Category.objects.filter(post_product='post'), label=_('category'))
     author = forms.ModelChoiceField(queryset=User.objects.all(), required=False, label=_('author'))
 
     class Meta:
         model = Post
-        exclude = ['main_image']
-        fields = '__all__'#['title', 'slug', 'meta_title', 'meta_description', 'brief_description', 'detailed_description', 'instagram_link', 'tags', 'main_image', 'alt', 'category', 'author']
+        fields = '__all__'#['title', 'meta_title', 'meta_description', 'brief_description', 'detailed_description', 'instagram_link', 'tags', 'main_image', 'alt', 'category', 'author']
 
     def save(self, commit=True):
-        self.instance.slug = slugify(self.data['title'], allow_unicode=True)
-        self.instance.author = self.request.user
+        # admin panel sends data with 'title_fa' and 'title_en' keys not 'title'.
+        for f_title, f_slug in zip(g_t('title'), g_t('slug')):             # fill slug field in forms submitted by frontend (front should not fill slug)
+            if getattr(self.instance, f_title, None) and self.data.get(f_title, None):
+                setattr(self.instance, f_slug, slugify(self.data[f_title], allow_unicode=True))
+        if getattr(self, 'request', None):          # admin panel sent request wouldn't be initialized with request
+            self.instance.author = self.request.user
         self.instance.visible = True
-        instance = super().save(commit)
-        image_icon = Image_icon(alt=self.data.get('alt', uuid.uuid4().hex[:6]), path='posts')
-        image_icon.image = File(self.files['main_image'])
-        image_icon.save()
-        instance.main_image = image_icon
-        instance.save()
-        return instance
+        return super().save(commit)
 
 
 image_qusmark_text = _('Image rate should be 1:1')
@@ -62,25 +50,10 @@ class ProductForm(myforms.ProductModelForm):
         initial = initial if initial else {}
         length, width, height = [float(i) for i in instance.size.split(',')] if instance and instance.size else (None,None,None)
         initial = {**initial, 'length': length, 'width': width, 'height': height} if length else initial
-        try:
-            image_icon = instance.image_icon
-            image, alts = image_icon.image, {}
-            for f in g_t('alt'):
-                if getattr(image_icon, f, None):
-                    alts[f] = getattr(image_icon, f)
-        except:
-            image = None
-        if image:
-            initial = {**initial, 'image': image}
-            for f in alts:
-                initial[f] = alts[f]
         super(). __init__(data, files, auto_id, prefix, initial, error_class, label_suffix, empty_permitted, instance, use_required_attribute, renderer)
 
     #category = myforms.CustomChoiceField(choices=(), widget=product_category_widget, required=True, label=_('category'))
     category = myforms.CustomModelChoiceField(queryset=Category.objects.all(), widget=product_category_widget, required=True, label=_('category'))
-    image = forms.ImageField(widget=image_icon_widget(qus_text=image_qusmark_text, input=''), required=True, label=_('image icon'))
-    alt_fa = forms.CharField(max_length=55, widget=forms.TextInput(attrs={'class': get_mt_input_classes('alt_fa')}), label=_('alt'))
-    alt_en = forms.CharField(max_length=55, widget=forms.TextInput(attrs={'class': get_mt_input_classes('alt_en')}), required=False, label=_('alt'))   # if you don't put required=False, this field will be required in modeltranslation tab.
     weight_fa = forms.FloatField(widget=NumberInputQuesMark(attrs={'class': get_mt_input_classes('weight_fa')}, qus_text=weight_qusmark_text), required=True, label=_('weight'))
     weight_en = forms.FloatField(widget=NumberInputQuesMark(attrs={'class': get_mt_input_classes('weight_en')}, qus_text=weight_qusmark_text), required=False, label=_('weight'))
     length = forms.FloatField(widget=NumberInputQuesMark(qus_text=length_qusmark_text), label=_('length'))
@@ -89,7 +62,7 @@ class ProductForm(myforms.ProductModelForm):
 
     class Meta:                                          #take fields from admin.fiedset but this is needed for validation.
         model = Product
-        fields = ['name', 'slug', 'meta_title', 'meta_description', 'brief_description', 'detailed_description', 'price', 'available', 'visible', 'filter_attributes', 'category', 'rating', 'image', 'alt_fa', 'alt_en', 'weight_fa', 'weight_en', 'length', 'width', 'height']
+        fields = ['name', 'slug', 'meta_title', 'meta_description', 'brief_description', 'detailed_description', 'price', 'available', 'visible', 'filter_attributes', 'category', 'rating', 'weight_fa', 'weight_en', 'length', 'width', 'height']
 
     def save(self, commit=True):
         length, width, height = self.cleaned_data.get('length'), self.cleaned_data.get('width'), self.cleaned_data.get('height')
@@ -149,6 +122,18 @@ class Filter_AttributeForm(forms.ModelForm):
     def is_valid(self):
         self.previouse_name = self.instance.name            # used in main.admin.Filter_AttributeAdmin.save_related
         return self.is_bound and not self.errors
+
+
+
+
+class ImageIconForm(forms.ModelForm):
+    image = forms.ImageField(widget=image_icon_widget(qus_text=image_qusmark_text, input=''), required=True, label=_('image icon'))
+    #alt_fa = forms.CharField(max_length=55, widget=forms.TextInput(attrs={'class': get_mt_input_classes('alt_fa')}), label=_('alt'))
+    #alt_en = forms.CharField(max_length=55, widget=forms.TextInput(attrs={'class': get_mt_input_classes('alt_en')}), required=False, label=_('alt'))   # if you don't put required=False, this field will be required in modeltranslation tab.
+
+    class Meta:
+        model = Image_icon
+        fields = '__all__'
 
 
 

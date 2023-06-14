@@ -174,34 +174,6 @@ class Rating(models.Model):                                                   #m
 
 
 
-def icon_path_selector(instance, filename):                        #note: if you use method in upload_to, strftime ("%Y/%m/%d/") dont work and should provided manualy.
-    if settings.IMAGES_PATH_TYPE == 'jalali':
-        date = jdatetime.datetime.fromgregorian(date=datetime.now()).strftime('%Y %-m %-d').split()
-    else:
-        date = datetime.now().strftime('%Y %-m %-d').split()
-    return f'{instance.path}_images/icons/{date[0]}/{date[1]}/{date[2]}/{filename}'  # instance.path == Image_icon.path
-
-class Image_icon(models.Model):
-    image = models.FileField(_('image'), upload_to=icon_path_selector)
-    alt = models.CharField(_('alt'), max_length=55, unique=True, null=True, default=None)    # alt should not be dublicate because we used alt instead image_icon id in def __str__(self)
-    path = models.CharField(_('path'), max_length=20, default='products')                  # can be value like: "products"  or  "posts" ....    
-
-    class Meta:
-        verbose_name = _('Image icon')
-        verbose_name_plural = _('Image icones')
-
-    def __str__(self):
-        return self.alt
-
-    def save(self, *args, **kwargs):
-        image_icon = super().save(*args, **kwargs)       
-        image = image_icon.image if image_icon else self.image              #only in creating new Image_icon, image_icon is not None, in editing we must use self (image_icon is None).
-        if image:
-            file = PilImage.open(image.path)
-            resized = file.resize((200, 200))
-            resized.save(image.path)
-
-
 class Post(models.Model):
     title = models.CharField(_('title'), max_length=255)
     slug = models.SlugField(_('slug'), allow_unicode=True, db_index=False)   #default db_index=True
@@ -213,10 +185,10 @@ class Post(models.Model):
     visible = models.BooleanField(_('delete'), default=True)
     published_date = models.DateTimeField(_('published date'), auto_now_add=True)
     tags = postgre_fields.ArrayField(models.CharField(max_length=150, blank=True), blank=True)
-    main_image = models.OneToOneField(Image_icon, on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('main image'))        # this image used in top of post page (in 1200px) and also for post icon (in 160px).
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('category'))
     author = models.ForeignKey(User, related_name='written_posts', on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('author'))
     #comment_set                                                   #backward relation
+    #image_icon_set               # for one image_icon, several image_icons created with different sizes. default size used in top of a post page and for post icon use smaller (in 160px).
 
     class Meta:
         verbose_name = _('Post')
@@ -255,12 +227,12 @@ class Product(models.Model):                                     #.order_by('-av
     filter_attributes = models.ManyToManyField(Filter_Attribute, through='Product_Filter_Attributes', blank=True, verbose_name=_('filter attributes'))
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('category'))
     brand = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('brand'))          # brand field as CharField is not logical and should be ForeignKey why? because for example in adding product1 we may add brand "nokia" and in second product2 add "Nokia". when products increased (supose more than 100) it will raise real problems
-    image_icon = models.OneToOneField(Image_icon, on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('image icon'))     #in home page(page that list of product shown) dont query product.image_set.all()[0] for showing one image of product, instead query product.image_icon   (more fster)
     rating = models.OneToOneField(Rating, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('rating'))
     stock = models.PositiveIntegerField(_('stock'), default=0)                        # important: stock before creating first shopfilteritem of product shoud be 0 otherwise it will sum with shopfilteritem.stock, example: supose we have product1.stock = 10  now after creating shopfilteritem1 with stock=12 product1.stock will be 10+12   (address: in ShopFilterItem.save and model_methods.py/update_product_stock
     weight = models.FloatField(_('weight'), null=True, blank=False)                   # weight is in gram and used in orders/mymethods/profile_order_detail/PostDispatchPrice  but if you dont specify weight in saving a product, it will be None and will ignore in PostDispatchPrice. its better null=True easier in creating products in tests.
     size = models.CharField(_('size'), max_length=25, blank=True)          # value should be in mm  and like '100,150,150'  this field seperate to 3 field in ProductForm in __init__ and save func), also we use size in mymethods.PostDispatchPrice  to define which box size should choice for posting.
     #image_set                                                    backward relation field
+    #image_icon_set
     #comment_set
     #product_filter_attributes_set
     #smallimages
@@ -358,6 +330,38 @@ class ShopFilterItem(models.Model):
 
 
 
+def icon_path_selector(instance, filename):                        #note: if you use method in upload_to, strftime ("%Y/%m/%d/") dont work and should provided manualy.
+    if settings.IMAGES_PATH_TYPE == 'jalali':
+        date = jdatetime.datetime.fromgregorian(date=datetime.now()).strftime('%Y %-m %-d').split()
+    else:
+        date = datetime.now().strftime('%Y %-m %-d').split()
+    return f'{instance.path}_images/icons/{date[0]}/{date[1]}/{date[2]}/{filename}'  # instance.path == Image_icon.path
+
+class Image_icon(models.Model):
+    image = models.ImageField(_('image'), upload_to=icon_path_selector)
+    alt = models.CharField(_('alt'), max_length=55, unique=True, null=True)    # alt should not be dublicate because we used alt instead image_icon id in def __str__(self)
+    path = models.CharField(_('path'), max_length=20, default='products')                  # can be value like: "products"  or  "posts" ....
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, blank=True, null=True, verbose_name=_('post'))
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, blank=True, null=True, verbose_name=_('product'))
+
+    class Meta:
+        verbose_name = _('Image icon')
+        verbose_name_plural = _('Image icones')
+
+    def __str__(self):
+        return self.alt if self.alt else self.image.path
+
+    '''def save(self, *args, **kwargs):
+        image_icon = super().save(*args, **kwargs)
+        image = image_icon.image if image_icon else self.image              #only in creating new Image_icon, image_icon is not None, in editing we must use self (image_icon is None).
+        if image:
+            file = PilImage.open(image.path)
+            resized = file.resize((200, 200))
+            resized.save(image.path)'''
+
+
+
+
 def image_path_selector(instance, filename):                        #note: if you use method in upload_to, strftime ("%Y/%m/%d/") dont work and should provided manualy.
     if settings.IMAGES_PATH_TYPE == 'jalali':
         date = jdatetime.datetime.fromgregorian(date=datetime.now()).strftime('%Y %-m %-d').split()
@@ -367,7 +371,7 @@ def image_path_selector(instance, filename):                        #note: if yo
 
 class Image(models.Model):
     image = models.ImageField(_('image'), upload_to=image_path_selector)
-    alt = models.CharField(_('alt'), max_length=55, unique=True, null=True, default='')                    # alt should not be dublicate because we used alt instead image id in def __str__(self)
+    alt = models.CharField(_('alt'), max_length=55, unique=True, null=True)                    # alt should not be dublicate because we used alt instead image id in def __str__(self)
     product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name=_('product'))
 
     class Meta:
@@ -389,7 +393,7 @@ def small_path_selector(instance, filename):                        #note: if yo
 
 class SmallImage(models.Model):
     image = models.ImageField(_('image'), upload_to=small_path_selector)
-    alt = models.CharField(_('alt'), max_length=55, blank=True, default='')
+    alt = models.CharField(_('alt'), max_length=55, unique=True, blank=True, null=True)
     father = models.OneToOneField(Image, on_delete=models.CASCADE, verbose_name=_('father'))
     product = models.ForeignKey(Product, related_name='smallimages', on_delete=models.CASCADE, verbose_name=_('product'))
 
@@ -404,7 +408,7 @@ def save_smallimage(sender, **kwargs):
     if kwargs['created']:
         image = kwargs['instance']
         smallimage = SmallImage(alt=image.alt, father=image, product=image.product)
-        smallimage.image.save(os.path.basename(image.image.path), File(open(image.image.path, 'rb')))                         #why save image handy and dont save like SmallImage.objects.create(image=image.image, ....)?  is worse because directory creating(like /media/2020/5/2/small/) and url of that image you expected by "upload_to" copied from image.image and dont see do SmallImage.image at all!!!. so why? because  you're assigning an image directly not uploading file(for saving image Image.image we upload its image by a form) so note upload_to and creating directory you specefid in it will done just when you upload image or save handi that image!!!!   
+        smallimage.image.save(os.path.basename(image.image.path), File(open(image.image.path, 'rb')))                         #why save image handy and dont save like SmallImage.objects.create(image=image.image, ....)?  is worse because directory creating(like /media/2020/5/2/small/) and url of that image you expected by "upload_to" copied from image.image and dont see do SmallImage.image at all!!!. so why? because  you're assigning an image directly not uploading file(for saving image Image.image we upload its image by a form) so note upload_to and creating directory you specefid in it will done just when you upload image or save handi that image!!!!
         smallimage.save()
         file = PilImage.open(smallimage.image.path)
         resized = file.resize((160, 160))

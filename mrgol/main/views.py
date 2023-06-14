@@ -25,7 +25,7 @@ from PIL import Image as PilImage
 from math import ceil
 
 from . import myserializers, myforms
-from .mymethods import get_products, get_posts, get_posts_products_by_category, make_next
+from .mymethods import get_products, get_posts, get_posts_products_by_category, make_next, ImageCreation
 from .models import *
 from users.myserializers import UserSerializer, UserChangeSerializer
 from cart.myserializers import CartProductSerializer
@@ -51,7 +51,7 @@ def index(request):
         rend = render(request, 'main/index.html', {'a': a, 'b': b})
         #rend.set_cookie('cart_products', {'1': {'q': 23, 'p': 33}, '2': {'q': 230, 'p': 330}})
         return rend
-    
+
     else:
         a = ''
         b = ''
@@ -204,9 +204,21 @@ class PostList(views.APIView):
         return Response({'sessionid': sessionid, **serializers, 'pages': page_count})
 
     def post(self, request, *args, **kwargs):
-        form = myforms.PostForm(request.POST, request.FILES, request=request)
+        form = myforms.PostForm(request.POST, request=request)
         if form.is_valid():
-            instance = form.save()
+            instance, sizes = form.save(), [240, 420, 640, 720, 960, 1280, 'default']
+            file_data, alt = request.FILES['file'].read(), request.POST.get('alt', uuid.uuid4().hex[:6])
+            if settings.IMAGES_PATH_TYPE == 'jalali':
+                date = jdatetime.datetime.fromgregorian(date=datetime.now()).strftime('%Y %-m %-d').split()
+            else:
+                date = datetime.now().strftime('%Y %-m %-d').split()
+            path = f'/media/posts_images/icons/{date[0]}/{date[1]}/{date[2]}/'
+            stream = io.BytesIO(file_data)  # .encode().decode('unicode_escape').encode("raw_unicode_escape")
+            instances = [Image_icon(alt=f'{alt}-{size}', path='posts', post=instance) for size in sizes]
+            image, base_path = PilImage.open(stream), str(Path(__file__).resolve().parent.parent)
+            paths, instances = ImageCreation().create_images(image, path, sizes, instances, 'image')
+            if instances:
+                Image_icon.objects.bulk_create(instances)
             return Response(myserializers.PostDetailSerializer(instance, context={'request': request}).data)
         return Response(form.errors)
 '''
@@ -371,26 +383,12 @@ class UploadImage(views.APIView):
     #permission_classes = [IsAdminUser]
     def post(self, request, *args, **kwargs):
         # request.data['file'] sended by front is InMemoryUploadedFile object, like data sended by <input type="file"..>
-        filename, file_data = request.data['file'].name, request.data['file'].read()
+        file_data = request.data['file'].read()
         if settings.IMAGES_PATH_TYPE == 'jalali':
             date = jdatetime.datetime.fromgregorian(date=datetime.now()).strftime('%Y %-m %-d').split()
         else:
             date = datetime.now().strftime('%Y %-m %-d').split()
-        base_path = str(Path(__file__).resolve().parent.parent)     # is like: /home/akh/eCommerce-web-api/mrgol
         path = f'/media/posts_images/{date[0]}/{date[1]}/{date[2]}/'
-        if not os.path.exists(base_path + path):
-            os.makedirs(base_path + path)
         stream = io.BytesIO(file_data)   # .encode().decode('unicode_escape').encode("raw_unicode_escape")
         image = PilImage.open(stream)
-        width, height = image.size
-        aspect_ratio = width / height
-        name = uuid.uuid4().hex[:12]     # generate random unique string (length 12)
-        image.save(base_path + path + f'{name}-default' + f'.{image.format}')
-        sizes, paths = [240, 420, 640, 720, 960, 1280], {}
-        for i in sizes:
-            image = PilImage.open(stream)
-            resized = image.resize((i, int(i/aspect_ratio)))
-            resized.save(base_path + path + f'{name}-{i}' + f'.{image.format}')
-            # path is like: /media/posts_images/1402/3/20/qwer43asd2e4-720.JPG
-            paths[i] = path + f'{name}-{i}' + f'.{image.format}'
-        return Response({'default': path + f'{name}-default' + f'.{image.format}', **paths})
+        return Response(ImageCreation().create_images(image, path, [240, 420, 640, 720, 960, 1280, 'default']))
