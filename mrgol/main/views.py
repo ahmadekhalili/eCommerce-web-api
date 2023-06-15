@@ -206,19 +206,7 @@ class PostList(views.APIView):
     def post(self, request, *args, **kwargs):
         form = myforms.PostForm(request.POST, request.FILES)
         if form.is_valid():
-            instance, sizes = form.save(), [240, 420, 640, 720, 960, 1280, 'default']
-            file_data, alt = request.FILES['file'].read(), request.POST.get('alt', uuid.uuid4().hex[:6])
-            if settings.IMAGES_PATH_TYPE == 'jalali':
-                date = jdatetime.datetime.fromgregorian(date=datetime.now()).strftime('%Y %-m %-d').split()
-            else:
-                date = datetime.now().strftime('%Y %-m %-d').split()
-            path = f'/media/posts_images/icons/{date[0]}/{date[1]}/{date[2]}/'
-            stream = io.BytesIO(file_data)  # .encode().decode('unicode_escape').encode("raw_unicode_escape")
-            instances = [Image_icon(alt=f'{alt}-{size}', path='posts', post=instance) for size in sizes]
-            image, base_path = PilImage.open(stream), str(Path(__file__).resolve().parent.parent)
-            paths, instances = ImageCreation().create_images(image, path, sizes, instances, 'image')
-            if instances:
-                Image_icon.objects.bulk_create(instances)
+            instance = form.save()
             return Response(myserializers.PostDetailSerializer(instance, context={'request': request}).data)
         return Response(form.errors)
 '''
