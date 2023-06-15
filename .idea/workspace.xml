@@ -3,8 +3,32 @@
   <component name="ChangeListManager">
     <list default="true" id="7b69a780-01c9-4eb8-bca4-c0f997313a78" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/cart/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/cart/migrations/0001_initial.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/cart/migrations/0002_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/cart/migrations/0002_initial.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mrgol/main/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/migrations/0001_initial.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/migrations/0002_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/migrations/0002_initial.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/migrations/0003_remove_post_image_icon_post_main_image_and_more.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/migrations/0004_remove_post_main_image_en_remove_post_main_image_fa_and_more.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/migrations/0005_remove_post_tags.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/migrations/0006_post_tags.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/migrations/0007_alter_image_icon_alt_alter_image_icon_alt_en_and_more.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/migrations/0008_alter_post_tags.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/migrations/0009_comment_name.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/migrations/0010_comment_email.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/migrations/0011_post_instagram_link_post_instagram_link_en_and_more.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/migrations/0012_remove_post_instagram_link_en_and_more.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/migrations/0013_alter_post_instagram_link_alter_product_meta_title_and_more.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/migrations/0014_alter_post_instagram_link_alter_post_title_and_more.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/migrations/0015_alter_post_tags_alter_post_title_alter_post_title_en_and_more.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/migrations/0016_remove_post_main_image_remove_product_image_icon_and_more.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/model_methods.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/model_methods.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mrgol/main/myserializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/myserializers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/orders/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/orders/migrations/0001_initial.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/orders/migrations/0002_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/orders/migrations/0002_initial.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/users/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/users/migrations/0001_initial.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -176,6 +200,7 @@
       <workItem from="1685981513928" duration="9547000" />
       <workItem from="1686049498950" duration="1998000" />
       <workItem from="1686056128144" duration="62199000" />
+      <workItem from="1686787875024" duration="30450000" />
     </task>
     <servers />
   </component>

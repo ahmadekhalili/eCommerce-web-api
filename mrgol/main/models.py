@@ -201,6 +201,24 @@ class Post(models.Model):
 
 
 
+class PostDetailMongo(djongo_models.Model):
+    id = djongo_models.IntegerField(blank=False, null=False, primary_key=True)
+    json = djongo_models.JSONField()
+    objects = djongo_models.DjongoManager()
+
+    class Meta:
+        verbose_name = _('Post')
+        verbose_name_plural = _('Posts')
+
+    def __str__(self):
+        try:
+            return self.json['title']                      # self.json.get   raise error.
+        except:
+            return 'nameless'                              # return None can't accept (error)
+
+
+
+
 class ProductManager(models.Manager):                             #we have two seperate way for creating an object,  .create( product.objects.create ) and .save( p=product(..) p.save() ), it is important for us in two way rating creation suported same.
     def create(self, *args, **kwargs):
         product = super().create(*args, **kwargs)
@@ -280,7 +298,7 @@ from main.signals import FillCategoryfilters_brands         # this cause "m2m_ch
 
 
 
-class MDetailProduct(djongo_models.Model):
+class ProductDetainMongo(djongo_models.Model):
     id = djongo_models.IntegerField(blank=False, null=False, primary_key=True)
     json = djongo_models.JSONField()
     #name = djongo_models.CharField(_('name'), max_length=60)
@@ -351,13 +369,6 @@ class Image_icon(models.Model):
     def __str__(self):
         return self.alt if self.alt else self.image.path
 
-    '''def save(self, *args, **kwargs):
-        image_icon = super().save(*args, **kwargs)
-        image = image_icon.image if image_icon else self.image              #only in creating new Image_icon, image_icon is not None, in editing we must use self (image_icon is None).
-        if image:
-            file = PilImage.open(image.path)
-            resized = file.resize((200, 200))
-            resized.save(image.path)'''
 
 
 

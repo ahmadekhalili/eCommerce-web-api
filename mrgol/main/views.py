@@ -204,7 +204,7 @@ class PostList(views.APIView):
         return Response({'sessionid': sessionid, **serializers, 'pages': page_count})
 
     def post(self, request, *args, **kwargs):
-        form = myforms.PostForm(request.POST, request=request)
+        form = myforms.PostForm(request.POST, request.FILES)
         if form.is_valid():
             instance, sizes = form.save(), [240, 420, 640, 720, 960, 1280, 'default']
             file_data, alt = request.FILES['file'].read(), request.POST.get('alt', uuid.uuid4().hex[:6])

@@ -78,6 +78,33 @@ class PostAdmin(TranslationAdmin):
     get_published_date.allow_tags = True
     get_published_date.short_description = _('published date')
 
+    def save_related(self, request, form, formsets, change):
+        super().save_related(request, form, formsets, change)
+        self.save_to_mongo(request, form, change)
+
+    def save_to_mongo(self, request, form, change):
+        data = {}
+        for tuple in request.POST.items():                              # find all additional fields added in admin panel and add to 'data' in order to save them to db
+            if len(tuple[0]) > 6 and tuple[0][:6] == 'extra_':
+                data[tuple[0]] = tuple[1]
+        language_code = get_language()                                  # get current language code
+        activate('en')                                                  # all keys should save in database in `en` laguage(for showing data you can select eny language) otherwise it was problem understading which language should select to run query on them like in:  s = myserializers.ProductDetailMongoSerializer(form.instance, context={'request': request}).data['shopfilteritems']:     {'رنگ': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} it is false for saving, we should change language by  `activate('en')` and now true form for saving:  {'color': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} and query like: s['color']
+        if not change:
+            s = myserializers.PostDetailMongoSerializer(form.instance, context={'request': request}).data
+            content = JSONRenderer().render(s)
+            stream = io.BytesIO(content)
+            data = {**JSONParser().parse(stream), **data}                           # s is like: {'id': 12, 'name': 'test2', 'slug': 'test2', ...., 'categories': [OrderedDict([('name', 'Workout'), ('slug', 'Workout')])]} and 'OrderedDict' will cease raise error when want save in mongo so we fixed it in data, so data is like:  {'id': 12, 'name': 'test', 'slug': 'test', ...., 'categories': [{'name': 'Workout', 'slug': 'Workout'}]}   note in Response(some_serializer) some_serializer will fixed auto by Response class like our way
+            PostDetailMongo(id=data['id'], json=data).save(using='mongo')
+        else:
+            s = myserializers.PostDetailMongoSerializer(form.instance, context={'request': request}).data
+            content = JSONRenderer().render(s)
+            stream = io.BytesIO(content)
+            data = {**JSONParser().parse(stream), **data}
+            mongo_product = PostDetailMongo.objects.using('mongo').get(id=data['id'])
+            mongo_product.json = data
+            mongo_product.save(using='mongo')
+        activate(language_code)
+
 admin.site.register(Post, PostAdmin)
 
 
@@ -96,16 +123,16 @@ class BrandAdmin(TranslationAdmin):
             'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
         }
 
-    def save_related(self, request, form, formsets, change):             # here update product in mongo database  (MDetailProduct.json.brand) according to Brand changes. for example if brand_1.name changes to 'Apl'  MDetailProduct:  [{ id: 1, json: {brand: 'Apl', ...}}, {id: 2, ...}]
-        form.save_m2m()
-        for formset in formsets:
-            self.save_formset(request, form, formset, change=change)
-
+    def save_related(self, request, form, formsets, change):             # here update product in mongo database  (ProductDetainMongo.json.brand) according to Brand changes. for example if brand_1.name changes to 'Apl'  ProductDetainMongo:  [{ id: 1, json: {brand: 'Apl', ...}}, {id: 2, ...}]
+        super().save_related(request, form, formsets, change)
         if change:
-            brand = form.instance
-            products_ids = list(Product.objects.filter(brand=brand).values_list('id', flat=True))             # doc in Filter_AttributeAdmin.save_related
-            mycol = shopdb_mongo["main_mdetailproduct"]
-            mycol.update_many({'id': {'$in': products_ids}}, {'$set': {'json.brand': brand.name}})
+            self.save_to_mongo(form)
+
+    def save_to_mongo(self, form):
+        brand = form.instance
+        products_ids = list(Product.objects.filter(brand=brand).values_list('id', flat=True))             # doc in Filter_AttributeAdmin.save_related
+        mycol = shopdb_mongo["main_productdetailmongo"]
+        mycol.update_many({'id': {'$in': products_ids}}, {'$set': {'json.brand': brand.name}})
 
 admin.site.register(Brand, BrandAdmin)
 
@@ -140,11 +167,6 @@ except:
 class ImageInline(admin.StackedInline):
     model = Image
     form = myforms.ImageForm
-
-
-class ImageIconInline(admin.TabularInline):
-    model = Image_icon
-    fields = ('image', 'alt', 'path')
 
 
 class ProductAdmin(CustModelAdmin):
@@ -217,12 +239,11 @@ class ProductAdmin(CustModelAdmin):
         if change:
             pass
 
-    def save_related(self, request, form, formsets, change):            # this is for adding product and it's changes in mongo database (MDetailProduct model)
-        """
-        """
-        form.save_m2m()          # manytomany fields will remove from form.instance._meta.many_to_many after calling save_m2m()
-        for formset in formsets:
-            self.save_formset(request, form, formset, change=change)
+    def save_related(self, request, form, formsets, change):            # this is for adding product and it's changes in mongo database (ProductDetailMongo model)
+        super().save_related(request, form, formsets, change)             # manytomany fields will remove from form.instance._meta.many_to_many after calling save_m2m()
+        self.save_to_mongo(request, form, change)
+
+    def save_to_mongo(self, request, form, change):
         data = {}
         for tuple in request.POST.items():                              # find all additional fields added in admin panel and add to 'data' in order to save them to db
             if len(tuple[0]) > 6 and tuple[0][:6] == 'extra_':
@@ -234,13 +255,13 @@ class ProductAdmin(CustModelAdmin):
             content = JSONRenderer().render(s)
             stream = io.BytesIO(content)
             data = {**JSONParser().parse(stream), **data}                           # s is like: {'id': 12, 'name': 'test2', 'slug': 'test2', ...., 'categories': [OrderedDict([('name', 'Workout'), ('slug', 'Workout')])]} and 'OrderedDict' will cease raise error when want save in mongo so we fixed it in data, so data is like:  {'id': 12, 'name': 'test', 'slug': 'test', ...., 'categories': [{'name': 'Workout', 'slug': 'Workout'}]}   note in Response(some_serializer) some_serializer will fixed auto by Response class like our way
-            MDetailProduct(id=data['id'], json=data).save(using='mongo')
+            ProductDetainMongo(id=data['id'], json=data).save(using='mongo')
         else:
             s = myserializers.ProductDetailMongoSerializer(form.instance, context={'request': request}).data
             content = JSONRenderer().render(s)
             stream = io.BytesIO(content)
             data = {**JSONParser().parse(stream), **data}
-            mongo_product = MDetailProduct.objects.using('mongo').get(id=data['id'])
+            mongo_product = ProductDetainMongo.objects.using('mongo').get(id=data['id'])
             mongo_product.json = data
             mongo_product.save(using='mongo')
         activate(language_code)
@@ -277,7 +298,7 @@ class ProductAdmin(CustModelAdmin):
             selected_filters = [filter_attribute.filterr for filter_attribute in selected_filter_attributes if filter_attribute]             #if obj.filter_attributes.all() was blank, filter_attribute.id  raise error so we need check with if filter_attribute
             extra_context['selected_filter_attributes'] = make_next(selected_filter_attributes)  
             extra_context['selected_filters'] = make_next(selected_filters)
-            mongo_product_query = MDetailProduct.objects.using('mongo').filter(id=obj.id)
+            mongo_product_query = ProductDetainMongo.objects.using('mongo').filter(id=obj.id)
             mongo_product = mongo_product_query[0] if mongo_product_query else None  # if add product in shell, mongo_product can be None
             extra_fields = {}
             if mongo_product:
@@ -356,7 +377,7 @@ class CommentAdmin(admin.ModelAdmin):
         obj.status = '4'
         obj.save()
 
-    def save_related(self, request, form, formsets, change):         # here update product in mongo database  (MDetailProduct.json.comment_set) according to Comment changes. for example if we have comment_1 (comment_1.product=<Product (1)>)   comment_1.content changes to 'another_content'  MDetailProduct:  [{id: 1, json: {comment_set: [{ id: 2, status: '1', published_date: '2022-08-07T17:33:38.724203', content: 'another_content', author: { id: 1, user_name: 'ادمین' }, reviewer: null, post: null, product: 12 }], ...}}, {id: 2, ...}]
+    def save_related(self, request, form, formsets, change):         # here update product in mongo database  (ProductDetainMongo.json.comment_set) according to Comment changes. for example if we have comment_1 (comment_1.product=<Product (1)>)   comment_1.content changes to 'another_content'  ProductDetainMongo:  [{id: 1, json: {comment_set: [{ id: 2, status: '1', published_date: '2022-08-07T17:33:38.724203', content: 'another_content', author: { id: 1, user_name: 'ادمین' }, reviewer: null, post: null, product: 12 }], ...}}, {id: 2, ...}]
         form.save_m2m()
         for formset in formsets:
             self.save_formset(request, form, formset, change=change)
@@ -368,7 +389,7 @@ class CommentAdmin(admin.ModelAdmin):
             content = JSONRenderer().render(s)
             stream = io.BytesIO(content)
             data = JSONParser().parse(stream)
-            mycol = shopdb_mongo["main_mdetailproduct"]
+            mycol = shopdb_mongo["main_productdetailmongo"]
             mycol.update_one({'id': product_id}, {'$set': {'json.comment_set.$[element]': data}}, array_filters=[{'element.id': comment_id}])
 
 admin.site.register(Comment, CommentAdmin)
@@ -436,7 +457,7 @@ class CategoryAdmin(TranslationAdmin):
             categories_before_join, categories_after_join = set_levels_afterthis_all_childes_id(previous_father_queryset, [category], Category._meta.get_field('level').validators[1].limit_value, delete=True)
             Category.objects.bulk_update(categories_before_join, ['levels_afterthis', 'all_childes_id']) if categories_before_join else None
 
-    def save_related(self, request, form, formsets, change):         # here update product in mongo database  (MDetailProduct.json.categories) according to Category changes. for example if <Category digital>.name changes to 'digggital'  all products with category 'digital' os children of 'digital' like 'phone' or 'smart phone' will changes like product_1 (product_1.category=<Category digital>), product_2 (product_2.category=<Category phone>), product_3 (product_3.category=<Category smart phone>):   MDetailProduct:  [{ id: 1, json: {categories: [{ name: 'digggital', slug: 'digital' }], ...}}, { id: 2, json: {categories: [{ name: 'digital', slug: 'digital' }, { name: 'phone', slug: 'phone' }], ...}}, { id: 3, json: {categories: [{ name: 'digggital', slug: 'digital' }, { name: 'phone', slug: 'phone' }, { name: 'smart phone', slug: 'smart-phone' }], ...}}]
+    def save_related(self, request, form, formsets, change):         # here update product in mongo database  (ProductDetainMongo.json.categories) according to Category changes. for example if <Category digital>.name changes to 'digggital'  all products with category 'digital' os children of 'digital' like 'phone' or 'smart phone' will changes like product_1 (product_1.category=<Category digital>), product_2 (product_2.category=<Category phone>), product_3 (product_3.category=<Category smart phone>):   ProductDetainMongo:  [{ id: 1, json: {categories: [{ name: 'digggital', slug: 'digital' }], ...}}, { id: 2, json: {categories: [{ name: 'digital', slug: 'digital' }, { name: 'phone', slug: 'phone' }], ...}}, { id: 3, json: {categories: [{ name: 'digggital', slug: 'digital' }, { name: 'phone', slug: 'phone' }, { name: 'smart phone', slug: 'smart-phone' }], ...}}]
         form.save_m2m()
         for formset in formsets:
             self.save_formset(request, form, formset, change=change)
@@ -446,7 +467,7 @@ class CategoryAdmin(TranslationAdmin):
             children_ids = category.all_childes_id.split(',') if category.all_childes_id else []
             category_children_ids = [category.id] + list(Category.objects.filter(id__in=children_ids).values_list('id', flat=True))   # why we need children of category?  supose we edit `digital` category in admin, we should update all products with category digital or child of `digital`.  for example: product1.category = <Smart phone...>,  product1 in mongo db: product1['json']['categories'] is like [{ name: 'digital', slug: 'digital' }, { name: 'phone', slug: 'phone'}, { name: 'smart phone', slug: 'smart_phone'}],  now if we edit digital product1 should update!
             products_ids = list(Product.objects.filter(category_id__in=category_children_ids).values_list('id', flat=True))             # doc in Filter_AttributeAdmin.save_related
-            mycol = shopdb_mongo["main_mdetailproduct"]
+            mycol = shopdb_mongo["main_productdetailmongo"]
             mycol.update_many({'id': {'$in': products_ids}}, {'$set': {'json.categories.$[element]': {'name': category.name, 'slug': category.slug}}}, array_filters=[{'element': {'name': form.previouse_name, 'slug': form.previouse_slug}}])
             del form.previouse_name
             del form.previouse_slug
@@ -539,7 +560,7 @@ class Filter_AttributeAdmin(TranslationAdmin):
             'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
         }
 
-    def save_related(self, request, form, formsets, change):         # here update MDetailProduct.json.filters.{filter_name} with new filter_attribute.name like: {id: 1, json: {filters: {'color': ['abi', 'zar']}, ...}} >== {id:1, json: {filters: {'color': ['sefid', 'zar']}, ...}}   filter_attribute = form.instance     previouse filter_attribute.name only exists before runing form.is_valid() in _changeform_view  so we saved previouse name in Filter_AttributeForm.is_valid
+    def save_related(self, request, form, formsets, change):         # here update ProductDetainMongo.json.filters.{filter_name} with new filter_attribute.name like: {id: 1, json: {filters: {'color': ['abi', 'zar']}, ...}} >== {id:1, json: {filters: {'color': ['sefid', 'zar']}, ...}}   filter_attribute = form.instance     previouse filter_attribute.name only exists before runing form.is_valid() in _changeform_view  so we saved previouse name in Filter_AttributeForm.is_valid
         form.save_m2m()
         for formset in formsets:
             self.save_formset(request, form, formset, change=change)
@@ -548,7 +569,7 @@ class Filter_AttributeAdmin(TranslationAdmin):
             filter_attribute = form.instance
             filter_name, filterattribute_name = filter_attribute.filterr.name, filter_attribute.name
             products_ids = list(filter_attribute.product_set.values_list('id', flat=True))                 # products_ids is like ['1', '2', '5', ...]
-            mycol = shopdb_mongo["main_mdetailproduct"]
+            mycol = shopdb_mongo["main_productdetailmongo"]
             mycol.update_many({'id': {'$in': products_ids}}, {'$set': {'json.filters.{}.$[element]'.format(filter_name): filterattribute_name}}, array_filters=[{'element': form.previouse_name}])      # note1: form.previouse_name should be in databse otherwise comment will not work       2:  we can't use like:  mycol.update_many({'id': {'$in': products_ids}}, {'$set': {'json.filters.{}.{}'.format(filter_name, form.previouse_name): filterattribute_name}})  because json.filters.filter_name is list not dict  also can't use string type f: f'...' and should use ''.fromat
             del form.previouse_name
 
@@ -573,7 +594,7 @@ class ShopFilterItemAdmin(TranslationAdmin):
         return str(obj)
     get_str.short_description = _('shopfilteritem')                  # should be same with ShopFilterItem.Meta.verbose_name
 
-    def save_related(self, request, form, formsets, change):         # here update product in mongo database  (MDetailProduct.json.shopfilteritems) according to ShopFilterItem changes. for example if shopfilteritem_1.name changes to 'Apl'  MDetailProduct:  [{ id: 1, json: {brand: 'Apl', ...}}, {id: 2, ...}]
+    def save_related(self, request, form, formsets, change):         # here update product in mongo database  (ProductDetainMongo.json.shopfilteritems) according to ShopFilterItem changes. for example if shopfilteritem_1.name changes to 'Apl'  ProductDetainMongo:  [{ id: 1, json: {brand: 'Apl', ...}}, {id: 2, ...}]
         form.save_m2m()
         for formset in formsets:
             self.save_formset(request, form, formset, change=change)
@@ -581,7 +602,7 @@ class ShopFilterItemAdmin(TranslationAdmin):
         if change:
             shopfilteritem = form.instance
             product_id, filter_name = shopfilteritem.product.id, shopfilteritem.filter_attribute.filterr.name            # doc in Filter_AttributeAdmin.save_related
-            mycol = shopdb_mongo["main_mdetailproduct"]
+            mycol = shopdb_mongo["main_productdetailmongo"]
             mycol.update_many({'id': product_id}, {'$set': {'json.shopfilteritems.{}.$[element]'.format(filter_name): myserializers.ShopFilterItemSerializer(shopfilteritem).data}}, array_filters=[{'element.id': shopfilteritem.id}])
 
 admin.site.register(ShopFilterItem, ShopFilterItemAdmin)
@@ -598,7 +619,7 @@ class ImageAdmin(TranslationAdmin):
             'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
         }
 
-    def save_related(self, request, form, formsets, change):         # here update product in mongo database  (MDetailProduct.json.smallimages) according to Image changes. for example if image_1.alt changes to 'another_alt'  MDetailProduct.json.smallimages:  [{ id: 1, image: '...', alt: 'Macbook m1-2', father: {id: 27, image: '...', alt: 'another_alt'}}, {id: 2, ...}}    note: image is subset of smallimage,we used smallimage instead image and dont different because eny changes on image appears on smallimage too.
+    def save_related(self, request, form, formsets, change):         # here update product in mongo database  (ProductDetainMongo.json.smallimages) according to Image changes. for example if image_1.alt changes to 'another_alt'  ProductDetainMongo.json.smallimages:  [{ id: 1, image: '...', alt: 'Macbook m1-2', father: {id: 27, image: '...', alt: 'another_alt'}}, {id: 2, ...}}    note: image is subset of smallimage,we used smallimage instead image and dont different because eny changes on image appears on smallimage too.
         form.save_m2m()
         for formset in formsets:
             self.save_formset(request, form, formset, change=change)
@@ -610,7 +631,7 @@ class ImageAdmin(TranslationAdmin):
             content = JSONRenderer().render(s)
             stream = io.BytesIO(content)
             data = JSONParser().parse(stream)
-            mycol = shopdb_mongo["main_mdetailproduct"]
+            mycol = shopdb_mongo["main_productdetailmongo"]
             mycol.update_one({'id': product_id}, {'$set': {'json.smallimages.$[element]': data}}, array_filters=[{'element.id': smallimage_id}])
 
 admin.site.register(Image, ImageAdmin)
@@ -627,7 +648,7 @@ class SmallImageAdmin(TranslationAdmin):
             'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
         }
 
-    def save_related(self, request, form, formsets, change):         # here update product in mongo database  (MDetailProduct.json.smallimages) according to SmallImage changes. for example if smallimage_1.alt changes to 'another_alt'  MDetailProduct.json.smallimages:  [{ id: 1, image: '...', alt: 'another_alt', father: {id: 27, image: '...', alt: 'Macbook m1-2'}}, {id: 2, ...}}
+    def save_related(self, request, form, formsets, change):         # here update product in mongo database  (ProductDetainMongo.json.smallimages) according to SmallImage changes. for example if smallimage_1.alt changes to 'another_alt'  ProductDetainMongo.json.smallimages:  [{ id: 1, image: '...', alt: 'another_alt', father: {id: 27, image: '...', alt: 'Macbook m1-2'}}, {id: 2, ...}}
         form.save_m2m()
         for formset in formsets:
             self.save_formset(request, form, formset, change=change)
@@ -639,7 +660,7 @@ class SmallImageAdmin(TranslationAdmin):
             content = JSONRenderer().render(s)
             stream = io.BytesIO(content)
             data = JSONParser().parse(stream)
-            mycol = shopdb_mongo["main_mdetailproduct"]
+            mycol = shopdb_mongo["main_productdetailmongo"]
             mycol.update_one({'id': product_id}, {'$set': {'json.smallimages.$[element]': data}}, array_filters=[{'element.id': smallimage_id}])
 
 admin.site.register(SmallImage, SmallImageAdmin)

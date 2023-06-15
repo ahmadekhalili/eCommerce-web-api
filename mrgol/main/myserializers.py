@@ -45,7 +45,7 @@ class ImageSerializer(serializers.ModelSerializer):
     def get_image(self, obj):
         request = self.context.get('request', None)
         try:
-            url = request.build_absolute_uri(obj.image.url)                 #request.build_absolute_uri()  is like "http://127.0.0.1:8000/product_list/"     and   request.build_absolute_uri(obj.image_icon.url) is like:  "http://192.168.114.6:8000/product_list/media/3.jpg" (request.build_absolute_uri() + obj.image_icon.url)
+            url = obj.image.url                 #request.build_absolute_uri()  is like "http://127.0.0.1:8000/product_list/"     and   request.build_absolute_uri(obj.image_icon.url) is like:  "http://192.168.114.6:8000/product_list/media/3.jpg" (request.build_absolute_uri() + obj.image_icon.url)
         except:
             url = ''
         return url
@@ -61,7 +61,7 @@ class SmallImageSerializer(serializers.ModelSerializer):
     def get_image(self, obj):
         request = self.context.get('request', None)
         try:
-            url = request.build_absolute_uri(obj.image.url)
+            url = obj.image.url
         except:
             url = ''
         return url
@@ -76,7 +76,7 @@ class Image_iconSerializer(serializers.ModelSerializer):
     def get_image(self, obj):
         request = self.context.get('request', None)
         try:
-            url = request.build_absolute_uri(obj.image.url)
+            url = obj.image.url
         except:
             url = ''
         return url
@@ -298,6 +298,10 @@ class PostDetailSerializer(serializers.ModelSerializer):
         return result
 
 
+class PostDetailMongoSerializer(PostDetailSerializer):
+    pass
+
+
 class ProductDetailSerializer(serializers.ModelSerializer):       # important: for saving we should first switch to `en` language by:  django.utils.translation.activate('en').    comment_set will optained by front in other place so we deleted from here.   more description:  # all keys should save in database in `en` laguage(for showing data you can select eny language) otherwise it was problem understading which language should select to run query on them like in:  s = myserializers.ProductDetailMongoSerializer(form.instance, context={'request': request}).data['shopfilteritems']:     {'رنگ': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} it is false for saving, we should change language by  `activate('en')` and now true form for saving:  {'color': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} and query like: s['color']
     categories = serializers.SerializerMethodField()
     brand = serializers.SerializerMethodField()
@@ -349,11 +353,10 @@ class ProductDetailSerializer(serializers.ModelSerializer):       # important: f
 
         related_serialized = []
         for product in related_products:
-            name, price, image_icon = product.name, str(product.price), product.image_icon              #rest_framework for default convert decimal fields to str, so we convert to str too.
+            name, price, image_icons = product.name, str(product.price), product.image_icon_set.all()              #rest_framework for default convert decimal fields to str, so we convert to str too.
             url = '/products/detail/{}/{}/'.format(product.id, product.slug)
-            image_icon_url = request.build_absolute_uri(image_icon.image.url) if image_icon else ''
-            alt = image_icon.alt
-            related_serialized.append({'name': name, 'price': price, 'url': url, 'image_icon': {'image': image_icon_url, 'alt': alt}})
+            image_icons = [{'image': im.image.url, 'alt': im.alt} for im in image_icons]
+            related_serialized.append({'name': name, 'price': price, 'url': url, 'image_icons': image_icons})
         return related_serialized
 
 
