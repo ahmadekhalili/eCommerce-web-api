@@ -379,4 +379,4 @@ class UploadImage(views.APIView):
         path = f'/media/posts_images/{date[0]}/{date[1]}/{date[2]}/'
         stream = io.BytesIO(file_data)   # .encode().decode('unicode_escape').encode("raw_unicode_escape")
         image = PilImage.open(stream)
-        return Response(ImageCreation().create_images(image, path, [240, 420, 640, 720, 960, 1280, 'default']))
+        return Response(ImageCreation().create_images(image, path, [240, 420, 640, 720, 960, 1280, 'default'])[0])
