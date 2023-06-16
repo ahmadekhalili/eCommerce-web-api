@@ -3,10 +3,10 @@
   <component name="ChangeListManager">
     <list default="true" id="7b69a780-01c9-4eb8-bca4-c0f997313a78" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mrgol/main/mymethods.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/mymethods.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mrgol/main/templates/main/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templates/main/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/myforms.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/myforms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/myserializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/myserializers.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mrgol/main/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mrgol/mrgol/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/mrgol/settings.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -179,7 +179,7 @@
       <workItem from="1686049498950" duration="1998000" />
       <workItem from="1686056128144" duration="62199000" />
       <workItem from="1686787875024" duration="37292000" />
-      <workItem from="1686874716851" duration="21448000" />
+      <workItem from="1686874716851" duration="25766000" />
     </task>
     <servers />
   </component>

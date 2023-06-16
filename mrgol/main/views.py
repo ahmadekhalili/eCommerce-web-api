@@ -42,7 +42,7 @@ def index(request):
         #request.session[translation.LANGUAGE_SESSION_KEY] = user_language
         #Accept-Language
 
-        a = ''
+        a = myforms.PostForm()
         b = ''
 
         #formset_factory(myforms.ImageForm)()

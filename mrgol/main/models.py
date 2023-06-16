@@ -176,7 +176,7 @@ class Rating(models.Model):                                                   #m
 
 class Post(models.Model):
     title = models.CharField(_('title'), max_length=255)
-    slug = models.SlugField(_('slug'), allow_unicode=True, db_index=False)   #default db_index=True
+    slug = models.SlugField(_('slug'), max_length=255, allow_unicode=True, db_index=False)   #default db_index=True
     meta_title = models.CharField(_('meta title'), max_length=60, blank=True, default='')
     meta_description = models.TextField(_('meta description'), validators=[MaxLengthValidator(160)], blank=True, default='')    
     brief_description = models.TextField(_('brief description'), validators=[MaxLengthValidator(1000)])

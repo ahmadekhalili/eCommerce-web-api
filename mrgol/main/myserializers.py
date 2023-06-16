@@ -230,7 +230,8 @@ class PostListSerializer(serializers.ModelSerializer):
 
     def get_author(self, obj):
         pk, slug = obj.id, obj.slug
-        return {'name': user_name_shown(obj.author), 'url': '/users/profile/admin/{}/'.format(obj.author.id)}
+        url = '/users/profile/admin/{}/'.format(obj.author.id) if obj.author else ''
+        return {'name': user_name_shown(obj.author), 'url': url}
     
     def get_url(self, obj):
         pk, slug = obj.id, obj.slug

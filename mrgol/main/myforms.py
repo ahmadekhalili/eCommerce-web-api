@@ -27,6 +27,7 @@ from .models import Post, Product, Category, Filter, Image, Comment, Filter_Attr
 
 
 class PostForm(forms.ModelForm):
+    slug = forms.SlugField(required=False, label=_('slug'))
     slug_fa = forms.SlugField(required=False, widget=forms.TextInput(attrs={'class': get_mt_input_classes('slug_fa')}), label=_('slug'))                      # we don't want front add slug field in writing post, it should adds in backend
     slug_en = forms.SlugField(required=False, widget=forms.TextInput(attrs={'class': get_mt_input_classes('slug_en')}), label=_('slug'))
     category = forms.ModelChoiceField(queryset=Category.objects.filter(post_product='post'), label=_('category'))
@@ -39,8 +40,9 @@ class PostForm(forms.ModelForm):
     def save(self, commit=True):
         # admin panel sends data with 'title_fa' and 'title_en' keys not 'title'.
         for f_title, f_slug in zip(g_t('title'), g_t('slug')):             # fill slug field in forms submitted by frontend (front should not fill slug)
-            if getattr(self.instance, f_title, None) and self.data.get(f_title, None):
+            if self.data.get(f_title, None):
                 setattr(self.instance, f_slug, slugify(self.data[f_title], allow_unicode=True))
+        setattr(self.instance, 'slug', slugify(self.data['title'], allow_unicode=True)) if self.data.get('title') else None   # this line mainly is when form submited by frontend. frontend doesnt send data as translation field. in other word front send data like: 'title': value, 'meta_title': value...   while admin panel send like 'title_fa': value, 'meta_title': value
         if getattr(self, 'request', None):          # admin panel sent request wouldn't be initialized with request
             self.instance.author = self.request.user
         self.instance.visible = True              # visible for no reason saves False when submit form by frontend!
