@@ -180,6 +180,7 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
+# STATIC_ROOT = BASE_DIR / "static"      # for run command "python manage.py collectstatic" required
 
 LOCALE_PATHS = (BASE_DIR / 'locale', )
 
