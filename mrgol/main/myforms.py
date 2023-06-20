@@ -21,13 +21,15 @@ from users.models import User
 from . import myserializers
 from .mywidgets import *
 from .mymethods import get_mt_input_classes, ImageCreation
+from .model_methods import save_to_mongo
 from .models import Post, Product, Category, Filter, Image, Comment, Filter_Attribute, Brand, ShopFilterItem, Image_icon
 # note1: if edit or add a form field exits in translation.py, like add Categoryform.name field, make sure in admin panel shown correctly (in 'tabbed' mode). if not shown correctly, you have to add a widget with required modeltreanslation classes like in ProductForm.alt_fa.widget.attrs
 
 
 
 class PostForm(forms.ModelForm):
-    def __init__(self, data=None, files=None, auto_id='id_%s', prefix=None, initial=None, error_class=ErrorList, label_suffix=None, empty_permitted=False, instance=None, use_required_attribute=None, renderer=None):
+    def __init__(self, data=None, files=None, auto_id='id_%s', prefix=None, initial=None, error_class=ErrorList, label_suffix=None, empty_permitted=False, instance=None, use_required_attribute=None, renderer=None, request=None):
+        self.request = request
         super(). __init__(data, files, auto_id, prefix, initial, error_class, label_suffix, empty_permitted, instance, use_required_attribute, renderer)
         if self.fields.get('slug'):                       # when use form manually in views.py, fields is like: [title, title_fa, title_en, slug, slug_fa,..] as expected  but when use PostFrom in adminpanel, self.fields is like: [title_fa, title_en, slug_fa,..] because admin edit and removes original model fields like 'title', 'slug'
             self.fields['slug'].required = False          # we can define slug field instead this but tab selection for languages will disappeare.
@@ -47,8 +49,8 @@ class PostForm(forms.ModelForm):
             self.instance.author = self.request.user
         self.instance.visible = True              # visible for no reason saves False when submit form by frontend!
         instance = super().save(commit)
-        instance = instance if instance else self
-        if not instance.image_icon_set.exists():        # supose post1.image_icon_set.all() == [image240, image420, image40,.., imagedefault] . now if you go to admin/post/post1 and edit one of image icones and submit what will happen? program will save 7 another image for one that if this condition wasnt.
+        post = instance if instance else self
+        if not post.image_icon_set.exists():        # supose post1.image_icon_set.all() == [image240, image420, image40,.., imagedefault] . now if you go to admin/post/post1 and edit one of image icones and submit what will happen? program will save 7 another image for one that if this condition wasnt.
             sizes = [240, 420, 640, 720, 960, 1280, 'default']
             file_data = self.files['file'].read() if self.files.get('file') else self.files['image_icon_set-0-image'].read()
             alt = self.data.get('alt', uuid.uuid4().hex[:6])
@@ -58,12 +60,14 @@ class PostForm(forms.ModelForm):
                 date = datetime.now().strftime('%Y %-m %-d').split()
             path = f'/media/posts_images/icons/{date[0]}/{date[1]}/{date[2]}/'
             stream = io.BytesIO(file_data)  # .encode().decode('unicode_escape').encode("raw_unicode_escape")
-            instances = [Image_icon(alt=f'{alt}-{size}', path='posts', post=instance) for size in sizes]
+            instances = [Image_icon(alt=f'{alt}-{size}', path='posts', post=post) for size in sizes]
             image, base_path = PilImage.open(stream), str(Path(__file__).resolve().parent.parent)
             paths, instances = ImageCreation().create_images(image, path, sizes, instances, 'image')
             if instances:
                 Image_icon.objects.bulk_create(instances)
-        return instance
+        from .myserializers import PostDetailMongo, PostDetailMongoSerializer
+        save_to_mongo(self.request, self, PostDetailMongo, PostDetailMongoSerializer, not bool(instance))
+        return post
 
 
 image_qusmark_text = _('Image rate should be 1:1')

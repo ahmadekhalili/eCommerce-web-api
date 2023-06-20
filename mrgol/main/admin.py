@@ -78,33 +78,6 @@ class PostAdmin(TranslationAdmin):
     get_published_date.allow_tags = True
     get_published_date.short_description = _('published date')
 
-    def save_related(self, request, form, formsets, change):
-        super().save_related(request, form, formsets, change)
-        self.save_to_mongo(request, form, change)
-
-    def save_to_mongo(self, request, form, change):
-        data = {}
-        for tuple in request.POST.items():                              # find all additional fields added in admin panel and add to 'data' in order to save them to db
-            if len(tuple[0]) > 6 and tuple[0][:6] == 'extra_':
-                data[tuple[0]] = tuple[1]
-        language_code = get_language()                                  # get current language code
-        activate('en')                                                  # all keys should save in database in `en` laguage(for showing data you can select eny language) otherwise it was problem understading which language should select to run query on them like in:  s = myserializers.ProductDetailMongoSerializer(form.instance, context={'request': request}).data['shopfilteritems']:     {'رنگ': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} it is false for saving, we should change language by  `activate('en')` and now true form for saving:  {'color': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} and query like: s['color']
-        if not change:
-            s = myserializers.PostDetailMongoSerializer(form.instance, context={'request': request}).data
-            content = JSONRenderer().render(s)
-            stream = io.BytesIO(content)
-            data = {**JSONParser().parse(stream), **data}                           # s is like: {'id': 12, 'name': 'test2', 'slug': 'test2', ...., 'categories': [OrderedDict([('name', 'Workout'), ('slug', 'Workout')])]} and 'OrderedDict' will cease raise error when want save in mongo so we fixed it in data, so data is like:  {'id': 12, 'name': 'test', 'slug': 'test', ...., 'categories': [{'name': 'Workout', 'slug': 'Workout'}]}   note in Response(some_serializer) some_serializer will fixed auto by Response class like our way
-            PostDetailMongo(id=data['id'], json=data).save(using='mongo')
-        else:
-            s = myserializers.PostDetailMongoSerializer(form.instance, context={'request': request}).data
-            content = JSONRenderer().render(s)
-            stream = io.BytesIO(content)
-            data = {**JSONParser().parse(stream), **data}
-            mongo_product = PostDetailMongo.objects.using('mongo').get(id=data['id'])
-            mongo_product.json = data
-            mongo_product.save(using='mongo')
-        activate(language_code)
-
 admin.site.register(Post, PostAdmin)
 
 

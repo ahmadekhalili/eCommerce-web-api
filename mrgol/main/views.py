@@ -204,7 +204,7 @@ class PostList(views.APIView):
         return Response({'sessionid': sessionid, **serializers, 'pages': page_count})
 
     def post(self, request, *args, **kwargs):
-        form = myforms.PostForm(request.POST, request.FILES)
+        form = myforms.PostForm(request.POST, request.FILES, request=request)
         if form.is_valid():
             instance = form.save()
             return Response(myserializers.PostDetailSerializer(instance, context={'request': request}).data)
