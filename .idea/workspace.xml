@@ -3,10 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="7b69a780-01c9-4eb8-bca4-c0f997313a78" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mrgol/main/myforms.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/myforms.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mrgol/main/mymethods.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/mymethods.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mrgol/main/myserializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/myserializers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mrgol/main/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -36,16 +32,23 @@
     </file-type-list>
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="file://$PROJECT_DIR$/mrgol/main/mywidgets.py" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../.virtualenvs/venv/lib/python3.10/site-packages/django/contrib/admin/options.py" root0="SKIP_INSPECTION" />
-    <setting file="file://$PROJECT_DIR$/mrgol/main/mymethods.py" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/mrgol/main/templates/main/index.html" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/mrgol/main/views.py" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/mrgol/main/translation.py" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/mrgol/customed_files/rest_framework/rest_framework_customed_classes/custom_rest_authentication.py" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/mrgol/main/urls.py" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/mrgol/main/models.py" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../.virtualenvs/venv/lib/python3.10/site-packages/django/contrib/admin/views/main.py" root0="SKIP_INSPECTION" />
     <setting file="file://$PROJECT_DIR$/mrgol/main/admin.py" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/mrgol/main/templates/main/widgets/field_question_mark.html" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/mrgol/main/myforms.py" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/mrgol/main/mywidgets.py" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/mrgol/main/myserializers.py" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../.virtualenvs/venv/lib/python3.10/site-packages/rest_framework/authentication.py" root0="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/mrgol/main/model_methods.py" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/mrgol/main/mymethods.py" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/mrgol/mrgol/urls.py" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../.virtualenvs/venv/lib/python3.10/site-packages/django/contrib/admin/views/main.py" root0="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/mrgol/main/templates/main/widgets/field_question_mark.html" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" />
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
@@ -183,7 +186,7 @@
       <workItem from="1687058589373" duration="6668000" />
       <workItem from="1687153323828" duration="6190000" />
       <workItem from="1687221311594" duration="46916000" />
-      <workItem from="1687392388197" duration="27195000" />
+      <workItem from="1687392388197" duration="27967000" />
     </task>
     <servers />
   </component>

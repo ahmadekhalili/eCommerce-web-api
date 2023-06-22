@@ -641,11 +641,11 @@ msgstr "با تشکر از شما برای گذراندن وقت با ارزشت
 msgid "Log in again"
 msgstr ""
 
-#: mrgol/settings.py:166
+#: ictsun/settings.py:166
 msgid "Farsi"
 msgstr ""
 
-#: mrgol/settings.py:167
+#: ictsun/settings.py:167
 msgid "English"
 msgstr ""
 

@@ -343,7 +343,7 @@ class ShopFilterItem(models.Model):
         self.available = False if self.stock < 1 else True
         super().save(*args, **kwargs)
 
-    def __str__(self):                                           # important: because we query to 2 another table in ShopFilterItem.str so its important to use query optimize when reading ShopFilterItem objects (like .select_related('product').select_related('filter_attribute')). example:    in mrgol\main\templatetags\admin\main\shopfilteritem\admin_list.py: cl.result_list.select_related('product').select_related('filter_attribute')     cl.result_list is objects of shopfilteritem will diplay in list_display of shopfilteritem.
+    def __str__(self):                                           # important: because we query to 2 another table in ShopFilterItem.str so its important to use query optimize when reading ShopFilterItem objects (like .select_related('product').select_related('filter_attribute')). example:    in ictsun\main\templatetags\admin\main\shopfilteritem\admin_list.py: cl.result_list.select_related('product').select_related('filter_attribute')     cl.result_list is objects of shopfilteritem will diplay in list_display of shopfilteritem.
         return self.product.name + ' - ' + self.filter_attribute.name if self.filter_attribute else super().__str__()         # in testing (like in cart.tests.ShopFilterItemCartTestCase) we create ShopFilterItem with least fields (without filter_attribute)
 
 

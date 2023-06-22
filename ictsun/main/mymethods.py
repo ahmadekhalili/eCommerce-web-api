@@ -201,7 +201,7 @@ class make_next:                             #for adding next to list you shold 
 class ImageCreation:
     def __init__(self, data, files, sizes, name=None):
         # data==request.data. it's not good idea name of file be same with alt (alt هس like: "food-vegetables-healthy"(
-        self.base_path = str(Path(__file__).resolve().parent.parent)  # is like: /home/akh/eCommerce-web-api/mrgol
+        self.base_path = str(Path(__file__).resolve().parent.parent)  # is like: /home/akh/eCommerce-web-api/ictsun
         self.data = data
         self.files = files
         self.sizes = sizes
@@ -228,7 +228,7 @@ class ImageCreation:
         return self.instances
 
     def _save_image(self, opened_image, full_path, full_name, format, instance, att_name):
-        # full_path is like: '/home/akh/.../mrgol/media/picture1.jpg'  fullname: 'picture1.jpg
+        # full_path is like: '/home/akh/.../ictsun/media/picture1.jpg'  fullname: 'picture1.jpg
         if isinstance(opened_image, PilImage.Image):
             if instance:           # save image to hard by image field
                 buffer = io.BytesIO()
