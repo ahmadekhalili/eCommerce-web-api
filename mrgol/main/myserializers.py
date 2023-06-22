@@ -13,6 +13,7 @@ import re
 
 from .models import *
 from .mymethods import get_category_and_fathers
+from .model_methods import save_to_mongo
 from users.models import User
 from users.myserializers import UserNameSerializer
 from users.myserializers import UserSerializer
@@ -300,7 +301,12 @@ class PostDetailSerializer(serializers.ModelSerializer):
 
 
 class PostDetailMongoSerializer(PostDetailSerializer):
-    pass
+    # .save() require kwarg request
+    def save(self, **kwargs):
+        change = bool(self.instance)
+        instance = super().save(**kwargs)
+        save_to_mongo(kwargs['request'], PostDetailMongo, self, instance, change)
+        return instance
 
 
 class ProductDetailSerializer(serializers.ModelSerializer):       # important: for saving we should first switch to `en` language by:  django.utils.translation.activate('en').    comment_set will optained by front in other place so we deleted from here.   more description:  # all keys should save in database in `en` laguage(for showing data you can select eny language) otherwise it was problem understading which language should select to run query on them like in:  s = myserializers.ProductDetailMongoSerializer(form.instance, context={'request': request}).data['shopfilteritems']:     {'رنگ': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} it is false for saving, we should change language by  `activate('en')` and now true form for saving:  {'color': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} and query like: s['color']

@@ -42,8 +42,9 @@ def index(request):
         #request.session[translation.LANGUAGE_SESSION_KEY] = user_language
         #Accept-Language
 
-        a = myforms.PostForm()
-        b = ''
+        a = myforms.PostForm(instance=Post.objects.get(id=20))
+        from rest_framework.serializers import ModelSerializer, Serializer
+        b = Post.objects.get(id=20)
 
         #formset_factory(myforms.ImageForm)()
         #formset = formset_factory(myforms.CategoryForm, extra=2)
@@ -234,6 +235,14 @@ class PostDetail(views.APIView):
         serializer = myserializers.PostDetailSerializer(post, many=True).data
         sessionid = request.session.session_key
         return Response({'sessionid': sessionid, **serializer[0]})               #serializer is list (because of many=True)    serializer[0] is dict
+
+    def post(self, request, *args, **kwargs):               # you have to submit data by form not json.
+        post = get_object_or_404(Post, id=kwargs['pk'])
+        form = myforms.PostForm(request.POST, request.FILES, instance=post, request=request)
+        if form.is_valid():
+            instance = form.save()
+            return Response(myserializers.PostDetailSerializer(instance, context={'request': request}).data)
+        return Response(form.errors)
 
 
 
