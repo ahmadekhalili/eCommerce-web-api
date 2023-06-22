@@ -3,10 +3,9 @@
   <component name="ChangeListManager">
     <list default="true" id="7b69a780-01c9-4eb8-bca4-c0f997313a78" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mrgol/main/model_methods.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/model_methods.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mrgol/main/myforms.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/myforms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mrgol/main/mymethods.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/mymethods.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mrgol/main/myserializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/myserializers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mrgol/main/templates/main/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/templates/main/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mrgol/main/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/mrgol/main/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -184,7 +183,7 @@
       <workItem from="1687058589373" duration="6668000" />
       <workItem from="1687153323828" duration="6190000" />
       <workItem from="1687221311594" duration="46916000" />
-      <workItem from="1687392388197" duration="4280000" />
+      <workItem from="1687392388197" duration="27195000" />
     </task>
     <servers />
   </component>

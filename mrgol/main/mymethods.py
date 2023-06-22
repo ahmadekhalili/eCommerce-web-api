@@ -6,6 +6,8 @@ import copy
 import os
 import io
 import uuid
+import jdatetime
+from datetime import datetime
 from decimal import Decimal
 from bs4 import BeautifulSoup
 import requests
@@ -197,41 +199,67 @@ class make_next:                             #for adding next to list you shold 
 
 
 class ImageCreation:
-    def __init__(self, name=None):      # it's not good idea name of file be same with alt (alt هس like: "food-vegetables-healthy"(
+    def __init__(self, data, files, sizes, name=None):
+        # data==request.data. it's not good idea name of file be same with alt (alt هس like: "food-vegetables-healthy"(
         self.base_path = str(Path(__file__).resolve().parent.parent)  # is like: /home/akh/eCommerce-web-api/mrgol
+        self.data = data
+        self.files = files
+        self.sizes = sizes
         self.name = name if name else uuid.uuid4().hex[:12]  # generate random unique string (length 12)
+        self.instances = None
 
-    def _save_image(self, opened_image, full_path, full_name, instance, att_name):
+    def get_file_stream(self):
+        file = self.files['file'].read() if self.files.get('file') else self.files['image_icon_set-0-image'].read()
+        return io.BytesIO(file)
+
+    def get_path(self, middle_path='/media/posts_images/icons/'):
+        if settings.IMAGES_PATH_TYPE == 'jalali':
+            date = jdatetime.datetime.fromgregorian(date=datetime.now()).strftime('%Y %-m %-d').split()
+        else:
+            date = datetime.now().strftime('%Y %-m %-d').split()
+        return f'{middle_path}{date[0]}/{date[1]}/{date[2]}/'
+
+    def get_alt(self, size):
+        pre_alt = self.data.get('alt', uuid.uuid4().hex[:6])
+        return f'{pre_alt}-{size}'
+
+    def set_instances(self, model, **kwargs):   # kwargs is model fields, for Image_icon like: path='posts', post=post1
+        self.instances = [model(alt=f'{self.get_alt(size)}', **kwargs) for size in self.sizes]
+        return self.instances
+
+    def _save_image(self, opened_image, full_path, full_name, format, instance, att_name):
         # full_path is like: '/home/akh/.../mrgol/media/picture1.jpg'  fullname: 'picture1.jpg
         if isinstance(opened_image, PilImage.Image):
             if instance:           # save image to hard by image field
                 buffer = io.BytesIO()
-                opened_image.save(buffer, format=self.format)
+                opened_image.save(buffer, format=format)
                 setattr(instance, att_name, SimpleUploadedFile(full_name, buffer.getvalue()))
             else:                  # save image to hard by pillow.sav()
-                opened_image.save(full_path + f'{full_name}')
+                opened_image.save(full_path + full_name)
 
-    def create_images(self, opened_image, path, sizes, instances=None, att_name='image'):
+    def create_images(self, opened_image=None, path=None, att_name='image'):
         '''
-        create 'opened_image' in different sizes and save them in 'path'. returned value is like:
+        path is like: /media/posts_images/icons/. returned value is like:
         {'default': '/media/../..7a0-default.JPEG', 240: '/media/../..7a0-240.JPEG', ...}. if you specify instances,
         image creation will done by model field(instance.att_name.save()) instead of PilImage.save()
         '''
-        iter_instances = cycle(instances) if instances else None
+        opened_image = PilImage.open(self.get_file_stream()) if not opened_image else opened_image
+        path = self.get_path() if not path else self.get_path(path)
+        iter_instances = cycle(self.instances) if self.instances else None
         if isinstance(opened_image, PilImage.Image):
-            paths, self.format = {}, opened_image.format              # opened_image.format is like: "JPG"
+            paths, format = {}, opened_image.format              # opened_image.format is like: "JPG"
             if not os.path.exists(self.base_path + path):
                 os.makedirs(self.base_path + path)
             width, height = opened_image.size                 # opened_image.size is like: (1080, 1920)
             aspect_ratio = width / height
-            for width in sizes:
+            for width in self.sizes:
                 resized = opened_image.resize((width, int(width / aspect_ratio))) if isinstance(width, int) else opened_image
-                full_path, full_name = self.base_path + path, f'{self.name}-{width}' + f'.{self.format}'
-                instance = next(iter_instances) if instances else None
-                self._save_image(resized, full_path, full_name, instance, att_name)
+                full_path, full_name = self.base_path + path, f'{self.name}-{width}' + f'.{format}'
+                instance = next(iter_instances) if self.instances else None
+                self._save_image(resized, full_path, full_name, format, instance, att_name)
                 # path is like: /media/posts_images/1402/3/20/qwer43asd2e4-720.JPG
                 paths[width] = path + full_name
-            return (paths, instances)
+            return (paths, self.instances)
 
         elif isinstance(opened_image, io.BufferedReader):      # open image by built-in function open()
             pass

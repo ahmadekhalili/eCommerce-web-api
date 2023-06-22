@@ -12,7 +12,7 @@ import jdatetime
 import re
 
 from .models import *
-from .mymethods import get_category_and_fathers
+from .mymethods import get_category_and_fathers, ImageCreation
 from .model_methods import save_to_mongo
 from users.models import User
 from users.myserializers import UserNameSerializer
@@ -305,6 +305,11 @@ class PostDetailMongoSerializer(PostDetailSerializer):
     def save(self, **kwargs):
         change = bool(self.instance)
         instance = super().save(**kwargs)
+        obj = ImageCreation(data=self.data, files=self.data, sizes=[240, 420, 640, 720, 960, 1280, 'default'])
+        obj.set_instances(Image_icon, path='posts', post=instance)
+        paths, instances = obj.create_images(path='/media/posts_images/icons/')
+        if instances:
+            Image_icon.objects.bulk_create(instances)
         save_to_mongo(kwargs['request'], PostDetailMongo, self, instance, change)
         return instance
 

@@ -3,17 +3,10 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MaxLengthValidator
 from django.forms.utils import ErrorList
 from django import forms
-from django.conf import settings
 from django.core.files import File
 from django.utils.text import slugify
 
 import json
-import io
-import uuid
-import jdatetime
-from datetime import datetime
-from pathlib import Path
-from PIL import Image as PilImage
 from modeltranslation.utils import get_translation_fields as g_t
 
 from customed_files.django.classes import myforms
@@ -26,10 +19,6 @@ from .models import Post, Product, Category, Filter, Image, Comment, Filter_Attr
 # note1: if edit or add a form field exits in translation.py, like add Categoryform.name field, make sure in admin panel shown correctly (in 'tabbed' mode). if not shown correctly, you have to add a widget with required modeltreanslation classes like in ProductForm.alt_fa.widget.attrs
 
 
-class PostFormm(forms.ModelForm):
-    class Meta:
-        model = Post
-        fields = '__all__'#['title', 'meta_title', 'meta_description', 'brief_description', 'detailed_description', 'instagram_link', 'published_date', 'tags', 'category', 'author']
 
 class PostForm(forms.ModelForm):
     # in form calling, request is required like: PostForm(data=request.POST, request=request)
@@ -55,19 +44,10 @@ class PostForm(forms.ModelForm):
         self.instance.visible = True              # visible for no reason saves False when submit form by frontend!
         instance = super().save(commit)
         post = instance if instance else self.instance
-        if not post.image_icon_set.exists():        # supose post1.image_icon_set.all() == [image240, image420, image40,.., imagedefault] . now if you go to admin/post/post1 and edit one of image icones and submit what will happen? program will save 7 another image for one that if this condition wasnt.
-            sizes = [240, 420, 640, 720, 960, 1280, 'default']
-            file_data = self.files['file'].read() if self.files.get('file') else self.files['image_icon_set-0-image'].read()
-            alt = self.data.get('alt', uuid.uuid4().hex[:6])
-            if settings.IMAGES_PATH_TYPE == 'jalali':
-                date = jdatetime.datetime.fromgregorian(date=datetime.now()).strftime('%Y %-m %-d').split()
-            else:
-                date = datetime.now().strftime('%Y %-m %-d').split()
-            path = f'/media/posts_images/icons/{date[0]}/{date[1]}/{date[2]}/'
-            stream = io.BytesIO(file_data)  # .encode().decode('unicode_escape').encode("raw_unicode_escape")
-            instances = [Image_icon(alt=f'{alt}-{size}', path='posts', post=post) for size in sizes]
-            image, base_path = PilImage.open(stream), str(Path(__file__).resolve().parent.parent)
-            paths, instances = ImageCreation().create_images(image, path, sizes, instances, 'image')
+        if not post.image_icon_set.exists():        # suppose post1.image_icon_set.all() == [image240, image420, image40,.., imagedefault] . now if you go to admin/post/post1 and edit one of image icones and submit what will happen? program will save 7 another image for one that if this condition wasnt.
+            obj = ImageCreation(self.data, self.files, [240, 420, 640, 720, 960, 1280, 'default'])
+            obj.set_instances(Image_icon, path='posts', post=post)
+            paths, instances = obj.create_images(path='/media/posts_images/icons/')
             if instances:
                 Image_icon.objects.bulk_create(instances)
         from .myserializers import PostDetailMongo, PostDetailMongoSerializer

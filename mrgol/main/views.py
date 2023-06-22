@@ -380,12 +380,5 @@ class UploadImage(views.APIView):
     #permission_classes = [IsAdminUser]
     def post(self, request, *args, **kwargs):
         # request.data['file'] sended by front is InMemoryUploadedFile object, like data sended by <input type="file"..>
-        file_data = request.data['file'].read()
-        if settings.IMAGES_PATH_TYPE == 'jalali':
-            date = jdatetime.datetime.fromgregorian(date=datetime.now()).strftime('%Y %-m %-d').split()
-        else:
-            date = datetime.now().strftime('%Y %-m %-d').split()
-        path = f'/media/posts_images/{date[0]}/{date[1]}/{date[2]}/'
-        stream = io.BytesIO(file_data)   # .encode().decode('unicode_escape').encode("raw_unicode_escape")
-        image = PilImage.open(stream)
-        return Response(ImageCreation().create_images(image, path, [240, 420, 640, 720, 960, 1280, 'default'])[0])
+        obj = ImageCreation(data=None, files=request.data, sizes=[240, 420, 640, 720, 960, 1280, 'default'])
+        return Response(obj.create_images(path='/media/posts_images/')[0])
