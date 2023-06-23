@@ -383,7 +383,7 @@ def image_path_selector(instance, filename):                        #note: if yo
 class Image(models.Model):
     image = models.ImageField(_('image'), upload_to=image_path_selector)
     alt = models.CharField(_('alt'), max_length=55, unique=True, null=True)                    # alt should not be dublicate because we used alt instead image id in def __str__(self)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name=_('product'))
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True, verbose_name=_('product'))
 
     class Meta:
         verbose_name = _('Image')
@@ -416,7 +416,7 @@ class SmallImage(models.Model):
         return self.alt
 
 def save_smallimage(sender, **kwargs):
-    if kwargs['created']:
+    if kwargs['created'] and kwargs['instance'].product:
         image = kwargs['instance']
         smallimage = SmallImage(alt=image.alt, father=image, product=image.product)
         smallimage.image.save(os.path.basename(image.image.path), File(open(image.image.path, 'rb')))                         #why save image handy and dont save like SmallImage.objects.create(image=image.image, ....)?  is worse because directory creating(like /media/2020/5/2/small/) and url of that image you expected by "upload_to" copied from image.image and dont see do SmallImage.image at all!!!. so why? because  you're assigning an image directly not uploading file(for saving image Image.image we upload its image by a form) so note upload_to and creating directory you specefid in it will done just when you upload image or save handi that image!!!!

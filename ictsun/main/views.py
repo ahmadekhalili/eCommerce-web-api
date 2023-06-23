@@ -6,7 +6,6 @@ from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
-#from django.template.defaultfilters import slugify
 from django.utils.text import slugify
 from django.middleware.csrf import get_token
 
@@ -41,10 +40,16 @@ def index(request):
         #translation.activate(user_language)
         #request.session[translation.LANGUAGE_SESSION_KEY] = user_language
         #Accept-Language
-
+        from django.core.files.storage import FileSystemStorage
         a = myforms.PostForm(instance=Post.objects.get(id=20))
         from rest_framework.serializers import ModelSerializer, Serializer
-        b = Post.objects.get(id=20)
+        def iicon_path_selector(instance, filename):
+            pass
+        i = Image.objects.get(id=1)
+        i.image = File(open('/home/akh/eCommerce-web-api/ictsun/media/meli.jpg', 'rb'), 'KKK.jpg')
+        getattr(i, 'image').field.upload_to = 'posts_images/'#FileSystemStorage(location="posts_images")
+        i.save()
+        b = i.image
 
         #formset_factory(myforms.ImageForm)()
         #formset = formset_factory(myforms.CategoryForm, extra=2)
@@ -380,5 +385,5 @@ class UploadImage(views.APIView):
     #permission_classes = [IsAdminUser]
     def post(self, request, *args, **kwargs):
         # request.data['file'] sended by front is InMemoryUploadedFile object, like data sended by <input type="file"..>
-        obj = ImageCreation(data=None, files=request.data, sizes=[240, 420, 640, 720, 960, 1280, 'default'])
+        obj = ImageCreation(data=request.data, files=request.data, sizes=[240, 420, 640, 720, 960, 1280, 'default'])
         return Response(obj.create_images(path='/media/posts_images/')[0])

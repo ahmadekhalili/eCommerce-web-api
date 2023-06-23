@@ -4,9 +4,9 @@
 </head><body>
 
 
-<form action="http://127.0.0.1:8000/posts/" method="post" enctype="multipart/form-data">
-    {{ a.as_p }}
+<form action="http://127.0.0.1:8000/upload/" method="post" enctype="multipart/form-data">
     <input type="file" name="file">
+    <input type="text" name="alt">
     <input type="submit" value="Submit">
 </form>
 <p> {{ b }} </p>

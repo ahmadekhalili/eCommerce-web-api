@@ -227,15 +227,15 @@ class ImageCreation:
         self.instances = [model(alt=f'{self.get_alt(size)}', **kwargs) for size in self.sizes]
         return self.instances
 
-    def _save_image(self, opened_image, full_path, full_name, format, instance, att_name):
-        # full_path is like: '/home/akh/.../ictsun/media/picture1.jpg'  fullname: 'picture1.jpg
+    def _save_image(self, opened_image, path, full_name, format, instance, att_name):
         if isinstance(opened_image, PilImage.Image):
             if instance:           # save image to hard by image field
                 buffer = io.BytesIO()
                 opened_image.save(buffer, format=format)
                 setattr(instance, att_name, SimpleUploadedFile(full_name, buffer.getvalue()))
+                getattr(instance, att_name).field.upload_to = path.replace('/media/', '', 1)
             else:                  # save image to hard by pillow.sav()
-                opened_image.save(full_path + full_name)
+                opened_image.save(self.base_path + path + full_name)
 
     def create_images(self, opened_image=None, path=None, att_name='image'):
         '''
@@ -250,15 +250,15 @@ class ImageCreation:
             paths, format = {}, opened_image.format              # opened_image.format is like: "JPG"
             if not os.path.exists(self.base_path + path):
                 os.makedirs(self.base_path + path)
-            width, height = opened_image.size                 # opened_image.size is like: (1080, 1920)
-            aspect_ratio = width / height
-            for width in self.sizes:
-                resized = opened_image.resize((width, int(width / aspect_ratio))) if isinstance(width, int) else opened_image
-                full_path, full_name = self.base_path + path, f'{self.name}-{width}' + f'.{format}'
+            height, width = opened_image.size                 # opened_image.size is like: (1080, 1920)
+            aspect_ratio = height / width
+            for height in self.sizes:
+                resized = opened_image.resize((height, int(height / aspect_ratio))) if isinstance(height, int) else opened_image
+                full_name = f'{self.name}-{height}' + f'.{format}'
                 instance = next(iter_instances) if self.instances else None
-                self._save_image(resized, full_path, full_name, format, instance, att_name)
+                self._save_image(resized, path, full_name, format, instance, att_name)
                 # path is like: /media/posts_images/1402/3/20/qwer43asd2e4-720.JPG
-                paths[width] = path + full_name
+                paths[height] = path + full_name
             return (paths, self.instances)
 
         elif isinstance(opened_image, io.BufferedReader):      # open image by built-in function open()
