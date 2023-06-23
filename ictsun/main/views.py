@@ -41,15 +41,8 @@ def index(request):
         #request.session[translation.LANGUAGE_SESSION_KEY] = user_language
         #Accept-Language
         from django.core.files.storage import FileSystemStorage
-        a = myforms.PostForm(instance=Post.objects.get(id=20))
-        from rest_framework.serializers import ModelSerializer, Serializer
-        def iicon_path_selector(instance, filename):
-            pass
-        i = Image.objects.get(id=1)
-        i.image = File(open('/home/akh/eCommerce-web-api/ictsun/media/meli.jpg', 'rb'), 'KKK.jpg')
-        getattr(i, 'image').field.upload_to = 'posts_images/'#FileSystemStorage(location="posts_images")
-        i.save()
-        b = i.image
+        a = myforms.PostForm()
+        b = ''
 
         #formset_factory(myforms.ImageForm)()
         #formset = formset_factory(myforms.CategoryForm, extra=2)
