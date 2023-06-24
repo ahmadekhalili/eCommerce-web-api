@@ -223,7 +223,8 @@ class ImageCreation:
         pre_alt = self.data.get('alt', uuid.uuid4().hex[:6])
         return f'{pre_alt}-{size}'
 
-    def set_instances(self, model, **kwargs):   # kwargs is model fields, for Image_icon like: path='posts', post=post1
+    def set_instances(self, model, **kwargs):
+        # model like: Image_icon, kwargs is model fields, for Image_icon like: path='posts', post=post1
         self.instances = [model(alt=f'{self.get_alt(size)}', **kwargs) for size in self.sizes]
         return self.instances
 

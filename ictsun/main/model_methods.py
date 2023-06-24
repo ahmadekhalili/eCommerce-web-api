@@ -135,9 +135,10 @@ def save_to_mongo(request, model, serializer, instance, change):
     # model like Post, serializer like PostDetailSerializer or PostDetailSerializer(), instance like post1
     from django.utils.translation import activate, get_language
     data = {}
-    for tuple in request.POST.items():                              # find all additional fields added in admin panel and add to 'data' in order to save them to db
-        if len(tuple[0]) > 6 and tuple[0][:6] == 'extra_':
-            data[tuple[0]] = tuple[1]
+    if request:             # when Modeladmin use form request is None (admin calls form without request)
+        for tuple in request.POST.items():                              # find all additional fields added in admin panel and add to 'data' in order to save them to db
+            if len(tuple[0]) > 6 and tuple[0][:6] == 'extra_':
+                data[tuple[0]] = tuple[1]
     language_code = get_language()                                  # get current language code
     activate('en')                                                  # all keys should save in database in `en` laguage(for showing data you can select eny language) otherwise it was problem understading which language should select to run query on them like in:  s = myserializers.ProductDetailMongoSerializer(form.instance, context={'request': request}).data['shopfilteritems']:     {'رنگ': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} it is false for saving, we should change language by  `activate('en')` and now true form for saving:  {'color': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} and query like: s['color']
     if not change:

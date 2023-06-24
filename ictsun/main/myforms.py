@@ -43,13 +43,15 @@ class PostForm(forms.ModelForm):
             self.instance.author = self.request.user
         self.instance.visible = True              # visible for no reason saves False when submit form by frontend!
         instance = super().save(commit)
+        # calling post.image_icon_set.exists() several time, cause runs several query
         post = instance if instance else self.instance
-        if not post.image_icon_set.exists():        # suppose post1.image_icon_set.all() == [image240, image420, image40,.., imagedefault] . now if you go to admin/post/post1 and edit one of image icones and submit what will happen? program will save 7 another image for one that if this condition wasnt.
+        image_icon_exits = post.image_icon_set.exists()
+        if self.files.get('file') or not image_icon_exits:  # in post updating, we update post images icons when frontend provide self.data['file']. suppose post1.image_icon_set.all() == [image240, image420, image40,.., imagedefault] . now if you go to admin/post/post1 and edit one of image icones and submit what will happen? program will save 7 another image for one that if this condition wasnt.
             obj = ImageCreation(self.data, self.files, [240, 420, 640, 720, 960, 1280, 'default'])
             obj.set_instances(Image_icon, path='posts', post=post)
             paths, instances = obj.create_images(path='/media/posts_images/icons/')
-            if instances:
-                Image_icon.objects.bulk_create(instances)
+            post.image_icon_set.all().delete() if image_icon_exits else None
+            Image_icon.objects.bulk_create(instances) if instances else None
         from .myserializers import PostDetailMongo, PostDetailMongoSerializer
         save_to_mongo(self.request, PostDetailMongo, PostDetailMongoSerializer, self.instance, not bool(instance))
         return post
