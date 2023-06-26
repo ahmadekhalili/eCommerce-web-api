@@ -46,14 +46,14 @@ class PostForm(forms.ModelForm):
         # calling post.image_icon_set.exists() several time, cause runs several query
         post = instance if instance else self.instance
         image_icon_exits = post.image_icon_set.exists()
-        if self.files.get('file') or not image_icon_exits:  # in post updating, we update post images icons when frontend provide self.data['file']. suppose post1.image_icon_set.all() == [image240, image420, image40,.., imagedefault] . now if you go to admin/post/post1 and edit one of image icones and submit what will happen? program will save 7 another image for one that if this condition wasnt.
+        if self.files.get('file') or self.files.get('image_icon_set-0-image'):  # in post updating, we update post images icons when frontend provide self.data['file'] or admin sends first image image_icon_set-0-image (means in admin we can edit image icons only if we change first image icon). suppose post1.image_icon_set.all() == [image240, image420, image40,.., imagedefault] . now if you go to admin/post/post1 and edit one of image icones and submit what will happen? program will save 7 another image for one that if this condition wasnt.
             obj = ImageCreation(self.data, self.files, [240, 420, 640, 720, 960, 1280, 'default'])
             obj.set_instances(Image_icon, path='posts', post=post)
             paths, instances = obj.create_images(path='/media/posts_images/icons/')
             post.image_icon_set.all().delete() if image_icon_exits else None
             Image_icon.objects.bulk_create(instances) if instances else None
         from .myserializers import PostDetailMongo, PostDetailMongoSerializer
-        save_to_mongo(self.request, PostDetailMongo, PostDetailMongoSerializer, self.instance, not bool(instance))
+        save_to_mongo(self.request, PostDetailMongo, self.instance, PostDetailMongoSerializer, not bool(instance))
         return post
 
 
@@ -107,7 +107,7 @@ class CategoryForm(forms.ModelForm):
         fields = '__all__'
 
     def is_valid(self):
-        self.previouse_name = self.instance.name            # used in main.admin.CategoryAdmin.save_related
+        self.previouse_name = self.instance.name            # used in main.admin.CategoryAdmin.save_to_mongo
         self.previouse_slug = self.instance.slug
         return self.is_bound and not self.errors
 

@@ -22,9 +22,10 @@ import jdatetime
 from pathlib import Path
 from PIL import Image as PilImage
 from math import ceil
+import pymongo
 
 from . import myserializers, myforms
-from .mymethods import get_products, get_posts, get_posts_products_by_category, make_next, ImageCreation
+from .mymethods import get_products, get_posts, get_posts_products_by_category, make_next, ImageCreation, get_parsed_data
 from .models import *
 from users.myserializers import UserSerializer, UserChangeSerializer
 from cart.myserializers import CartProductSerializer
@@ -40,8 +41,7 @@ def index(request):
         #translation.activate(user_language)
         #request.session[translation.LANGUAGE_SESSION_KEY] = user_language
         #Accept-Language
-        from django.core.files.storage import FileSystemStorage
-        a = myforms.PostForm()
+        a = myforms.PostForm(instance=Post.objects.get(id=20))
         b = ''
 
         #formset_factory(myforms.ImageForm)()
@@ -229,10 +229,11 @@ class PostDetail(views.APIView):
         output a post depend on pk you specify.
         '''
         #permission_classes = [IsAuthenticated]
-        post = Post.objects.filter(id=kwargs['pk']).select_related('author', 'category').prefetch_related('comment_set')
-        serializer = myserializers.PostDetailSerializer(post, many=True).data
+        #post = Post.objects.filter(id=kwargs['pk']).select_related('author', 'category').prefetch_related('comment_set')
+        #data = myserializers.PostDetailSerializer(post, many=True).data[0]
+        data = PostDetailMongo.objects.using('mongo').get(id=kwargs['pk']).json
         sessionid = request.session.session_key
-        return Response({'sessionid': sessionid, **serializer[0]})               #serializer is list (because of many=True)    serializer[0] is dict
+        return Response({'sessionid': sessionid, **data})               #serializer is list (because of many=True)    serializer[0] is dict
 
     def post(self, request, *args, **kwargs):               # you have to submit data by form not json.
         post = get_object_or_404(Post, id=kwargs['pk'])
@@ -299,63 +300,30 @@ class ProductCategoryList(views.APIView):
         serializers = {'product_categories': myserializers.CategoryListSerializer(product_prant_categories, many=True).data}
         #sessionid = request.session.session_key
         return Response({'sessionid': '', **serializers})
-'''
-generics.RetrieveAPIView
-queryset = Post_Category.objects.all()
-serializer_class = myserializers.PostListSerializer
-def retrieve(self, request, *args, **kwargs):
-    instance = self.get_object()
-    serializer = myserializers.PostListSerializer(instance.post_set.all(), many=True, context={'request': request})
-    return Response(serializer.data)
 
 
-class PostCategoryDetail(generics.RetrieveAPIView):
-    def get(self, request, *args, **kwargs):                #dont need define like serializer = {'post': myserializers.PostDetailSerializer(product_categories).data} because myserializers.PostDetailSerializer(product_categories).data dont has many=True so is dict not list and dont raise error when putin in Reaponse
-        #input: receive from  /posts/categories/  like product_categories0.url = "/1/زینتی/"__________
-        #output: Category is choicen depend on pk you specify and next depend on post or product category, will be shown all products or posts related to category and category's children. {"sessionid": "...", "products": [...]} 
-        category = Category.objects.get(id=kwargs['pk'])
-        serializers = {'posts': myserializers.PostListSerializer(get_posts_products_by_category(category), many=True, context={'request': request}).data}            
-        sessionid = request.session.session_key
-        return Response({'sessionid': sessionid, **serializers})
 
-    
-class ProductCategoryDetail(generics.RetrieveAPIView):
-    def get(self, request, *args, **kwargs):                #dont need define like serializer = {'post': myserializers.PostDetailSerializer(product_categories).data} because myserializers.PostDetailSerializer(product_categories).data dont has many=True so is dict not list and dont raise error when putin in Reaponse
-        #input: receive from /products/categories/   like product_categories0.url = "/1/زینتی/"__________
-        #output: Category is choicen depend on pk you specify and next depend on post or product category, will be shown all products or posts related to category and category's children. {"sessionid": "...", "products": [...]}
-        category = Category.objects.get(id=kwargs['pk'])
-        serializers = {'products': myserializers.ProductListSerializer(get_posts_products_by_category(category), many=True, context={'request': request}).data}
-        sessionid = request.session.session_key
-        return Response({'sessionid': sessionid, **serializers})
-'''
-class PostCommentCreate(views.APIView):
+
+class CommentCreate(views.APIView):
     def post(self, request, *args, **kwargs):
-        pk = int(kwargs['pk'])
-        if Post.objects.filter(id=pk).exists():
-            try:
-                data = request.data
-                user = None if not request.user.is_authenticated else request.user
-                comment = Comment.objects.create(name=data.get('name', ''), email=data.get('email', ''), content=data['content'], author=user, post_id=pk)
-                return Response({'status': 'نظر شما با موفقيت ثبت شد.'})
-            except:
-                return Response({'status': 'اطلاعات جهت ثبت نظر کافي نيست.'}, status=400)
-        else:
-            return Response({'user': request.user}, status=401)
+        # request variables in request.data is: content, post_id or product_id
+        try:
+            data, user = request.data, None if not request.user.is_authenticated else request.user
+            comment = Comment.objects.create(name=data.get('name', _('user')), email=data.get('email', ''), content=data['content'], author=user, post_id=data.get('post_id'), product_id=data.get('product_id'))
+            if comment.post_id:
+                mongo_db_name = "main_postdetailmongo"
+                foreignkey = comment.post_id
+            else:
+                mongo_db_name = "main_productdetailmongo"
+                foreignkey = comment.product_id
+            shopdb_mongo, comment_id = pymongo.MongoClient("mongodb://localhost:27017/")['shop'], comment.id
+            data = get_parsed_data(comment, myserializers.CommentSerializer)
+            mycol = shopdb_mongo[mongo_db_name]
+            mycol.update_one({'id': foreignkey}, {'$push': {'json.comment_set': data}})
+            return Response({'status': 'نظر شما با موفقيت ثبت شد.'})
+        except:
+            return Response({'status': 'اطلاعات جهت ثبت نظر کافي نيست.'}, status=400)
 
-
-
-
-class ProductCommentCreate(views.APIView):
-    def post(self, request, *args, **kwargs):                
-        if request.user.is_authenticated:
-            try:
-                data = request.data
-                comment = Comment.objects.create(content=data['content'], author=request.user, product_id=data['product_id'])
-                return Response({'status': 'نظر شما با موفقيت ثبت شد.'})
-            except:
-                return Response({'status': 'اطلاعات جهت ثبت نظر کافي نيست.'}, status=400)
-        else:
-            return Response({'user': request.user}, status=401)
 
 
 

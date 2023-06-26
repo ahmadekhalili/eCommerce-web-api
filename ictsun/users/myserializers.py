@@ -96,4 +96,4 @@ class UserNameSerializer(serializers.ModelSerializer):         #UserName = NAme 
         fields = ['id', 'user_name']
         
     def get_user_name(self, obj):
-        return user_name_shown(obj, _('admin'))
+        return user_name_shown(obj, 'کاربر')

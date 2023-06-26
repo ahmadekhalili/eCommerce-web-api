@@ -86,9 +86,15 @@ class Image_iconSerializer(serializers.ModelSerializer):
 
 
 class CategoryChainedSerializer(serializers.ModelSerializer):         #this is used for chane roost like: 'digital' > 'phone' > 'sumsung'
+    url = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = Category
-        fields = [*g_t('name'), *g_t('slug')]
+        fields = ['name', 'url']
+
+    def get_url(self, obj):
+        post_product = 'posts' if obj.post_product == 'post' else 'products'
+        return f'/{post_product}/{obj.slug}/'
 #'/products/categories/detail/{}/{}/'.format(obj.id, slugify(obj.name, allow_unicode=True))
 
 
@@ -281,16 +287,11 @@ class PostDetailSerializer(serializers.ModelSerializer):
     def to_representation(self, obj):
         fields = super().to_representation(obj)
         fields['author'] = UserNameSerializer(obj.author).data
-        fields['category'] = self.get_category(obj)
+        fields['categories'] = CategoryChainedSerializer(get_category_and_fathers(obj.category), many=True).data
         return fields
 
     def get_published_date(self, obj):
         return round(jdatetime.datetime.fromgregorian(datetime=obj.published_date).timestamp())
-    
-    def get_category(self, obj):                                     #we must create form like: <form method="get" action="/posts/?obj.category.slug"> .  note form must shown as link. you can put that form in above of that post.
-        pk, slug = obj.id, obj.slug
-        name, url = (obj.category.name, f'/posts/{obj.category.slug}/') if obj.category else ('', '')       #post.category has null=True so this field can be blank like when you remove and category.
-        return {'name': name, 'url': url}
 
     def get_image_icons(self, obj):                                     #we must create form like: <form method="get" action="/posts/?obj.category.slug"> .  note form must shown as link. you can put that form in above of that post.
         result = {}
@@ -310,7 +311,7 @@ class PostDetailMongoSerializer(PostDetailSerializer):
         paths, instances = obj.create_images(path='/media/posts_images/icons/')
         if instances:
             Image_icon.objects.bulk_create(instances)
-        save_to_mongo(kwargs['request'], PostDetailMongo, self, instance, change)
+        save_to_mongo(kwargs['request'], PostDetailMongo, instance, self, change)
         return instance
 
 

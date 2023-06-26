@@ -2,6 +2,9 @@ from django.db.models import Max, Min
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 
+from rest_framework.renderers import JSONRenderer
+from rest_framework.parsers import JSONParser
+
 import copy
 import os
 import io
@@ -58,13 +61,14 @@ def get_childs_and_category(category, return_self=True):
 
 
 def get_category_and_fathers(category):
-    category_and_fathers = [category]
-    for i in range(category.level-1):
-        category = category.father_category
-        if category:
-            category_and_fathers += [category]
-    return category_and_fathers
-
+    if category:
+        category_and_fathers = [category]
+        for i in range(category.level-1):
+            category = category.father_category
+            if category:
+                category_and_fathers += [category]
+        return category_and_fathers
+    return None  # returns None is safe for use inside serializer like: CategoryChainedSerializer(None, many=True).data
 
 
 def get_category_and_children(category):
@@ -266,3 +270,11 @@ class ImageCreation:
             pass
         else:
             raise Exception('opened_image is not object of PilImage or python built in .open()')
+
+
+
+def get_parsed_data(instance, serializer, request=None):   # instance like: comment1, serializer like: CommentSerializer
+    s = serializer(instance, context={'request': request}).data
+    content = JSONRenderer().render(s)
+    stream = io.BytesIO(content)
+    return JSONParser().parse(stream)

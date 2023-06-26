@@ -126,13 +126,14 @@ def update_product_stock(self, product, saving):         # self is ShopFilterIte
 
 
 
-def save_to_mongo(request, model, serializer, instance, change):
+def save_to_mongo(request, model, instance, serializer, change):
+    # model like Post, instance like post1, serializer like PostDetailSerializer or PostDetailSerializer()
+    # below serializer calls inside ModelSerializer like PostDetailMongoSerializer
     if isinstance(serializer, Serializer):
         serializer.request, serializer.instance = request, instance
         serialized = serializer.data
-    else:
+    else:                                     # here serializer is like: PostDetailMongoSerializer
         serialized = serializer(instance, context={'request': request}).data
-    # model like Post, serializer like PostDetailSerializer or PostDetailSerializer(), instance like post1
     from django.utils.translation import activate, get_language
     data = {}
     if request:             # when Modeladmin use form request is None (admin calls form without request)
@@ -150,9 +151,9 @@ def save_to_mongo(request, model, serializer, instance, change):
         content = JSONRenderer().render(serialized)
         stream = io.BytesIO(content)
         data = {**JSONParser().parse(stream), **data}
-        mongo_product = model.objects.using('mongo').get(id=data['id'])
-        mongo_product.json = data
-        mongo_product.save(using='mongo')
+        mongo_model = model.objects.using('mongo').get(id=data['id'])
+        mongo_model.json = data
+        mongo_model.save(using='mongo')
     activate(language_code)
 
 
