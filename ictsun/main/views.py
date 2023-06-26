@@ -308,8 +308,8 @@ class CommentCreate(views.APIView):
     def post(self, request, *args, **kwargs):
         # request variables in request.data is: content, post_id or product_id
         try:
-            data, user = request.data, None if not request.user.is_authenticated else request.user
-            comment = Comment.objects.create(name=data.get('name', _('user')), email=data.get('email', ''), content=data['content'], author=user, post_id=data.get('post_id'), product_id=data.get('product_id'))
+            data, user = dict(request.data), None if not request.user.is_authenticated else request.user
+            comment = Comment.objects.create(**data, author=user)
             if comment.post_id:
                 mongo_db_name = "main_postdetailmongo"
                 foreignkey = comment.post_id

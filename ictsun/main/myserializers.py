@@ -25,17 +25,27 @@ from users.mymethods import user_name_shown
 class CommentSerializer(serializers.ModelSerializer):
     published_date = serializers.SerializerMethodField()
     author = UserNameSerializer(read_only=True)                                # this field must be read_only otherwise can't save like: c=CommentSerializer(data={'content': 'aaaaa', 'author': 1, 'reviewer': 1, 'product_id': 1}) c.is_valid() c.save()
+
     class Meta:
         model = Comment
         fields = '__all__'
 
+    def to_representation(self, obj):
+        self.fields['reply_comments'] = serializers.SerializerMethodField()
+        return super().to_representation(obj)
+
     def get_published_date(self, obj):
         return round(jdatetime.datetime.fromgregorian(datetime=obj.published_date).timestamp())
-    
+
+    def get_reply_comments(self, obj):
+        return CommentSerializer(obj.reply_comments.all(), many=True).data#ReplyCommentSerializer(obj.reply_comments.all(), many=True).data
+
+
 class RatingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rating
         fields = ['rate']
+
 
 class ImageSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()  
@@ -277,7 +287,7 @@ class ProductListSerializer(serializers.ModelSerializer):
 class PostDetailSerializer(serializers.ModelSerializer):
     published_date = serializers.SerializerMethodField(read_only=True)
     tags = serializers.ListField(child=serializers.CharField(max_length=30))
-    comment_set = CommentSerializer(read_only=True, many=True)
+    comment_set = serializers.SerializerMethodField(read_only=True)
     image_icons = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
@@ -292,6 +302,11 @@ class PostDetailSerializer(serializers.ModelSerializer):
 
     def get_published_date(self, obj):
         return round(jdatetime.datetime.fromgregorian(datetime=obj.published_date).timestamp())
+
+    def get_comment_set(self, obj):
+        # for every post, comments should be like:
+        # [{'id':1,'content':'first comment', 'reply': None, 'reply_comments': [comment20, comment21,..]}, 'id': 2, ...
+        return CommentSerializer(obj.comment_set.filter(reply=None), many=True).data
 
     def get_image_icons(self, obj):                                     #we must create form like: <form method="get" action="/posts/?obj.category.slug"> .  note form must shown as link. you can put that form in above of that post.
         result = {}

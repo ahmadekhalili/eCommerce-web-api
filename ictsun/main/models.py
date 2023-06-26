@@ -441,6 +441,7 @@ class Comment(models.Model):
     reviewer = models.ForeignKey(User, related_name='reviewed_comments', related_query_name='comments_reviewer', on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('reviewer'))        # reviewer is last admin changed comment.status
     post = models.ForeignKey(Post, on_delete=models.CASCADE, blank=True, null=True, verbose_name=_('post'))
     product = models.ForeignKey(Product, on_delete=models.CASCADE, blank=True, null=True, verbose_name=_('product'))
+    reply = models.ForeignKey('self', related_name='reply_comments', related_query_name='replies', on_delete=models.SET_NULL, blank=True, null=True, verbose_name=_('reply'))
 
     class Meta:
         verbose_name = _('Comment')
