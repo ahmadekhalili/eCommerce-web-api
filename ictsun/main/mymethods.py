@@ -217,6 +217,7 @@ class ImageCreation:
         return io.BytesIO(file)
 
     def get_path(self, middle_path='/media/posts_images/icons/'):
+        # get path like: '/media/posts_images/icons/' returns like: '/media/posts_images/icons/1402/3/15/'
         if settings.IMAGES_PATH_TYPE == 'jalali':
             date = jdatetime.datetime.fromgregorian(date=datetime.now()).strftime('%Y %-m %-d').split()
         else:
@@ -224,11 +225,13 @@ class ImageCreation:
         return f'{middle_path}{date[0]}/{date[1]}/{date[2]}/'
 
     def get_alt(self, size):
+        # if submited data provide 'alt' (send inside input) we use it otherwise generate 6 letter random unique.
         pre_alt = self.data.get('alt', uuid.uuid4().hex[:6])
         return f'{pre_alt}-{size}'
 
     def set_instances(self, model, **kwargs):
         # model like: Image_icon, kwargs is model fields, for Image_icon like: path='posts', post=post1
+        # this method must call before create_images() if you want same image by model field instead pillow.save()
         self.instances = [model(alt=f'{self.get_alt(size)}', **kwargs) for size in self.sizes]
         return self.instances
 
@@ -238,13 +241,14 @@ class ImageCreation:
                 buffer = io.BytesIO()
                 opened_image.save(buffer, format=format)
                 setattr(instance, att_name, SimpleUploadedFile(full_name, buffer.getvalue()))
+                # field.upload_to must change to our path, also '/media/' must remove from path otherwise raise error
                 getattr(instance, att_name).field.upload_to = path.replace('/media/', '', 1)
-            else:                  # save image to hard by pillow.sav()
+            else:                  # save image to hard by pillow.save()
                 opened_image.save(self.base_path + path + full_name)
 
     def create_images(self, opened_image=None, path=None, att_name='image'):
         '''
-        path is like: /media/posts_images/icons/. returned value is like:
+        path is like: /media/posts_images/icons/  returned value is like:
         {'default': '/media/../..7a0-default.JPEG', 240: '/media/../..7a0-240.JPEG', ...}. if you specify instances,
         image creation will done by model field(instance.att_name.save()) instead of PilImage.save()
         '''

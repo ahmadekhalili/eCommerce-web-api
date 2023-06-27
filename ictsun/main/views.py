@@ -345,6 +345,10 @@ class TownsByState(views.APIView):
 class UploadImage(views.APIView):
     #permission_classes = [IsAdminUser]
     def post(self, request, *args, **kwargs):
-        # request.data['file'] sended by front is InMemoryUploadedFile object, like data sended by <input type="file"..>
+        '''
+        here we create different sizes of image has sent inside "request.data['file']" and save them to hard and
+        return their urls like: {'default': '/media/../..7a0-default.JPEG', 240: '/media/../..7a0-240.JPEG', ...}
+        request.data['file'] sent by front is InMemoryUploadedFile object, like data sent by <input type="file"...>
+        '''
         obj = ImageCreation(data=request.data, files=request.data, sizes=[240, 420, 640, 720, 960, 1280, 'default'])
         return Response(obj.create_images(path='/media/posts_images/')[0])
