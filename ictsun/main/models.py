@@ -182,7 +182,7 @@ class Post(models.Model):
     brief_description = models.TextField(_('brief description'), validators=[MaxLengthValidator(1000)])
     detailed_description = models.TextField(_('detailed description'), blank=True)    # ckeditor implemented in front, here only saved html content sended from front end.
     instagram_link = models.CharField(_('instagram link'), max_length=255, blank=True, default='')        # instagram link of specefied post (for every post we have one associated post)
-    visible = models.BooleanField(_('delete'), default=True)
+    visible = models.BooleanField(_('visible'), default=True)
     published_date = models.DateTimeField(_('published date'), auto_now_add=True)
     tags = postgre_fields.ArrayField(models.CharField(max_length=150, blank=True), blank=True)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('category'))
@@ -239,7 +239,7 @@ class Product(models.Model):                                     #.order_by('-av
     detailed_description = RichTextUploadingField(_('detailed description'), blank=True)
     price = models.DecimalField(_('price'), max_digits=10, decimal_places=2, default='0')    # for $ prices we need 2 decimal places like 19.99$ and for rial it's x.00 that should serialize to x    if default=0 (instead default='0') products with price=0 will saves in database as 0 instead '0.00' while all other prices are in two decimal format, this removes integrity and cause problems in like main/tests/test_add_to_session.
     available = models.BooleanField(_('available'), default=False, db_index=True)
-    visible = models.BooleanField(_('delete'), default=True, db_index=True)                #we use visible for deleting an object, for deleting visible=False, in fact we must dont delete any product.    
+    visible = models.BooleanField(_('visible'), default=True, db_index=True)                #we use visible for deleting an object, for deleting visible=False, in fact we must dont delete any product.
     created = models.DateTimeField(_('created date'), auto_now_add=True)
     updated = models.DateTimeField(_('updated date'), auto_now=True)
     filter_attributes = models.ManyToManyField(Filter_Attribute, through='Product_Filter_Attributes', blank=True, verbose_name=_('filter attributes'))

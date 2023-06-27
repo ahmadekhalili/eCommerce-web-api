@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-06-09 17:40+0330\n"
+"POT-Creation-Date: 2023-06-27 11:01+0330\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -34,11 +34,18 @@ msgstr "کليد سشن"
 msgid "ses keys"
 msgstr "کليد سشن ها"
 
-#: customed_files/django/classes/custom_ModelAdmin.py:12 main/models.py:213
-#: main/models.py:252 orders/models.py:31 orders/models.py:57
-#: orders/models.py:89 users/models.py:63
+#: customed_files/django/classes/custom_ModelAdmin.py:12 orders/models.py:31
+#: orders/models.py:57 orders/models.py:89 users/models.py:63
 msgid "delete"
 msgstr "حذف"
+
+#: ictsun/settings.py:166
+msgid "Farsi"
+msgstr ""
+
+#: ictsun/settings.py:167
+msgid "English"
+msgstr ""
 
 #: main/admin.py:37
 msgid "{} site panel"
@@ -52,47 +59,47 @@ msgstr "پنل ادمین {}"
 msgid "admin panel"
 msgstr "پنل ادمین"
 
-#: main/admin.py:51 main/admin.py:74 main/admin.py:344 main/models.py:214
-#: main/models.py:423
+#: main/admin.py:51 main/admin.py:79 main/admin.py:333 main/models.py:186
+#: main/models.py:438
 msgid "published date"
 msgstr "تاريخ انتشار"
 
-#: main/admin.py:155 main/models.py:262
+#: main/admin.py:159 main/models.py:251
 msgid "size"
 msgstr "اندازه"
 
-#: main/admin.py:159
+#: main/admin.py:163
 msgid "seo fields"
 msgstr "فیلد های سئو"
 
-#: main/admin.py:180 main/admin.py:191 main/models.py:253 orders/admin.py:137
+#: main/admin.py:184 main/admin.py:195 main/models.py:243 orders/admin.py:137
 #: orders/models.py:56
 msgid "created date"
 msgstr "تاریخ ایجاد"
 
-#: main/admin.py:185 main/admin.py:196 main/models.py:254
+#: main/admin.py:189 main/admin.py:200 main/models.py:244
 msgid "updated date"
 msgstr "تاریخ ویرایش"
 
-#: main/admin.py:388
+#: main/admin.py:379
 msgid "Sub category"
 msgstr "زیر منو"
 
-#: main/admin.py:389
+#: main/admin.py:380
 msgid "Sub categories"
 msgstr "زیر منوها"
 
-#: main/admin.py:396 orders/admin.py:41 orders/admin.py:101
+#: main/admin.py:387 orders/admin.py:41 orders/admin.py:101
 msgid "id"
 msgstr "شناسه"
 
-#: main/admin.py:430 main/models.py:35 main/models.py:52 main/models.py:67
-#: main/models.py:145 main/models.py:244 main/models.py:442 main/models.py:455
-#: main/myforms.py:129 main/myforms.py:130
+#: main/admin.py:421 main/models.py:35 main/models.py:52 main/models.py:67
+#: main/models.py:145 main/models.py:234 main/models.py:458 main/models.py:471
+#: main/myforms.py:119 main/myforms.py:120
 msgid "name"
 msgstr "نام"
 
-#: main/admin.py:579 main/models.py:347 orders/models.py:90
+#: main/admin.py:575 main/models.py:337 orders/models.py:90
 msgid "shopfilteritem"
 msgstr "آیتم فیلتر فروش"
 
@@ -123,12 +130,12 @@ msgstr "فيلتر"
 msgid "Filters"
 msgstr "فيلتر ها"
 
-#: main/models.py:53 main/models.py:68 main/models.py:146 main/models.py:207
-#: main/models.py:245
+#: main/models.py:53 main/models.py:68 main/models.py:146 main/models.py:179
+#: main/models.py:235 main/myforms.py:31 main/myforms.py:32
 msgid "slug"
 msgstr "آدرس وب"
 
-#: main/models.py:57 main/models.py:130 main/models.py:257
+#: main/models.py:57 main/models.py:130 main/models.py:247
 msgid "brand"
 msgstr "برند"
 
@@ -136,11 +143,11 @@ msgstr "برند"
 msgid "brands"
 msgstr "برندها"
 
-#: main/models.py:69 main/myforms.py:111
+#: main/models.py:69 main/myforms.py:101
 msgid "level"
 msgstr "سطح"
 
-#: main/models.py:70 main/myforms.py:112
+#: main/models.py:70 main/myforms.py:102
 msgid "father category"
 msgstr "منو پدر"
 
@@ -154,8 +161,8 @@ msgstr "فيلتر"
 msgid "post or product"
 msgstr "کالا يا پست"
 
-#: main/models.py:82 main/models.py:115 main/models.py:129 main/models.py:217
-#: main/models.py:256 main/myforms.py:35 main/myforms.py:77
+#: main/models.py:82 main/models.py:115 main/models.py:129 main/models.py:188
+#: main/models.py:246 main/myforms.py:33 main/myforms.py:70
 msgid "category"
 msgstr "منو"
 
@@ -191,7 +198,7 @@ msgstr "برند"
 msgid "Category Brands"
 msgstr "برندها"
 
-#: main/models.py:154 main/models.py:295
+#: main/models.py:154 main/models.py:285
 msgid "Filter Attribute"
 msgstr "آيتم فيلتر"
 
@@ -215,235 +222,235 @@ msgstr "رتبه بندي"
 msgid "Ratings"
 msgstr "رتبه بندي ها"
 
-#: main/models.py:185 main/models.py:369 main/models.py:391 main/myforms.py:154
-msgid "image"
-msgstr "تصویر"
-
-#: main/models.py:186 main/models.py:370 main/models.py:392 main/myforms.py:79
-#: main/myforms.py:80 main/myforms.py:155 main/myforms.py:156
-msgid "alt"
-msgstr "توضيحات عکس"
-
-#: main/models.py:187
-msgid "path"
-msgstr "آدرس"
-
-#: main/models.py:190
-msgid "Image icon"
-msgstr "تصوير آيکن"
-
-#: main/models.py:191
-msgid "Image icones"
-msgstr "تصاوير آيکن ها"
-
-#: main/models.py:206
+#: main/models.py:178
 msgid "title"
 msgstr "عنوان"
 
-#: main/models.py:208 main/models.py:246
+#: main/models.py:180 main/models.py:236
 msgid "meta title"
 msgstr "متا عنوان"
 
-#: main/models.py:209 main/models.py:247
+#: main/models.py:181 main/models.py:237
 msgid "meta description"
 msgstr "متا توضيحات"
 
-#: main/models.py:210 main/models.py:248
+#: main/models.py:182 main/models.py:238
 msgid "brief description"
 msgstr "توضيحات مختصر"
 
-#: main/models.py:211 main/models.py:249
+#: main/models.py:183 main/models.py:239
 msgid "detailed description"
 msgstr "توضيحات مشروح"
 
-#: main/models.py:212
+#: main/models.py:184
 msgid "instagram link"
 msgstr "لینک اینستاگرام"
 
-#: main/models.py:216
-msgid "main image"
-msgstr "تصویر اصلی"
+#: main/models.py:185 main/models.py:242
+msgid "visible"
+msgstr "قابل مشاهده"
 
-#: main/models.py:218 main/models.py:425 main/myforms.py:36
+#: main/models.py:189 main/models.py:440 main/myforms.py:34
 msgid "author"
 msgstr "نويسنده"
 
-#: main/models.py:222
+#: main/models.py:194 main/models.py:210
 msgid "Post"
 msgstr "پست"
 
-#: main/models.py:223
+#: main/models.py:195 main/models.py:211
 msgid "Posts"
 msgstr "پست ها"
 
-#: main/models.py:250 main/models.py:342 orders/models.py:51
+#: main/models.py:240 main/models.py:332 orders/models.py:51
 #: orders/models.py:87
 msgid "price"
 msgstr "قيمت"
 
-#: main/models.py:251 main/models.py:343
+#: main/models.py:241 main/models.py:333
 msgid "available"
 msgstr "موجود"
 
-#: main/models.py:255
+#: main/models.py:245
 msgid "filter attributes"
 msgstr "آيتم های فيلتر"
 
-#: main/models.py:258 main/myforms.py:78
-msgid "image icon"
-msgstr "تصوير آيکن"
-
-#: main/models.py:259
+#: main/models.py:248
 msgid "rating"
 msgstr "رتبه بندی"
 
-#: main/models.py:260 main/models.py:341
+#: main/models.py:249 main/models.py:331
 msgid "stock"
 msgstr "موجودی انبار"
 
-#: main/models.py:261 main/myforms.py:81 main/myforms.py:82
+#: main/models.py:250 main/myforms.py:71 main/myforms.py:72
 msgid "weight"
 msgstr "وزن"
 
-#: main/models.py:273 main/models.py:325
+#: main/models.py:263 main/models.py:315
 msgid "Product"
 msgstr "کالا"
 
-#: main/models.py:274 main/models.py:326
+#: main/models.py:264 main/models.py:316
 msgid "Products"
 msgstr "کالا ها"
 
-#: main/models.py:294 main/models.py:339 main/models.py:371 main/models.py:394
-#: main/models.py:428 orders/models.py:91
+#: main/models.py:284 main/models.py:329 main/models.py:363 main/models.py:386
+#: main/models.py:409 main/models.py:443 orders/models.py:91
 msgid "product"
 msgstr "کالا"
 
-#: main/models.py:298 main/models.py:302
+#: main/models.py:288 main/models.py:292
 msgid "Product_Filter_Attribute"
 msgstr "آيتم فيلتر و کالا"
 
-#: main/models.py:299
+#: main/models.py:289
 msgid "Product_Filter_Attributes"
 msgstr "آيتم هاي فيلتر و کالا"
 
-#: main/models.py:338
+#: main/models.py:328
 msgid "filter attribute"
 msgstr "آیتم فیلتر"
 
-#: main/models.py:348
+#: main/models.py:338
 msgid "shopfilteritems"
 msgstr "آیتم های فیلتر فروش"
 
-#: main/models.py:374
-msgid "Image"
+#: main/models.py:359 main/models.py:384 main/models.py:406 main/myforms.py:156
+msgid "image"
 msgstr "تصویر"
 
-#: main/models.py:375
-msgid "Images"
-msgstr "تصاوير"
+#: main/models.py:360 main/models.py:385 main/models.py:407 main/myforms.py:157
+#: main/myforms.py:158
+msgid "alt"
+msgstr "توضيحات عکس"
 
-#: main/models.py:393
-msgid "father"
-msgstr "پدر"
+#: main/models.py:361
+msgid "path"
+msgstr "آدرس"
 
-#: main/models.py:397
-msgid "SmallImage"
-msgstr "تصوير کوچک"
-
-#: main/models.py:398
-msgid "SmallImages"
-msgstr "تصاویر کوچک شده"
-
-#: main/models.py:418
-msgid "not checked"
-msgstr "بررسی نشده"
-
-#: main/models.py:418
-msgid "confirmed"
-msgstr "تایید شده"
-
-#: main/models.py:418
-msgid "not confirmed"
-msgstr "رد شده"
-
-#: main/models.py:418
-msgid "deleted"
-msgstr "حذف شده"
-
-#: main/models.py:422 main/myforms.py:99
-msgid "status"
-msgstr "وضعيت"
-
-#: main/models.py:424
-msgid "content"
-msgstr "محتوا"
-
-#: main/models.py:426
-msgid "reviewer"
-msgstr "تایید/رد کننده"
-
-#: main/models.py:427
+#: main/models.py:362 main/models.py:442
 msgid "post"
 msgstr "پست"
 
-#: main/models.py:431 main/models.py:435
+#: main/models.py:366
+msgid "Image icon"
+msgstr "تصوير آيکن"
+
+#: main/models.py:367
+msgid "Image icones"
+msgstr "تصاوير آيکن ها"
+
+#: main/models.py:389
+msgid "Image"
+msgstr "تصویر"
+
+#: main/models.py:390
+msgid "Images"
+msgstr "تصاوير"
+
+#: main/models.py:408
+msgid "father"
+msgstr "پدر"
+
+#: main/models.py:412
+msgid "SmallImage"
+msgstr "تصوير کوچک"
+
+#: main/models.py:413
+msgid "SmallImages"
+msgstr "تصاویر کوچک شده"
+
+#: main/models.py:433
+msgid "not checked"
+msgstr "بررسی نشده"
+
+#: main/models.py:433
+msgid "confirmed"
+msgstr "تایید شده"
+
+#: main/models.py:433
+msgid "not confirmed"
+msgstr "رد شده"
+
+#: main/models.py:433
+msgid "deleted"
+msgstr "حذف شده"
+
+#: main/models.py:437 main/myforms.py:89
+msgid "status"
+msgstr "وضعيت"
+
+#: main/models.py:439
+msgid "content"
+msgstr "محتوا"
+
+#: main/models.py:441
+msgid "reviewer"
+msgstr "تایید/رد کننده"
+
+#: main/models.py:444
+msgid "reply"
+msgstr "پاسخ"
+
+#: main/models.py:447 main/models.py:451
 msgid "Comment"
 msgstr "نظر"
 
-#: main/models.py:432
+#: main/models.py:448
 msgid "Comments"
 msgstr "نظرات"
 
-#: main/models.py:441 main/models.py:454
+#: main/models.py:457 main/models.py:470
 msgid "key"
 msgstr "کلید"
 
-#: main/models.py:446
+#: main/models.py:462
 msgid "State"
 msgstr "استان"
 
-#: main/models.py:447
+#: main/models.py:463
 msgid "States"
 msgstr "استان ها"
 
-#: main/models.py:456 orders/admin.py:18 orders/admin.py:45 orders/forms.py:19
+#: main/models.py:472 orders/admin.py:18 orders/admin.py:45 orders/forms.py:19
 #: orders/forms.py:44 orders/forms.py:62
 msgid "state"
 msgstr "استان"
 
-#: main/models.py:459
+#: main/models.py:475
 msgid "Town"
 msgstr "شهر"
 
-#: main/models.py:460
+#: main/models.py:476
 msgid "Towns"
 msgstr "شهرها"
 
-#: main/myforms.py:54
+#: main/myforms.py:59
 msgid "Image rate should be 1:1"
 msgstr "نسبت تصویر باید 1:1 باشد"
 
-#: main/myforms.py:55
+#: main/myforms.py:60
 msgid "weight in gram"
 msgstr "وزن بر حسب گرم"
 
-#: main/myforms.py:56
+#: main/myforms.py:61
 msgid "size in millimeter"
 msgstr "اندازه بر حسب میلیمتر"
 
-#: main/myforms.py:83
+#: main/myforms.py:73
 msgid "length"
 msgstr "طول"
 
-#: main/myforms.py:84
+#: main/myforms.py:74
 msgid "width"
 msgstr "عرض"
 
-#: main/myforms.py:85
+#: main/myforms.py:75
 msgid "height"
 msgstr "ارتفاع"
 
-#: main/myforms.py:126
+#: main/myforms.py:116
 msgid ""
 "name for quering. it should be unique. (it is equel to verbose_name of "
 "filter in most cases but can be difference. for example supose we have "
@@ -456,15 +463,19 @@ msgstr ""
 "سیستم عامل گوشی  نام جهت نمایش فیلتر 1: سیستم عامل  نام فیلتر 2: سیستم عامل "
 "لپتاپ  نام جهت نمایش فیلتر 2: سیستم عامل"
 
-#: main/myforms.py:127
+#: main/myforms.py:117
 msgid "name for showing to user. (it is equel to name of filter in most cases)"
 msgstr "نام جهت نمایش به کاربر. (در اکثر مواقع با نام فیلتر برابر است)"
 
-#: main/myforms.py:131 main/myforms.py:132
+#: main/myforms.py:121 main/myforms.py:122
 #, fuzzy
 #| msgid "verbose name"
 msgid "verbose_name"
 msgstr "نام جهت نمایش"
+
+#: main/myforms.py:144
+msgid "image icon"
+msgstr "تصوير آيکن"
 
 #: main/templates/admin/base.html:40
 msgid "Welcome,"
@@ -639,14 +650,6 @@ msgstr "با تشکر از شما برای گذراندن وقت با ارزشت
 
 #: main/templates/registration/logged_out.html:12
 msgid "Log in again"
-msgstr ""
-
-#: ictsun/settings.py:166
-msgid "Farsi"
-msgstr ""
-
-#: ictsun/settings.py:167
-msgid "English"
 msgstr ""
 
 #: orders/admin.py:48 orders/forms.py:20 orders/forms.py:45 orders/forms.py:63
@@ -825,15 +828,15 @@ msgstr "سبد شما خالی است، برای سفارش کالایی وار�
 msgid "payment app"
 msgstr "بخش پرداخت"
 
-#: users/admin.py:19
+#: users/admin.py:26
 msgid "Personal info"
 msgstr ""
 
-#: users/admin.py:20
+#: users/admin.py:27
 msgid "Permissions"
 msgstr ""
 
-#: users/admin.py:22
+#: users/admin.py:29
 msgid "Important dates"
 msgstr ""
 
@@ -865,13 +868,8 @@ msgstr "اطلاعات داده شده جهت ورود صحیح نمی باشد.
 msgid "Must include phone and password."
 msgstr "شماره تلفن و پسورد باید وارد شوند."
 
-#: users/myserializers.py:99
-msgid "admin"
-msgstr "ادمین"
-
-
-
-
+#~ msgid "admin"
+#~ msgstr "ادمین"
 
 
 

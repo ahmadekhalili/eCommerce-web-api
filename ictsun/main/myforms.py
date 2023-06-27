@@ -28,8 +28,8 @@ class PostForm(forms.ModelForm):
         if self.fields.get('slug'):                       # when use form manually in views.py, fields is like: [title, title_fa, title_en, slug, slug_fa,..] as expected  but when use PostFrom in adminpanel, self.fields is like: [title_fa, title_en, slug_fa,..] because admin edit and removes original model fields like 'title', 'slug'
             self.fields['slug'].required = False          # we can define slug field instead this but tab selection for languages will disappeare.
 
-    slug_fa = forms.SlugField(required=False, widget=forms.TextInput(attrs={'class': get_mt_input_classes('slug_fa')}), label=_('slug'))      # Note: slug en in admin panel should be required False to ignore error for slug en in saving.
-    slug_en = forms.SlugField(required=False, widget=forms.TextInput(attrs={'class': get_mt_input_classes('slug_en')}), label=_('slug'))      # Note: slug en in admin panel should be required False to ignore error for slug en in saving.
+    slug_fa = forms.SlugField(required=False, widget=forms.TextInput(attrs={'class': get_mt_input_classes('slug_fa')}), allow_unicode=True, label=_('slug'))      # Note: slug fa in fronend should be required False to ignore error for slug fa in saving (frontend only sends slug)
+    slug_en = forms.SlugField(required=False, widget=forms.TextInput(attrs={'class': get_mt_input_classes('slug_en')}), allow_unicode=True, label=_('slug'))      # Note: slug en in admin panel should be required False to ignore error for slug en in saving.
     category = forms.ModelChoiceField(queryset=Category.objects.filter(post_product='post'), label=_('category'))
     author = forms.ModelChoiceField(queryset=User.objects.all(), required=False, label=_('author'))
 
@@ -41,7 +41,6 @@ class PostForm(forms.ModelForm):
         setattr(self.instance, 'slug', slugify(self.data['title'], allow_unicode=True)) if self.data.get('title') else None   # fill slug field in forms submitted by frontend (front should not fill slug). frontend send data like: 'title': value, 'meta_title': value...   while admin panel send like 'title_fa': value, 'slug_fa': value, 'meta_title': value
         if getattr(self, 'request', None):          # admin panel sent request wouldn't be initialized with request
             self.instance.author = self.request.user
-        self.instance.visible = True              # visible for no reason saves False when submit form by frontend!
         instance = super().save(commit)
         # calling post.image_icon_set.exists() several time, cause runs several query
         post = instance if instance else self.instance
