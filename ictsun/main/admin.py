@@ -78,6 +78,13 @@ class PostAdmin(TranslationAdmin):
     get_published_date.allow_tags = True
     get_published_date.short_description = _('published date')
 
+    def delete_model(self, request, obj):
+        if not settings.DEBUG:    # productions mode
+            obj.visible = False
+            obj.save()
+        else:                     # development mode
+            super().delete_model
+
 admin.site.register(Post, PostAdmin)
 
 
@@ -309,8 +316,12 @@ class ProductAdmin(ModelAdminCust):
         return super().change_view(request, object_id, form_url, extra_context)
 
     def delete_model(self, request, obj):
-        obj.visible = False
-        obj.save()
+        if not settings.DEBUG:    # productions mode
+            obj.visible = False
+            obj.save()
+        else:                     # development mode
+            super().delete_model
+
 admin.site.register(Product, ProductAdmin)
 
 
@@ -347,8 +358,11 @@ class CommentAdmin(admin.ModelAdmin):
         return form.save(commit=False)
 
     def delete_model(self, request, obj):
-        obj.status = '4'
-        obj.save()
+        if not settings.DEBUG:    # productions mode
+            obj.status = '4'
+            obj.save()
+        else:                     # development mode
+            super().delete_model
 
     def save_related(self, request, form, formsets, change):         # here update product in mongo database  (ProductDetainMongo.json.comment_set) according to Comment changes. for example if we have comment_1 (comment_1.product=<Product (1)>)   comment_1.content changes to 'another_content'  ProductDetainMongo:  [{id: 1, json: {comment_set: [{ id: 2, status: '1', published_date: '2022-08-07T17:33:38.724203', content: 'another_content', author: { id: 1, user_name: 'ادمین' }, reviewer: null, post: null, product: 12 }], ...}}, {id: 2, ...}]
         super().save_related(request, form, formsets, change)
