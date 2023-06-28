@@ -325,7 +325,7 @@ class PostDetailMongoSerializer(PostDetailSerializer):
         paths, instances = obj.create_images(path='/media/posts_images/icons/')
         if instances:
             Image_icon.objects.bulk_create(instances)
-        save_to_mongo(kwargs['request'], PostDetailMongo, instance, self, change)
+        save_to_mongo(PostDetailMongo, instance, self, change, kwargs['request'])
         return instance
 
 

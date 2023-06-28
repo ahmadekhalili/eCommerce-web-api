@@ -52,8 +52,6 @@ class PostForm(forms.ModelForm):
             paths, instances = obj.create_images(path='/media/posts_images/icons/')
             post.image_icon_set.all().delete() if image_icon_exits else None
             Image_icon.objects.bulk_create(instances) if instances else None
-        from .serializers import PostDetailMongoSerializer
-        save_to_mongo(PostDetailMongo, self.instance, PostDetailMongoSerializer, not bool(instance), self.request)
         return post
 
 
@@ -61,9 +59,8 @@ image_qusmark_text = _('Image rate should be 1:1')
 weight_qusmark_text = _('weight in gram')
 length_qusmark_text = _('size in millimeter')
 class ProductForm(custforms.ProductModelForm):
-    def __init__(self, data=None, files=None, auto_id='id_%s', prefix=None, initial=None, error_class=ErrorList, label_suffix=None, empty_permitted=False, instance=None, use_required_attribute=None, renderer=None, request=None):
+    def __init__(self, data=None, files=None, auto_id='id_%s', prefix=None, initial=None, error_class=ErrorList, label_suffix=None, empty_permitted=False, instance=None, use_required_attribute=None, renderer=None):
         initial = initial if initial else {}
-        self.request = request
         length, width, height = [float(i) for i in instance.size.split(',')] if instance and instance.size else (None,None,None)
         initial = {**initial, 'length': length, 'width': width, 'height': height} if length else initial
         super(). __init__(data, files, auto_id, prefix, initial, error_class, label_suffix, empty_permitted, instance, use_required_attribute, renderer)
@@ -94,8 +91,6 @@ class ProductForm(custforms.ProductModelForm):
             paths, instances = obj.create_images(path='/media/products_images/icons/')
             product.image_icon_set.all().delete() if image_icon_exits else None
             Image_icon.objects.bulk_create(instances) if instances else None
-        from .serializers import ProductDetailMongoSerializer
-        save_to_mongo(ProductDetainMongo, self.instance, ProductDetailMongoSerializer, not bool(instance), self.request)
         return product
 
 

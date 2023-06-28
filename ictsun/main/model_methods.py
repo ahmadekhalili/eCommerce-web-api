@@ -127,7 +127,7 @@ def update_product_stock(self, product, saving):         # self is ShopFilterIte
 
 
 def save_to_mongo(model, instance, serializer, change, request=None):
-    # model like Post, instance like post1, serializer like PostDetailSerializer or PostDetailSerializer()
+    # model like ProductDetainMongo, instance like post1, serializer like PostDetailSerializer or PostDetailSerializer()
     # below serializer calls inside ModelSerializer like PostDetailMongoSerializer
     if isinstance(serializer, Serializer):
         serializer.request, serializer.instance = request, instance

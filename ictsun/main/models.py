@@ -20,7 +20,7 @@ from ckeditor_uploader.fields import RichTextUploadingField
 
 import jdatetime
 
-from .model_methods import set_levels_afterthis_all_childes_id, update_product_stock
+from .model_methods import set_levels_afterthis_all_childes_id, update_product_stock, save_to_mongo
 from customed_files.django.classes import model_fields
 from users.models import User
 # note1: changing classes places may raise error when creating tables(makemigrations), for example changing Content with Post will raise error(Content use Post in its field and shuld be definded after Post)
@@ -216,7 +216,15 @@ class PostDetailMongo(djongo_models.Model):
         except:
             return 'nameless'                              # return None can't accept (error)
 
+def save_post_mongo(sender, **kwargs):
+    # if we pot save_to_mongo to PostForm.save instead here error will raise when save new post, because
+    # post.published_date required, but form.instance.published_date only available after return instance in form.save
+    change = False if kwargs['created'] else True
+    post = kwargs['instance']
+    from .serializers import PostDetailMongoSerializer
+    save_to_mongo(PostDetailMongo, post, PostDetailMongoSerializer, change)
 
+post_save.connect(save_post_mongo, sender=Post)
 
 
 class ProductManager(models.Manager):                             #we have two seperate way for creating an object,  .create( product.objects.create ) and .save( p=product(..) p.save() ), it is important for us in two way rating creation suported same.
@@ -321,7 +329,15 @@ class ProductDetainMongo(djongo_models.Model):
         except:
             return 'nameless'                             # return None can't accept (error)
 
+def save_product_mongo(sender, **kwargs):
+    # if we pot save_to_mongo to PostForm.save instead here error will raise when save new post, because
+    # post.published_date required, but form.instance.published_date only available after return instance in form.save
+    change = False if kwargs['created'] else True
+    product = kwargs['instance']
+    from .serializers import ProductDetailMongoSerializer
+    save_to_mongo(ProductDetainMongo, product, ProductDetailMongoSerializer, change)
 
+post_save.connect(save_product_mongo, sender=Product)
 
 
 class ShopFilterItem(models.Model):
