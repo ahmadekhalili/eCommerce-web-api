@@ -9,8 +9,8 @@ django-cors-headers==3.11.0        # install package corsheaders, used in settin
 Pillow==9.0.1                      # python library for working with images like: "from PIL import Image as PilImage" in main/models.py
 psycopg2==2.9.3                    # required for working django with postgres
 phonenumbers==8.12.44              # phonenumber_field needs phonenumbers for working, for exmaple: site-packages/phonenumber_field/formfields.py", line 1: import phonenumbers
-beautifulsoup4==4.10.0             # install bs4 package (BeautifulSoup  library), used in: ictsun/main/mymethods.py", line 5: from bs4 import BeautifulSoup
-requests==2.27.1                   # install requests library, used in ictsun/main/mymethods.py", line 6: import requests
+beautifulsoup4==4.10.0             # install bs4 package (BeautifulSoup  library), used in: ictsun/main/methods.py", line 5: from bs4 import BeautifulSoup
+requests==2.27.1                   # install requests library, used in ictsun/main/methods.py", line 6: import requests
 zeep==4.1.0                        # used in ictsun/payment/views.py", line 7: from zeep import Client
 coreapi==2.3.3                     # used in settings.py/REST_FRAMEWORK/DEFAULT_SCHEMA_CLASS
 celery==5.2.3                      # used in orders/tasks.py

@@ -4,9 +4,9 @@ from django.contrib.admin.widgets import AdminTextInputWidget, RelatedFieldWidge
 
 import json
 
-from . import myserializers
+from . import serializers as my_serializers
 from .models import Product, Category, Filter, Filter_Attribute
-from .mymethods import make_next
+from .methods import make_next
 
 
 class QuestionMark:
@@ -59,7 +59,7 @@ class filter_attributes_widget(forms.Select):
         filters = list(Filter.objects.prefetch_related('filter_attributes'))               #if dont use list, using filters again, reevaluate filters and query again to database!
         filters_attributes = []
         for filter in filters:                 #in this part we want create dynamicly options inside <select ..> </select>  for field category.level depend on validators we define in PositiveSmallIntegerField(validators=[here]) for example if we have MinValueValidator(1) MaxValueValidator(3) we have 3 options: <option value="1"> 1 </option>   <option value="2"> 2 </option>   <option value="3"> 3 </option>
-            filters_attributes += [json.dumps([serializer for serializer in myserializers.Filter_AttributeListSerializer(filter.filter_attributes.all(), many=True).data])]
+            filters_attributes += [json.dumps([serializer for serializer in my_serializers.Filter_AttributeListSerializer(filter.filter_attributes.all(), many=True).data])]
         two_select_context['filters_filters_attributes'] = list(zip(filters, filters_attributes))
         two_select_context['range_filters'] = '1:{}'.format(len(filters)) if len(filters)>=1 else '1:1'            #ff len(filter)==0  '1:0' will make error in our program.
         two_select_context['selected_filter_attributes'] = make_next([type('type', (), {'id':-1})])                #we create blank class with attribute id=-1 so in our template dont raise error: {{ selected_filter_attributes.next.id }}
@@ -100,7 +100,7 @@ class product_category_widget(forms.Select):
             categories_by_level += [same_categories]
         categoriesbyleveljs_levels = []
         for same_categories in categories_by_level:
-            categoriesbyleveljs_levels += [[json.dumps([serializer for serializer in myserializers.CategoryListSerializer(same_categories, many=True).data]), same_categories[0].level]]
+            categoriesbyleveljs_levels += [[json.dumps([serializer for serializer in my_serializers.CategoryListSerializer(same_categories, many=True).data]), same_categories[0].level]]
         two_select_context['categories_level_range'] = categories_level_range
         two_select_context['categoriesbyleveljs_levels'] = categoriesbyleveljs_levels
         two_select_context['range_1'] = '1:{}'.format(len(categoriesbyleveljs_levels))
@@ -191,7 +191,7 @@ class father_category_widget(forms.Select):
                 categories_by_level += [same_categories]
         categoriesbyleveljs_levels = []
         for same_categories in categories_by_level:
-            categoriesbyleveljs_levels += [[json.dumps([serializer for serializer in myserializers.CategoryListSerializer(same_categories, many=True).data]), same_categories[0].level+1]]
+            categoriesbyleveljs_levels += [[json.dumps([serializer for serializer in my_serializers.CategoryListSerializer(same_categories, many=True).data]), same_categories[0].level+1]]
         two_select_context['categoriesbyleveljs_levels'] = categoriesbyleveljs_levels
         two_select_context['selected_category_id'] = -1
 

@@ -34,7 +34,7 @@ msgstr "کليد سشن"
 msgid "ses keys"
 msgstr "کليد سشن ها"
 
-#: customed_files/django/classes/custom_ModelAdmin.py:12 orders/models.py:31
+#: customed_files/django/classes/ModelAdmin.py:12 orders/models.py:31
 #: orders/models.py:57 orders/models.py:89 users/models.py:63
 msgid "delete"
 msgstr "حذف"
@@ -95,7 +95,7 @@ msgstr "شناسه"
 
 #: main/admin.py:421 main/models.py:35 main/models.py:52 main/models.py:67
 #: main/models.py:145 main/models.py:234 main/models.py:458 main/models.py:471
-#: main/myforms.py:119 main/myforms.py:120
+#: main/forms.py:119 main/forms.py:120
 msgid "name"
 msgstr "نام"
 
@@ -131,7 +131,7 @@ msgid "Filters"
 msgstr "فيلتر ها"
 
 #: main/models.py:53 main/models.py:68 main/models.py:146 main/models.py:179
-#: main/models.py:235 main/myforms.py:31 main/myforms.py:32
+#: main/models.py:235 main/forms.py:31 main/forms.py:32
 msgid "slug"
 msgstr "آدرس وب"
 
@@ -143,11 +143,11 @@ msgstr "برند"
 msgid "brands"
 msgstr "برندها"
 
-#: main/models.py:69 main/myforms.py:101
+#: main/models.py:69 main/forms.py:101
 msgid "level"
 msgstr "سطح"
 
-#: main/models.py:70 main/myforms.py:102
+#: main/models.py:70 main/forms.py:102
 msgid "father category"
 msgstr "منو پدر"
 
@@ -162,7 +162,7 @@ msgid "post or product"
 msgstr "کالا يا پست"
 
 #: main/models.py:82 main/models.py:115 main/models.py:129 main/models.py:188
-#: main/models.py:246 main/myforms.py:33 main/myforms.py:70
+#: main/models.py:246 main/forms.py:33 main/forms.py:70
 msgid "category"
 msgstr "منو"
 
@@ -250,7 +250,7 @@ msgstr "لینک اینستاگرام"
 msgid "visible"
 msgstr "قابل مشاهده"
 
-#: main/models.py:189 main/models.py:440 main/myforms.py:34
+#: main/models.py:189 main/models.py:440 main/forms.py:34
 msgid "author"
 msgstr "نويسنده"
 
@@ -283,7 +283,7 @@ msgstr "رتبه بندی"
 msgid "stock"
 msgstr "موجودی انبار"
 
-#: main/models.py:250 main/myforms.py:71 main/myforms.py:72
+#: main/models.py:250 main/forms.py:71 main/forms.py:72
 msgid "weight"
 msgstr "وزن"
 
@@ -316,12 +316,12 @@ msgstr "آیتم فیلتر"
 msgid "shopfilteritems"
 msgstr "آیتم های فیلتر فروش"
 
-#: main/models.py:359 main/models.py:384 main/models.py:406 main/myforms.py:156
+#: main/models.py:359 main/models.py:384 main/models.py:406 main/forms.py:156
 msgid "image"
 msgstr "تصویر"
 
-#: main/models.py:360 main/models.py:385 main/models.py:407 main/myforms.py:157
-#: main/myforms.py:158
+#: main/models.py:360 main/models.py:385 main/models.py:407 main/forms.py:157
+#: main/forms.py:158
 msgid "alt"
 msgstr "توضيحات عکس"
 
@@ -377,7 +377,7 @@ msgstr "رد شده"
 msgid "deleted"
 msgstr "حذف شده"
 
-#: main/models.py:437 main/myforms.py:89
+#: main/models.py:437 main/forms.py:89
 msgid "status"
 msgstr "وضعيت"
 
@@ -426,31 +426,31 @@ msgstr "شهر"
 msgid "Towns"
 msgstr "شهرها"
 
-#: main/myforms.py:59
+#: main/forms.py:59
 msgid "Image rate should be 1:1"
 msgstr "نسبت تصویر باید 1:1 باشد"
 
-#: main/myforms.py:60
+#: main/forms.py:60
 msgid "weight in gram"
 msgstr "وزن بر حسب گرم"
 
-#: main/myforms.py:61
+#: main/forms.py:61
 msgid "size in millimeter"
 msgstr "اندازه بر حسب میلیمتر"
 
-#: main/myforms.py:73
+#: main/forms.py:73
 msgid "length"
 msgstr "طول"
 
-#: main/myforms.py:74
+#: main/forms.py:74
 msgid "width"
 msgstr "عرض"
 
-#: main/myforms.py:75
+#: main/forms.py:75
 msgid "height"
 msgstr "ارتفاع"
 
-#: main/myforms.py:116
+#: main/forms.py:116
 msgid ""
 "name for quering. it should be unique. (it is equel to verbose_name of "
 "filter in most cases but can be difference. for example supose we have "
@@ -463,17 +463,17 @@ msgstr ""
 "سیستم عامل گوشی  نام جهت نمایش فیلتر 1: سیستم عامل  نام فیلتر 2: سیستم عامل "
 "لپتاپ  نام جهت نمایش فیلتر 2: سیستم عامل"
 
-#: main/myforms.py:117
+#: main/forms.py:117
 msgid "name for showing to user. (it is equel to name of filter in most cases)"
 msgstr "نام جهت نمایش به کاربر. (در اکثر مواقع با نام فیلتر برابر است)"
 
-#: main/myforms.py:121 main/myforms.py:122
+#: main/forms.py:121 main/forms.py:122
 #, fuzzy
 #| msgid "verbose name"
 msgid "verbose_name"
 msgstr "نام جهت نمایش"
 
-#: main/myforms.py:144
+#: main/forms.py:144
 msgid "image icon"
 msgstr "تصوير آيکن"
 
@@ -860,11 +860,11 @@ msgstr "شغل"
 msgid "users"
 msgstr "کاربران"
 
-#: users/mymethods.py:16
+#: users/methods.py:16
 msgid "Unable to log in with provided credentials."
 msgstr "اطلاعات داده شده جهت ورود صحیح نمی باشد."
 
-#: users/mymethods.py:21
+#: users/methods.py:21
 msgid "Must include phone and password."
 msgstr "شماره تلفن و پسورد باید وارد شوند."
 

@@ -16,8 +16,8 @@ from cart.views import CartCategoryView
 from cart.cart import Cart
 from payment.views import PaymentStart
 from .models import ProfileOrder, Order, OrderItem, Dispatch
-from .myserializers import ProfileOrderSerializer, OrderSerializer, OrderItemSerializer
-from .mymethods import profile_order_detail
+from .serializers import ProfileOrderSerializer, OrderSerializer, OrderItemSerializer
+from .methods import profile_order_detail
 
 
 
@@ -36,7 +36,7 @@ class ListCreateProfileOrder(views.APIView):
         main_profileorder = ProfileOrder.objects.filter(user=request.user, main=True)
         data['main'] = True if not main_profileorder else False           #first profileorder must be main profileorder.
         data['user'] = request.user.id
-        serializer  = ProfileOrderSerializer(data=data)
+        serializer = ProfileOrderSerializer(data=data)
         if serializer.is_valid():
             profileorder = serializer.save()
             # get = request.GET.copy()
@@ -59,7 +59,7 @@ class ProfileOrderDetail(views.APIView):
             
     def put(self, request, *args, **kwargs):                                           #here ProfileOrder updated.
         profileorder = ProfileOrder.objects.get(id=kwargs.get('pk'))
-        serializer  = ProfileOrderSerializer(instance=profileorder, data=request.data, partial=True)     
+        serializer = ProfileOrderSerializer(instance=profileorder, data=request.data, partial=True)
         if serializer.is_valid():
             profileorder = serializer.save()                           
             return Response(ProfileOrderSerializer(profileorder).data)

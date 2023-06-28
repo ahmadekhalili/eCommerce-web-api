@@ -21,7 +21,7 @@ from ckeditor_uploader.fields import RichTextUploadingField
 import jdatetime
 
 from .model_methods import set_levels_afterthis_all_childes_id, update_product_stock
-from customed_files.django.classes import model_fields_custom
+from customed_files.django.classes import model_fields
 from users.models import User
 # note1: changing classes places may raise error when creating tables(makemigrations), for example changing Content with Post will raise error(Content use Post in its field and shuld be definded after Post)
 # note2: if you add or remove a field, you have to apply it in translation.py 'fields' if was required.
@@ -66,7 +66,7 @@ class Brand(models.Model):
 class Category(models.Model):                                  #note: supose roor2 object,  category2.father_category determine father of category2 and category2.child_categories is list of category2's childer,  category with level=1 can has eny father!
     name = models.CharField(_('name'), unique=True, max_length=50)
     slug = models.SlugField(_('slug'), allow_unicode=True, db_index=False)
-    level = models.PositiveSmallIntegerField(_('level'), default=1, validators=[MinValueValidator(1), MaxValueValidator(6)])        #important: in main/views/ProductCategoryList & ProductDetail and in main/mymethods/get_posts_products_by_category   we used MaxValueValidator with its posation in validator, so validator[1] must be MaxValueValidator otherwise will raise error.
+    level = models.PositiveSmallIntegerField(_('level'), default=1, validators=[MinValueValidator(1), MaxValueValidator(6)])        #important: in main/views/ProductCategoryList & ProductDetail and in main/methods/get_posts_products_by_category   we used MaxValueValidator with its posation in validator, so validator[1] must be MaxValueValidator otherwise will raise error.
     father_category = models.ForeignKey('self', related_name='child_categories', related_query_name='childs', null=True, blank=True, on_delete=models.CASCADE, verbose_name=_('father category'))        #if category.level>1 will force to filling this field.
     levels_afterthis = models.PositiveSmallIntegerField(default=0, blank=True)                         #in field neshan midahad chand sath farzand darad in pedar, masalam: <category(1) digital>,  <category(2) mobail>,  <category(3) samsung> farz konid mobail pedare samsung,  digital pedare mobail ast(<category(1) digital>.level=1,  <category(2) mobail>.level=2,  <category(3) samsung>.level=3)   . bala sare digital dar in mesal 2 sath farzand mibashad( mobail va samsung pas <category(1) digital>.levels_afterthis = 2   va <category(2) mobail>.levels_afterthis=1  va <category(3) samsung>.levels_afterthis=0
     previous_father_id = models.PositiveSmallIntegerField(null=True, blank=True)                         #supose you change category.father_category, we cant understant prevouse father was what in Category.save(ony new edited father_category is visible) so we added this field
@@ -247,8 +247,8 @@ class Product(models.Model):                                     #.order_by('-av
     brand = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('brand'))          # brand field as CharField is not logical and should be ForeignKey why? because for example in adding product1 we may add brand "nokia" and in second product2 add "Nokia". when products increased (supose more than 100) it will raise real problems
     rating = models.OneToOneField(Rating, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('rating'))
     stock = models.PositiveIntegerField(_('stock'), default=0)                        # important: stock before creating first shopfilteritem of product shoud be 0 otherwise it will sum with shopfilteritem.stock, example: supose we have product1.stock = 10  now after creating shopfilteritem1 with stock=12 product1.stock will be 10+12   (address: in ShopFilterItem.save and model_methods.py/update_product_stock
-    weight = models.FloatField(_('weight'), null=True, blank=False)                   # weight is in gram and used in orders/mymethods/profile_order_detail/PostDispatchPrice  but if you dont specify weight in saving a product, it will be None and will ignore in PostDispatchPrice. its better null=True easier in creating products in tests.
-    size = models.CharField(_('size'), max_length=25, blank=True)          # value should be in mm  and like '100,150,150'  this field seperate to 3 field in ProductForm in __init__ and save func), also we use size in mymethods.PostDispatchPrice  to define which box size should choice for posting.
+    weight = models.FloatField(_('weight'), null=True, blank=False)                   # weight is in gram and used in orders/methods/profile_order_detail/PostDispatchPrice  but if you dont specify weight in saving a product, it will be None and will ignore in PostDispatchPrice. its better null=True easier in creating products in tests.
+    size = models.CharField(_('size'), max_length=25, blank=True)          # value should be in mm  and like '100,150,150'  this field seperate to 3 field in ProductForm in __init__ and save func), also we use size in methods.PostDispatchPrice  to define which box size should choice for posting.
     #image_set                                                    backward relation field
     #image_icon_set
     #comment_set
@@ -259,7 +259,7 @@ class Product(models.Model):                                     #.order_by('-av
     objects = ProductManager()
 
     class Meta:
-        #default_permissions =  ('add', 'change', 'delete', 'view')
+        #default_permissions = ('add', 'change', 'delete', 'view')
         verbose_name = _('Product')
         verbose_name_plural = _('Products')
 

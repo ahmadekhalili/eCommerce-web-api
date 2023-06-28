@@ -8,8 +8,8 @@ import pymongo
 
 from .models import User
 from .forms import CustomUserCreationForm, CustomUserChangeForm
-from .myserializers import UserNameSerializer
-from main.mymethods import get_parsed_data
+from .serializers import UserNameSerializer
+from main.methods import get_parsed_data
 
 shopdb_mongo = pymongo.MongoClient("mongodb://localhost:27017/")['shop']
 

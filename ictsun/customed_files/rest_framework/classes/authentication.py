@@ -3,7 +3,7 @@ from django.middleware.csrf import _does_token_match
 from rest_framework import exceptions
 
 
-class CustomSessionAuthentication(SessionAuthentication):            
+class SessionAuthenticationCustom(SessionAuthentication):
     def enforce_csrf(self, request):
         pass
         '''if request.method == 'POST' or request.method == 'PUT':
@@ -17,11 +17,11 @@ class CustomSessionAuthentication(SessionAuthentication):
                     raise                                                                     #raise make runnin "except:"
 
             except AttributeError:                                                            #AttributeError error raises when attribute of a object is not definded, for example request is not attribute .data (djago request)
-                raise exceptions.PermissionDenied({'CustomSessionAuthentication': 'maybe error accur because you are using django rquest, only rest rquest accepted'})
+                raise exceptions.PermissionDenied({'SessionAuthenticationCustom': 'maybe error accur because you are using django rquest, only rest rquest accepted'})
             except TypeError:                                                                 #this like run when puting value for _does_token_match isnt char for example: csrf_token = {...}              
-                raise exceptions.PermissionDenied({'CustomSessionAuthentication': 'CSRF unexpected value'})
+                raise exceptions.PermissionDenied({'SessionAuthenticationCustom': 'CSRF unexpected value'})
             except KeyError:                                                                  #request.data['csrfmiddlewaretoken'] or request.COOKIES['csrftoken'] not provided.                    
-                raise exceptions.PermissionDenied({'CustomSessionAuthentication': 'CSRF not provided'})                       #this line run when request.data['csrfmiddlewaretoken'] or request.COOKIES['csrftoken']  arent provided.
+                raise exceptions.PermissionDenied({'SessionAuthenticationCustom': 'CSRF not provided'})                       #this line run when request.data['csrfmiddlewaretoken'] or request.COOKIES['csrftoken']  arent provided.
             except:                                                                           #bool_compared = False     
-                raise exceptions.PermissionDenied({'CustomSessionAuthentication': 'CSRF provided, but Failed'})
+                raise exceptions.PermissionDenied({'SessionAuthenticationCustom': 'CSRF provided, but Failed'})
 '''

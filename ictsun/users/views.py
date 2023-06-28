@@ -7,17 +7,17 @@ from rest_framework import views
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
-from .myserializers import UserSerializer, UserChangeSerializer
-from .mymethods import login_validate
+from .serializers import UserSerializer, UserChangeSerializer
+from .methods import login_validate
 from .models import User
 from cart.views import CartCategoryView
 from cart.cart import Cart
 from orders.views import ListCreateOrderItem
 from orders.models import ProfileOrder, Order
-from orders.myserializers import ProfileOrderSerializer, OrderSerializer
-from customed_files.rest_framework.rest_framework_customed_classes.custom_rest_authentication import CustomSessionAuthentication
+from orders.serializers import ProfileOrderSerializer, OrderSerializer
+from customed_files.rest_framework.classes.authentication import SessionAuthenticationCustom
 from main.models import Post, Comment
-from main.myserializers import CommentSerializer, PostListSerializer
+from main.serializers import CommentSerializer, PostListSerializer
 
 
 class LogIn(views.APIView):
@@ -35,7 +35,7 @@ class LogIn(views.APIView):
         output  {"sessionid": "...",  "user": "...", "favorite_products_ids": "..."}     "favorite_products_ids=1,2,3"
         '''
         user = login_validate(request)
-        #CustomSessionAuthentication().enforce_csrf(request)          #if you dont put this here, we will havent csrf check (meants without puting csrf codes we can login easily)(because in djangorest, csrf system based on runing class SessionAuthentication(here)CustomSessionAuthentication and class CustomSessionAuthentication runs when you are loged in, because of that we use handy method enforce_csrf(we arent here loged in), just in here(in other places, all critical tasks that need csrf checks have permissions.IsAuthenticated require(baese csrf check mishavad)).
+        #SessionAuthenticationCustom().enforce_csrf(request)          #if you dont put this here, we will havent csrf check (meants without puting csrf codes we can login easily)(because in djangorest, csrf system based on runing class SessionAuthentication(here)SessionAuthenticationCustom and class SessionAuthenticationCustom runs when you are loged in, because of that we use handy method enforce_csrf(we arent here loged in), just in here(in other places, all critical tasks that need csrf checks have permissions.IsAuthenticated require(baese csrf check mishavad)).
         login(request, user)
         cart = Cart(request)
         supporter_datas = CartCategoryView().get(request, datas_selector='products_user').data
@@ -52,7 +52,7 @@ class SignUp(views.APIView):
         input in POST = {"csrfmiddlewaretoken": "...", "phone": "...", "password1": "...", "password2": "..."}__________
         input in header cookie = {"csrftoken": "..."}
         '''
-        CustomSessionAuthentication().enforce_csrf(request)
+        SessionAuthenticationCustom().enforce_csrf(request)
         phone, password1, password2 = request.data.get('phone'), request.data.get('password1'), request.data.get('password2')
         serializer = UserSerializer(data={'phone': phone, 'password': password1})
         serializer.is_valid(raise_exception=True)                           # raise errors better than User.objects.create_user(...) forr example creating user with dublicate phone, create_user raise error:  duplicate key value violates unique constraint "users_user_phone_key"...     while is_valid raise: "unique": "کاربر با این شماره تلفن از قبل موجود است."

@@ -10,7 +10,7 @@ import jdatetime
 from customed_files import date_convertor
 from orders.models import ProfileOrder
 from .models import User
-from .mymethods import user_name_shown
+from .methods import user_name_shown
 
 
 

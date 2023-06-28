@@ -8,8 +8,8 @@ from rest_framework.response import Response
 from decimal import Decimal
 
 from .cart import Cart
-from .myserializers import CartProductSerializer
-from customed_files.rest_framework.rest_framework_customed_classes.custom_rest_authentication import CustomSessionAuthentication 
+from .serializers import CartProductSerializer
+from customed_files.rest_framework.classes.authentication import SessionAuthenticationCustom
 
 
 class CartPageView(views.APIView):       #user come from 'sabad'(in header) to here. 
@@ -26,7 +26,7 @@ class CartPageView(views.APIView):       #user come from 'sabad'(in header) to h
 
 class CartCategoryView(views.APIView):       #'sabad'(in header)
     def get(self, request, *args, **kwargs):                                       #supose user refresh /cart/ page
-        serializers, cart, total_prices, total_weight, dimensions, dimensions_fail  = [], Cart(request), Decimal(0), 0, [], False          #we sended dimensions not volume for using in future (in formols for processing carton size).
+        serializers, cart, total_prices, total_weight, dimensions, dimensions_fail = [], Cart(request), Decimal(0), 0, [], False          #we sended dimensions not volume for using in future (in formols for processing carton size).
         for item in cart:
             serializers.append({**CartProductSerializer(item, context={'request': request}).data})
             total_prices += item['total_price']
@@ -42,7 +42,7 @@ class CartCategoryView(views.APIView):       #'sabad'(in header)
 
 class CartAdd(views.APIView):       #user come from 'sabad'(in header) to this method.  add id in front, just front must car add current_item + cart_cookie in add. #set_fingers and remove  is in front 
     def post(self, request, *args, **kwargs):
-        #CustomSessionAuthentication().enforce_csrf(request)                        # this enable csrf checks for unauthenticated user (for loged in user, DEFAULT_AUTHENTICATION_CLASSES in settings.py cause csrf checks.
+        #SessionAuthenticationCustom().enforce_csrf(request)                        # this enable csrf checks for unauthenticated user (for loged in user, DEFAULT_AUTHENTICATION_CLASSES in settings.py cause csrf checks.
         data = request.data
         cart = Cart(request)
         cart.add(product_id=data['product_id'], quantity=data.get('quantity', 1), shopfilteritem_id=data.get('shopfilteritem_id'))    #cd['quantity'] is int but how is it because: coerce=int ? request.data['quantity'] is rest/views/CartDetail is string
@@ -53,7 +53,7 @@ class CartAdd(views.APIView):       #user come from 'sabad'(in header) to this m
 
 class CartMinus(views.APIView):       #reduce selected quantity of proselect by 1.  
     def post(self, request, *args, **kwargs):
-        #CustomSessionAuthentication().enforce_csrf(request)
+        #SessionAuthenticationCustom().enforce_csrf(request)
         data = request.data
         cart = Cart(request)
         cart.minus(product_id=data['product_id'], shopfilteritem_id=data.get('shopfilteritem_id'))
@@ -64,7 +64,7 @@ class CartMinus(views.APIView):       #reduce selected quantity of proselect by 
 
 class CartRemove(views.APIView):       #user come from 'sabad'(in header) to this method.  add id in front, just front must car add current_item + cart_cookie in add. #set_fingers and remove  is in front 
     def post(self, request, *args, **kwargs):
-        #CustomSessionAuthentication().enforce_csrf(request)
+        #SessionAuthenticationCustom().enforce_csrf(request)
         cart = Cart(request)
         cart.remove(request.data.get('product_id'), request.data.get('shopfilteritem_id'))
         return Response({**CartCategoryView().get(request).data})

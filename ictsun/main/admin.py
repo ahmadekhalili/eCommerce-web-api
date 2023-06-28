@@ -23,12 +23,12 @@ import pymongo
 from modeltranslation.admin import TranslationAdmin
 from modeltranslation.utils import get_translation_fields as g_t
 
-from customed_files.django.classes.custom_ModelAdmin import CustModelAdmin
-from . import myserializers
-from . import myforms
+from customed_files.django.classes.ModelAdmin import ModelAdminCust
+from . import serializers as my_serializers
+from . import forms as my_forms
 from .models import *
-from .mymethods import make_next, get_category_and_fathers, get_parsed_data
-from .mycontexts import PROJECT_VERBOSE_NAME
+from .methods import make_next, get_category_and_fathers, get_parsed_data
+from .contexts import PROJECT_VERBOSE_NAME
 from .model_methods import set_levels_afterthis_all_childes_id
 
 TO_FIELD_VAR = '_to_field'
@@ -60,7 +60,7 @@ class PostAdmin(TranslationAdmin):
     prepopulated_fields = {'slug':('title',)}
     inlines = [CommentInline, ImageIconInline]
     readonly_fields = ('get_published_date',)
-    form = myforms.PostForm
+    form = my_forms.PostForm
 
     class Media:                                 # this cause languages shown separatly in admin panel. (it should be use always, otherwise all field of all languages shown under each other at once)
         js = (
@@ -139,10 +139,10 @@ except:
 
 class ImageInline(admin.StackedInline):
     model = Image
-    form = myforms.ImageForm
+    form = my_forms.ImageForm
 
 
-class ProductAdmin(CustModelAdmin):
+class ProductAdmin(ModelAdminCust):
     search_fields = ['id', 'name__contains', 'slug', 'brand']                            #important: update manualy js file searchbar_help_text_product in class media.
     list_display = ['id', 'name', 'price', 'stock', 'rating', 'get_created_brief', 'get_updated_brief']                 #this line is for testing mode!!!
     list_filter = [*filters_list_filter, 'available', 'created', 'updated']
@@ -151,7 +151,7 @@ class ProductAdmin(CustModelAdmin):
     filter_horizontal = ('filter_attributes',)
     inlines = [ImageInline, CommentInline, ImageIconInline]
     readonly_fields = ('rating', 'get_created', 'get_updated')
-    form = myforms.ProductForm
+    form = my_forms.ProductForm
     fieldsets = (
         (None, {
             'fields': ('name', 'slug', 'brief_description', 'detailed_description', 'price', 'available', 'category', 'filter_attributes', 'rating', 'stock', 'brand', 'weight', 'get_created', 'get_updated')
@@ -222,15 +222,15 @@ class ProductAdmin(CustModelAdmin):
             if len(tuple[0]) > 6 and tuple[0][:6] == 'extra_':
                 data[tuple[0]] = tuple[1]
         language_code = get_language()                                  # get current language code
-        activate('en')                                                  # all keys should save in database in `en` laguage(for showing data you can select eny language) otherwise it was problem understading which language should select to run query on them like in:  s = myserializers.ProductDetailMongoSerializer(form.instance, context={'request': request}).data['shopfilteritems']:     {'رنگ': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} it is false for saving, we should change language by  `activate('en')` and now true form for saving:  {'color': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} and query like: s['color']
+        activate('en')                                                  # all keys should save in database in `en` laguage(for showing data you can select eny language) otherwise it was problem understading which language should select to run query on them like in:  s = serializers.ProductDetailMongoSerializer(form.instance, context={'request': request}).data['shopfilteritems']:     {'رنگ': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} it is false for saving, we should change language by  `activate('en')` and now true form for saving:  {'color': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} and query like: s['color']
         if not change:
-            s = myserializers.ProductDetailMongoSerializer(form.instance, context={'request': request}).data
+            s = serializers.ProductDetailMongoSerializer(form.instance, context={'request': request}).data
             content = JSONRenderer().render(s)
             stream = io.BytesIO(content)
             data = {**JSONParser().parse(stream), **data}                           # s is like: {'id': 12, 'name': 'test2', 'slug': 'test2', ...., 'categories': [OrderedDict([('name', 'Workout'), ('slug', 'Workout')])]} and 'OrderedDict' will cease raise error when want save in mongo so we fixed it in data, so data is like:  {'id': 12, 'name': 'test', 'slug': 'test', ...., 'categories': [{'name': 'Workout', 'slug': 'Workout'}]}   note in Response(some_serializer) some_serializer will fixed auto by Response class like our way
             ProductDetainMongo(id=data['id'], json=data).save(using='mongo')
         else:
-            s = myserializers.ProductDetailMongoSerializer(form.instance, context={'request': request}).data
+            s = my_serializers.ProductDetailMongoSerializer(form.instance, context={'request': request}).data
             content = JSONRenderer().render(s)
             stream = io.BytesIO(content)
             data = {**JSONParser().parse(stream), **data}
@@ -253,7 +253,7 @@ class ProductAdmin(CustModelAdmin):
         filters = list(Filter.objects.prefetch_related('filter_attributes'))               #if dont use list, using filters again, reevaluate filters and query again to database!
         filters_attributes = []
         for filter in filters:                 #in this part we want create dynamicly options inside <select ..> </select>  for field category.level depend on validators we define in PositiveSmallIntegerField(validators=[here]) for example if we have MinValueValidator(1) MaxValueValidator(3) we have 3 options: <option value="1"> 1 </option>   <option value="2"> 2 </option>   <option value="3"> 3 </option>
-            filters_attributes += [json.dumps([serializer for serializer in myserializers.Filter_AttributeListSerializer(filter.filter_attributes.all(), many=True).data])]
+            filters_attributes += [json.dumps([serializer for serializer in my_serializers.Filter_AttributeListSerializer(filter.filter_attributes.all(), many=True).data])]
         for i in range(50):
             selectname_filters += ['filters'+str(i)]
             selectid_filters += ['id_filters'+str(i)]
@@ -320,7 +320,7 @@ class CommentAdmin(admin.ModelAdmin):
     list_display = ['id', 'author', 'get_published_date', 'status']
     #fields = ('status', 'content', 'author', 'reviewer')
     #readonly_fields = ('author', 'reviewer', 'get_published_date')
-    #form = myforms.CommentForm
+    #form = my_forms.CommentForm
 
     def get_queryset(self, request):
         queryset = Comment.objects.exclude(status='4')
@@ -363,7 +363,7 @@ class CommentAdmin(admin.ModelAdmin):
             else:
                 mongo_db_name = "main_productdetailmongo"
                 foreignkey = comment.product_id
-            data, comment_id = get_parsed_data(comment, myserializers.CommentSerializer), comment.id
+            data, comment_id = get_parsed_data(comment, my_serializers.CommentSerializer), comment.id
             mycol = shopdb_mongo[mongo_db_name]
             mycol.update_one({'id': foreignkey}, {'$set': {'json.comment_set.$[element]': data}}, array_filters=[{'element.id': comment_id}])
 
@@ -402,7 +402,7 @@ class CategoryAdmin(TranslationAdmin):
     prepopulated_fields = {'slug':('name',)}
     #exclude = ('post_product',)
     filter_horizontal = ('filters', 'brands')
-    form = myforms.CategoryForm
+    form = my_forms.CategoryForm
     list_display = ['str_ob', 'id']
     ordering = ['id']
 
@@ -498,7 +498,7 @@ class CategoryAdmin(TranslationAdmin):
             categories_seperated_by_level_jslist = []
             all_categories = Category.objects.all()
             for i in MinValue_MaxValue_range:
-                categories_seperated_by_level_jslist += [json.dumps([serializer for serializer in myserializers.CategoryListSerializer(all_categories, many=True).data if serializer['level']==i-1])]           #1- we dont need other fields of category (so just use __str())   2- json.dumps is in fact aray of javascript, because python list can use as javascript aray. supose: L=[1,2,3],  L cant use in javascript as list(javascript dont understand that) but in js_L=json.dumps(L) we can use js_L in javascript ez.   3- we cant use list in list in json.dumps() for example json.dumps([[1,2], [3,4]]) isnt acceptable.
+                categories_seperated_by_level_jslist += [json.dumps([serializer for serializer in my_serializers.CategoryListSerializer(all_categories, many=True).data if serializer['level']==i-1])]           #1- we dont need other fields of category (so just use __str())   2- json.dumps is in fact aray of javascript, because python list can use as javascript aray. supose: L=[1,2,3],  L cant use in javascript as list(javascript dont understand that) but in js_L=json.dumps(L) we can use js_L in javascript ez.   3- we cant use list in list in json.dumps() for example json.dumps([[1,2], [3,4]]) isnt acceptable.
             return render(request, 'admin/change_category_template.html', {
                 'category': category,
                 'levelrange_categories': list(zip(MinValue_MaxValue_range, categories_seperated_by_level_jslist)),
@@ -510,7 +510,7 @@ admin.site.register(Category, CategoryAdmin)
 
 class FilterAdmin(TranslationAdmin):
     list_display = ['id', 'name']
-    form = myforms.FilterForm
+    form = my_forms.FilterForm
 
     class Media:                                 # this cause languages shown separatly in admin panel. (it should be use always, otherwise all field of all languages shown under each other at once)
         js = (
@@ -528,7 +528,7 @@ admin.site.register(Filter, FilterAdmin)
 class Filter_AttributeAdmin(TranslationAdmin):
     list_display = ('id', 'name', 'filterr')                         # filterr doesnt add additional query (can read project\project parts\admin\list_display seperat
     prepopulated_fields = {'slug':('name',)}
-    form = myforms.Filter_AttributeForm
+    form = my_forms.Filter_AttributeForm
 
     class Media:                                 # this cause languages shown separatly in admin panel. (it should be use always, otherwise all field of all languages shown under each other at once)
         js = (
@@ -557,7 +557,7 @@ admin.site.register(Filter_Attribute, Filter_AttributeAdmin)
 
 
 class ShopFilterItemAdmin(TranslationAdmin):
-    form = myforms.ShopFilterItemForm
+    form = my_forms.ShopFilterItemForm
     list_display = ['get_str', 'stock', 'price']
 
     class Media:                                 # this cause languages shown separatly in admin panel. (it should be use always, otherwise all field of all languages shown under each other at once)
@@ -583,7 +583,7 @@ class ShopFilterItemAdmin(TranslationAdmin):
             shopfilteritem = form.instance
             product_id, filter_name = shopfilteritem.product.id, shopfilteritem.filter_attribute.filterr.name            # doc in Filter_AttributeAdmin.save_related
             mycol = shopdb_mongo["main_productdetailmongo"]
-            mycol.update_many({'id': product_id}, {'$set': {'json.shopfilteritems.{}.$[element]'.format(filter_name): myserializers.ShopFilterItemSerializer(shopfilteritem).data}}, array_filters=[{'element.id': shopfilteritem.id}])
+            mycol.update_many({'id': product_id}, {'$set': {'json.shopfilteritems.{}.$[element]'.format(filter_name): my_serializers.ShopFilterItemSerializer(shopfilteritem).data}}, array_filters=[{'element.id': shopfilteritem.id}])
 
 admin.site.register(ShopFilterItem, ShopFilterItemAdmin)
 
@@ -607,7 +607,7 @@ class ImageAdmin(TranslationAdmin):
         if change:
             smallimage = form.instance.smallimage
             smallimage_id, product_id = smallimage.id, smallimage.product.id
-            s = myserializers.SmallImageSerializer(smallimage, context={'request': request}).data
+            s = my_serializers.SmallImageSerializer(smallimage, context={'request': request}).data
             content = JSONRenderer().render(s)
             stream = io.BytesIO(content)
             data = JSONParser().parse(stream)
@@ -636,7 +636,7 @@ class SmallImageAdmin(TranslationAdmin):
         if change:
             smallimage = form.instance
             smallimage_id, product_id = smallimage.id, smallimage.product.id
-            s = myserializers.SmallImageSerializer(smallimage, context={'request': request}).data
+            s = my_serializers.SmallImageSerializer(smallimage, context={'request': request}).data
             content = JSONRenderer().render(s)
             stream = io.BytesIO(content)
             data = JSONParser().parse(stream)
@@ -658,4 +658,4 @@ admin.site.register(State)
         a = super().get_form(request, obj=None, change=False, **kwargs)
         return a
 '''
-#video note: myforms.ProductForm.base_fields you can eazy see django modelform chose whitch fields for you foreignkey for manytomany or ... mode fields.
+#video note: my_forms.ProductForm.base_fields you can eazy see django modelform chose whitch fields for you foreignkey for manytomany or ... mode fields.

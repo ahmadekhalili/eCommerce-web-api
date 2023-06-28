@@ -12,12 +12,11 @@ import jdatetime
 import re
 
 from .models import *
-from .mymethods import get_category_and_fathers, ImageCreation
+from .methods import get_category_and_fathers, ImageCreation
 from .model_methods import save_to_mongo
 from users.models import User
-from users.myserializers import UserNameSerializer
-from users.myserializers import UserSerializer
-from users.mymethods import user_name_shown
+from users.serializers import UserNameSerializer, UserSerializer
+from users.methods import user_name_shown
 
 
 
@@ -330,7 +329,7 @@ class PostDetailMongoSerializer(PostDetailSerializer):
         return instance
 
 
-class ProductDetailSerializer(serializers.ModelSerializer):       # important: for saving we should first switch to `en` language by:  django.utils.translation.activate('en').    comment_set will optained by front in other place so we deleted from here.   more description:  # all keys should save in database in `en` laguage(for showing data you can select eny language) otherwise it was problem understading which language should select to run query on them like in:  s = myserializers.ProductDetailMongoSerializer(form.instance, context={'request': request}).data['shopfilteritems']:     {'رنگ': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} it is false for saving, we should change language by  `activate('en')` and now true form for saving:  {'color': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} and query like: s['color']
+class ProductDetailSerializer(serializers.ModelSerializer):       # important: for saving we should first switch to `en` language by:  django.utils.translation.activate('en').    comment_set will optained by front in other place so we deleted from here.   more description:  # all keys should save in database in `en` laguage(for showing data you can select eny language) otherwise it was problem understading which language should select to run query on them like in:  s = my_serializers.ProductDetailMongoSerializer(form.instance, context={'request': request}).data['shopfilteritems']:     {'رنگ': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} it is false for saving, we should change language by  `activate('en')` and now true form for saving:  {'color': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} and query like: s['color']
     categories = serializers.SerializerMethodField()
     brand = serializers.SerializerMethodField()
     rating = serializers.SerializerMethodField()

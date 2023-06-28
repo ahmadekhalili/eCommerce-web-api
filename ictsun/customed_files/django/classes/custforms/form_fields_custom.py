@@ -6,7 +6,7 @@ from main.models import Category, Town
 
 
 
-class CustomModelChoiceField(forms.ModelChoiceField):
+class ModelChoiceFieldCustom(forms.ModelChoiceField):
     def get_bound_field(self, form, field_name):
         """
         Return a BoundField instance that will be used when accessing the form
@@ -17,7 +17,7 @@ class CustomModelChoiceField(forms.ModelChoiceField):
 
 
 
-class CustomChoiceField(forms.ChoiceField):
+class ChoiceFieldCustom(forms.ChoiceField):
     def get_bound_field(self, form, field_name):
         """
         Return a BoundField instance that will be used when accessing the form

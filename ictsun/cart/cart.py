@@ -8,7 +8,7 @@ from datetime import datetime
 
 from .models import SesKey
 from main.models import Product, Filter, ShopFilterItem
-from .myserializers import CartProductSerializer
+from .serializers import CartProductSerializer
 
 class Cart(object):
 
@@ -144,7 +144,7 @@ class Cart(object):
         return counter
 
     def get_total_prices(self):                                          # this method should updated to return 'takhfif' in futer if requested in get_total_price argument.    get_total_prices use seperate queries to optain price, so dont use with methods like __iter__ (you can calculate total price in __iter__ itself) to prevent addiotional queries runing
-        product_ids =  [key for key in self.cart.keys() if not self.is_nested_dict(self.cart, key)]                               # we dont need productid contain shopfilteritem for example self.cart = {'1': {'2': {'quantity': 2, 'price': '30', 'old_price': '30'}}  now we don't need product id '1' inside product_ids  because dont need product.price with id=1 to calculate get_total_price)
+        product_ids = [key for key in self.cart.keys() if not self.is_nested_dict(self.cart, key)]                               # we dont need productid contain shopfilteritem for example self.cart = {'1': {'2': {'quantity': 2, 'price': '30', 'old_price': '30'}}  now we don't need product id '1' inside product_ids  because dont need product.price with id=1 to calculate get_total_price)
         shopfilteritem_ids = [key2 for key in self.cart if self.is_nested_dict(self.cart, key) for key2 in self.cart[key]]
         ids_productsprice = dict([(str(product.id), product.price) for product in Product.objects.filter(id__in=product_ids).values_list('id', 'price', named=True)])
         ids_shopfilteritemsprice = dict([(str(shopfilteritem.id), shopfilteritem.price) for shopfilteritem in ShopFilterItem.objects.filter(id__in=shopfilteritem_ids).values_list('id', 'price', named=True)])

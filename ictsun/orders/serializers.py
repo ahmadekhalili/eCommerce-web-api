@@ -2,9 +2,9 @@ from rest_framework import serializers
 
 import jdatetime
 
-from main.myserializers import StateSerializer, TownSerializer
-from cart.myserializers import CartProductSerializer
-from users.myserializers import UserNameSerializer
+from main.serializers import StateSerializer, TownSerializer
+from cart.serializers import CartProductSerializer
+from users.serializers import UserNameSerializer
 from .models import ProfileOrder, Order, OrderItem
 
 
@@ -20,7 +20,7 @@ class ProfileOrderSerializer(serializers.ModelSerializer):
         self.fields['state'] = serializers.SerializerMethodField()
         self.fields['town'] = TownSerializer(read_only=True)
         self.fields['user'] = UserNameSerializer(read_only=True)
-        fields =  super().to_representation(obj)
+        fields = super().to_representation(obj)
         return fields
 
     def get_phone(self, obj):
@@ -63,6 +63,6 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
     def to_representation(self, obj):
         self.fields['product'] = CartProductSerializer(read_only=True)
-        fields =  super().to_representation(obj)
+        fields = super().to_representation(obj)
         fields.pop('order')
         return fields

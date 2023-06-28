@@ -6,7 +6,7 @@ from django.utils.translation import gettext_lazy as _
 from datetime import datetime
 from phonenumber_field.modelfields import PhoneNumberField
 
-from customed_files.django.classes import model_fields_custom
+from customed_files.django.classes import model_fields
 from customed_files.states_towns import list_states_towns
 from main.models import Product, ShopFilterItem, State, Town
 from users.models import User

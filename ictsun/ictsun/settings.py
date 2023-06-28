@@ -79,7 +79,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'main.mycontexts.project_verbose',
+                'main.contexts.project_verbose',
             ],
         },
     },
@@ -137,7 +137,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'customed_files.rest_framework.rest_framework_customed_classes.custom_rest_authentication.CustomSessionAuthentication',
+        'customed_files.rest_framework.classes.authentication.SessionAuthenticationCustom',
     ),
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema'
     }
@@ -165,7 +165,7 @@ gettext = lambda s: s
 LANGUAGES = (
     ('fa', gettext('Farsi')),
     ('en', gettext('English')),
-)                                             # main/management/createstates use 'fa' as default. it is important put default language in first (use in mymethods.conf_questwidget_class).
+)                                             # main/management/createstates use 'fa' as default. it is important put default language in first (use in methods.conf_questwidget_class).
 
 '''
 "gregorian" or "jalali". in gregorian images saves like: products_images/2023/06/03  in jalali like:

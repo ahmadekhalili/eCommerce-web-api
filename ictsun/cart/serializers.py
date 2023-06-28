@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from main.myserializers import Image_iconSerializer
+from main.serializers import Image_iconSerializer
 from main.models import Product
 
 from collections.abc import Mapping

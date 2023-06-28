@@ -13,7 +13,7 @@ class SesKey(models.Model):
     ses_key = models.CharField(_('ses key'), max_length=60, default='', blank=True)
 
     class Meta:
-        verbose_name =  _('ses key')
+        verbose_name = _('ses key')
         verbose_name_plural = _('ses keys')
 
     def __str__(self):

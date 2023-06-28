@@ -10,7 +10,7 @@ from rest_framework import serializers
 
 from phonenumber_field.modelfields import PhoneNumberField
 
-from .mymethods import user_name_shown
+from .methods import user_name_shown
 # note1: if you add or remove a field, you have to apply it in translation.py 'fields' if was required.
 # note2: if you make changes in a model, you have to apply changes to it's serializers if needed.
 

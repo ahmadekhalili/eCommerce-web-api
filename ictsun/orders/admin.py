@@ -9,7 +9,7 @@ from datetime import datetime
 from customed_files.states_towns import list_states_towns
 from customed_files.date_convertor import MiladiToShamsi
 from main.models import State
-from users.mymethods import user_name_shown
+from users.methods import user_name_shown
 from .models import ProfileOrder, Order, OrderItem, Shipping, Dispatch
 from .forms import ProfileOrderCreateForm, ShippingForm, DispatchForm, OrderForm
 

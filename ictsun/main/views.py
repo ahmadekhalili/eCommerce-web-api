@@ -24,11 +24,12 @@ from PIL import Image as PilImage
 from math import ceil
 import pymongo
 
-from . import myserializers, myforms
-from .mymethods import get_products, get_posts, get_posts_products_by_category, make_next, ImageCreation, get_parsed_data
+from . import serializers as my_serializers
+from . import forms as my_forms
+from .methods import get_products, get_posts, get_posts_products_by_category, make_next, ImageCreation, get_parsed_data
 from .models import *
-from users.myserializers import UserSerializer, UserChangeSerializer
-from cart.myserializers import CartProductSerializer
+from users.serializers import UserSerializer, UserChangeSerializer
+from cart.serializers import CartProductSerializer
 from customed_files.states_towns import list_states_towns
 
 
@@ -41,11 +42,11 @@ def index(request):
         #translation.activate(user_language)
         #request.session[translation.LANGUAGE_SESSION_KEY] = user_language
         #Accept-Language
-        a = myforms.PostForm(instance=Post.objects.get(id=20))
+        a = my_forms.PostForm()
         b = ''
 
-        #formset_factory(myforms.ImageForm)()
-        #formset = formset_factory(myforms.CategoryForm, extra=2)
+        #formset_factory(my_forms.ImageForm)()
+        #formset = formset_factory(my_forms.CategoryForm, extra=2)
         #posts = f(initial=[{'name': 'asdasd', 'slug':'eqwe', 'level': 1, 'father_category': 26, 'post_product': 'product',}])#inlineformset_factory(Product, Category, fields=('name', 'slug', 'level', 'father_category', 'post_product'))(instance=p)
         rend = render(request, 'main/index.html', {'a': a, 'b': b})
         #rend.set_cookie('cart_products', {'1': {'q': 23, 'p': 33}, '2': {'q': 230, 'p': 330}})
@@ -109,8 +110,8 @@ class HomePage(views.APIView):
         posts = get_posts(0, 4).select_related('category')
         posts = posts if posts else []
         #supporter_datas = supporter_datas_serializer(request, mode='read')
-        products_serialized = {'products': myserializers.ProductListSerializer(products, many=True, context={'request': request}).data}       #myserializers.ProductListSerializer(posts, many=True).data  is list not dict so cant use ** before it (like {**serialized})
-        posts_serialized = {'posts': myserializers.PostListSerializer(posts, many=True, context={'request': request}).data}
+        products_serialized = {'products': my_serializers.ProductListSerializer(products, many=True, context={'request': request}).data}       #my_serializers.ProductListSerializer(posts, many=True).data  is list not dict so cant use ** before it (like {**serialized})
+        posts_serialized = {'posts': my_serializers.PostListSerializer(posts, many=True, context={'request': request}).data}
         sessionid = request.session.session_key
         return Response({'sessionid': sessionid, **products_serialized, **posts_serialized})
 
@@ -146,15 +147,15 @@ class ProductList(views.APIView):
             sidebarcategory_checkbox = category_and_allitschiles.filter(level__in=[category.level, category.level+1]) if category.levels_afterthis == 1 else None
             sidebarcategory_link = category_and_allitschiles.filter(level__in=[category.level, category.level+1]) if category.levels_afterthis > 1 else None
             category_ids = category_and_allitschiles.values_list('id', flat=True)
-            brands_serialized = myserializers.BrandSerializer(Brand.objects.filter(category__in=category_ids), many=True).data
-            filters_serialized = myserializers.FilterSerializer(Filter.objects.filter(category__in=category_ids).prefetch_related('filter_attributes'), many=True).data       # in FilterSerializer has field 'filter_attributes' so if we dont put this prefetch, program will run 1+len(filters) queries (for example supose we have this filters:  <object(1) Filter>, <object(2) Filter> queries number was run for serializing filters: our program run one query for this two object and second for: <object(1) Filter>.filter_attributes.all() and third for <object(2) Filter>.filter_attributes.all() so run 3 query for this 2 filter object! but now just run 2 for eny filter objects.
+            brands_serialized = my_serializers.BrandSerializer(Brand.objects.filter(category__in=category_ids), many=True).data
+            filters_serialized = my_serializers.FilterSerializer(Filter.objects.filter(category__in=category_ids).prefetch_related('filter_attributes'), many=True).data       # in FilterSerializer has field 'filter_attributes' so if we dont put this prefetch, program will run 1+len(filters) queries (for example supose we have this filters:  <object(1) Filter>, <object(2) Filter> queries number was run for serializing filters: our program run one query for this two object and second for: <object(1) Filter>.filter_attributes.all() and third for <object(2) Filter>.filter_attributes.all() so run 3 query for this 2 filter object! but now just run 2 for eny filter objects.
 
         else:                                      #none category.   url example:  /products/
             products = Product.objects.filter()
             sidebarcategory_checkbox = None
             sidebarcategory_link = Category.objects.filter(level=1)
-            brands_serialized = myserializers.BrandSerializer(Brand.objects.all(), many=True).data
-            filters_serialized = myserializers.FilterSerializer(Filter.objects.all().prefetch_related('filter_attributes'), many=True).data
+            brands_serialized = my_serializers.BrandSerializer(Brand.objects.all(), many=True).data
+            filters_serialized = my_serializers.FilterSerializer(Filter.objects.all().prefetch_related('filter_attributes'), many=True).data
 
         ## 2 sidebar filter.   url example: /products?zard=1/      filter_attributeslug_id_list is like: [{'meshki': '1'}, {'sefid': '2'}, ..]. why we choiced  slug+id?  answer: slug must be unique and with slug+id it is unique. so front must add id to every slug before sending like: filter_attribute.slug+filter_attribute.id
         filter_attributeslug_id_list = [{filter_attribute['slug']+str(filter_attribute['id']): str(filter_attribute['id'])} for filter in filters_serialized for filter_attribute in filter['filter_attributes']]
@@ -171,9 +172,9 @@ class ProductList(views.APIView):
             products = products.annotate(ordered_quantity=Coalesce(Sum(Case(When(order_items__order__paid=True, then=F('order_items__quantity')))), 0)) if 'bestselling' in sort else products    #Coalesce duty? answer: when Sum has not resualt, return None(and it makes raise problem in ordering), now return 0 instead None if dont find eny quantity for specefic product.
 
         products = get_products(0, 24, products, orders)                                         #note(just for remembering): in nested order_by like: products.order_by('-ordered_quantity').order_by('-available')   ordering start from last order_by here: -available but in one order_by start from first element like:  products..order_by('-available', '-id')  ordering start from "-available" 
-        products_serialized = {'products': myserializers.ProductListSerializer(products, many=True, context={'request': request}).data}
-        sidebarcategory_checkbox_serialized = myserializers.CategoryChainedSerializer(sidebarcategory_checkbox, many=True).data
-        sidebarcategory_link_serialized = myserializers.CategoryChainedSerializer(sidebarcategory_link, many=True).data
+        products_serialized = {'products': my_serializers.ProductListSerializer(products, many=True, context={'request': request}).data}
+        sidebarcategory_checkbox_serialized = my_serializers.CategoryChainedSerializer(sidebarcategory_checkbox, many=True).data
+        sidebarcategory_link_serialized = my_serializers.CategoryChainedSerializer(sidebarcategory_link, many=True).data
         sessionid = request.session.session_key
         
         return Response({'sessionid': sessionid, **products_serialized, **{'sidebarcategory_checkbox': sidebarcategory_checkbox_serialized}, **{'sidebarcategory_link': sidebarcategory_link_serialized}, 'brands': brands_serialized, 'filters': filters_serialized})
@@ -193,26 +194,26 @@ class PostList(views.APIView):
             category = get_object_or_404(Category, slug=category_slug)
             posts = get_posts_products_by_category(category)
             sessionid = request.session.session_key
-            serializers = {'posts': myserializers.PostListSerializer(posts, many=True, context={'request': request}).data}             #you must put context={'request': request} in PostListSerializer argument for working request.build_absolute_uri  in PostListSerializer, otherwise request will be None in PostListSerializer and raise error
+            serializers = {'posts': my_serializers.PostListSerializer(posts, many=True, context={'request': request}).data}             #you must put context={'request': request} in PostListSerializer argument for working request.build_absolute_uri  in PostListSerializer, otherwise request will be None in PostListSerializer and raise error
             return Response({'sessionid': sessionid, **serializers})
         rang = (page * step - step, page * step)
         posts = get_posts(*rang).select_related('category')
-        serializers = {'posts': myserializers.PostListSerializer(posts, many=True, context={'request': request}).data}             #you must put context={'request': request} in PostListSerializer argument for working request.build_absolute_uri  in PostListSerializer, otherwise request will be None in PostListSerializer and raise error
+        serializers = {'posts': my_serializers.PostListSerializer(posts, many=True, context={'request': request}).data}             #you must put context={'request': request} in PostListSerializer argument for working request.build_absolute_uri  in PostListSerializer, otherwise request will be None in PostListSerializer and raise error
         sessionid = request.session.session_key
         page_count = ceil(Post.objects.count() / step)        # round up number, like: ceil(2.2)==3 ceil(3)==3
         return Response({'sessionid': sessionid, **serializers, 'pages': page_count})
 
     def post(self, request, *args, **kwargs):
-        form = myforms.PostForm(request.POST, request.FILES, request=request)
+        form = my_forms.PostForm(request.POST, request.FILES, request=request)
         if form.is_valid():
             instance = form.save()
-            return Response(myserializers.PostDetailSerializer(instance, context={'request': request}).data)
+            return Response(my_serializers.PostDetailSerializer(instance, context={'request': request}).data)
         return Response(form.errors)
 '''
 output is same like ProductList(views.APIView) but can work without context={'request': request} initializing in serializer(ListAPIView put request auto).
 class ProductList(generics.ListAPIView):
     queryset = Product.objects.filter(id__lt=100).select_related('rating')
-    serializer_class = myserializers.ProductListSerializer
+    serializer_class = my_serializers.ProductListSerializer
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         serializer = self.get_serializer(queryset, many=True).data      
@@ -223,24 +224,24 @@ class ProductList(generics.ListAPIView):
 
 
 class PostDetail(views.APIView):
-    def get(self, request, *args, **kwargs):                #dont need define like serializer = {'post': myserializers.PostDetailSerializer(product_categories).data} because myserializers.PostDetailSerializer(product_categories).data dont has many=True so is dict not list and dont raise error when putin in Reaponse
+    def get(self, request, *args, **kwargs):                #dont need define like serializer = {'post': my_serializers.PostDetailSerializer(product_categories).data} because my_serializers.PostDetailSerializer(product_categories).data dont has many=True so is dict not list and dont raise error when putin in Reaponse
         '''
         input receive from /posts/ like posts0.url = "3/یسشی/"__________
         output a post depend on pk you specify.
         '''
         #permission_classes = [IsAuthenticated]
         #post = Post.objects.filter(id=kwargs['pk']).select_related('author', 'category').prefetch_related('comment_set')
-        #data = myserializers.PostDetailSerializer(post, many=True).data[0]
+        #data = my_serializers.PostDetailSerializer(post, many=True).data[0]
         data = PostDetailMongo.objects.using('mongo').get(id=kwargs['pk']).json
         sessionid = request.session.session_key
         return Response({'sessionid': sessionid, **data})               #serializer is list (because of many=True)    serializer[0] is dict
 
     def post(self, request, *args, **kwargs):               # you have to submit data by form not json.
         post = get_object_or_404(Post, id=kwargs['pk'])
-        form = myforms.PostForm(request.POST, request.FILES, instance=post, request=request)
+        form = my_forms.PostForm(request.POST, request.FILES, instance=post, request=request)
         if form.is_valid():
             instance = form.save()
-            return Response(myserializers.PostDetailSerializer(instance, context={'request': request}).data)
+            return Response(my_serializers.PostDetailSerializer(instance, context={'request': request}).data)
         return Response(form.errors)
 
 
@@ -248,7 +249,7 @@ class PostDetail(views.APIView):
 
 
 class ProductDetail(views.APIView):
-    def get(self, request, *args, **kwargs):                #dont need define like serializer = {'post': myserializers.PostDetailSerializer(product_categories).data} because myserializers.PostDetailSerializer(product_categories).data dont has many=True so is dict not list and dont raise error when putin in Reaponse
+    def get(self, request, *args, **kwargs):                #dont need define like serializer = {'post': my_serializers.PostDetailSerializer(product_categories).data} because my_serializers.PostDetailSerializer(product_categories).data dont has many=True so is dict not list and dont raise error when putin in Reaponse
         '''
         input receive from /products/ like products0.url = "1/گل-زر/"__________
         output a product depend on pk you specify.
@@ -260,13 +261,13 @@ class ProductDetail(views.APIView):
         for p in product:                                                         #using like product[0].comment_set revalute and use extra queries
             if request.user.is_authenticated:
                 comment_of_user = p.comment_set.filter(author=request.user, product=p)        #this line dont affect select_related and prefetch_related on product and they steal work perfect.                           
-                comment_of_user_serialized = myserializers.CommentSerializer(comment_of_user, many=True).data
+                comment_of_user_serialized = my_serializers.CommentSerializer(comment_of_user, many=True).data
                 comment_of_user_serialized = comment_of_user_serialized[0] if comment_of_user_serialized else {}  #comment_of_user_serialized is list and need removing list but if comment was blank so comment_of_user_serialized == [] and [][0] will raise error.
             else:
                 comment_of_user_serialized = {}
             comments = p.comment_set.all()
-        comments_serialized = myserializers.CommentSerializer(comments, many=True).data
-        product_serializer = myserializers.ProductDetailSerializer(product, many=True, context={'request': request}).data    #product is query set so we need pu like product[0] or put product with many=True (product[0] make revaluate
+        comments_serialized = my_serializers.CommentSerializer(comments, many=True).data
+        product_serializer = my_serializers.ProductDetailSerializer(product, many=True, context={'request': request}).data    #product is query set so we need pu like product[0] or put product with many=True (product[0] make revaluate
         product_serializer = product_serializer[0] if product_serializer else {}
         sessionid = request.session.session_key
         
@@ -281,7 +282,7 @@ class PostCategoryList(views.APIView):
         output all posts categories objects.
         '''
         post_categories = Category.objects.filter(post_product='post', level=1)
-        serializers = {'post_categories': myserializers.CategoryListSerializer(post_categories, many=True).data}
+        serializers = {'post_categories': my_serializers.CategoryListSerializer(post_categories, many=True).data}
         sessionid = request.session.session_key
         return Response({'sessionid': sessionid, **serializers})
 
@@ -297,7 +298,7 @@ class ProductCategoryList(views.APIView):
         for i in range(Category._meta.get_field('level').validators[1].limit_value-2):
             prefetch_query += '__child_categories'
         product_prant_categories = Category.objects.filter(post_product='product', level=1).prefetch_related(prefetch_query)
-        serializers = {'product_categories': myserializers.CategoryListSerializer(product_prant_categories, many=True).data}
+        serializers = {'product_categories': my_serializers.CategoryListSerializer(product_prant_categories, many=True).data}
         #sessionid = request.session.session_key
         return Response({'sessionid': '', **serializers})
 
@@ -317,7 +318,7 @@ class CommentCreate(views.APIView):
                 mongo_db_name = "main_productdetailmongo"
                 foreignkey = comment.product_id
             shopdb_mongo, comment_id = pymongo.MongoClient("mongodb://localhost:27017/")['shop'], comment.id
-            data = get_parsed_data(comment, myserializers.CommentSerializer)
+            data = get_parsed_data(comment, my_serializers.CommentSerializer)
             mycol = shopdb_mongo[mongo_db_name]
             mycol.update_one({'id': foreignkey}, {'$push': {'json.comment_set': data}})
             return Response({'status': 'نظر شما با موفقيت ثبت شد.'})
@@ -330,12 +331,12 @@ class CommentCreate(views.APIView):
 
 class States(views.APIView):
     def get(self, request, *args, **kwargs):
-        return Response(myserializers.StateSerializer(State.objects.all(), many=True).data)#Response([L[0] for L in list_states_towns])
+        return Response(my_serializers.StateSerializer(State.objects.all(), many=True).data)#Response([L[0] for L in list_states_towns])
 
            
 class TownsByState(views.APIView):
     def get(self, request, *args, **kwargs):
-        return Response(myserializers.TownSerializer(State.objects.get(key=kwargs.get('key')).towns.all() , many=True).data)
+        return Response(my_serializers.TownSerializer(State.objects.get(key=kwargs.get('key')).towns.all() , many=True).data)
     '''
         for L in list_states_towns:
             if L[0][0] == kwargs.get('id'):
