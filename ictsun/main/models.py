@@ -49,8 +49,8 @@ class Filter(models.Model):
 
 
 class Brand(models.Model):
-    name = models.CharField(_('name'), max_length=25, null=True, blank=True)
-    slug = models.SlugField(_('slug'), allow_unicode=True, null=True, blank=True, db_index=False)
+    name = models.CharField(_('name'), max_length=25, blank=True)
+    slug = models.SlugField(_('slug'), allow_unicode=True, null=True, blank=True, unique=True, db_index=False)
     #category_set
 
     class Meta:
