@@ -15,7 +15,8 @@ from . import serializers
 from .widgets import *
 from .methods import get_mt_input_classes, ImageCreation
 from .model_methods import save_to_mongo
-from .models import Post, Product, Category, Filter, Image, Comment, Filter_Attribute, Brand, ShopFilterItem, Image_icon
+from .models import Post, Product, Category, Filter, Image, Comment, Filter_Attribute, Brand, ShopFilterItem, \
+    Image_icon, PostDetailMongo, ProductDetainMongo
 # note1: if edit or add a form field exits in translation.py, like add Categoryform.name field, make sure in admin panel shown correctly (in 'tabbed' mode). if not shown correctly, you have to add a widget with required modeltreanslation classes like in ProductForm.alt_fa.widget.attrs
 
 
@@ -39,7 +40,7 @@ class PostForm(forms.ModelForm):
 
     def save(self, commit=True):
         setattr(self.instance, 'slug', slugify(self.data['title'], allow_unicode=True)) if self.data.get('title') else None   # fill slug field in forms submitted by frontend (front should not fill slug). frontend send data like: 'title': value, 'meta_title': value...   while admin panel send like 'title_fa': value, 'slug_fa': value, 'meta_title': value
-        if getattr(self, 'request', None):          # admin panel sent request wouldn't be initialized with request
+        if getattr(self, 'request', None):          # admin form has not request parameter
             self.instance.author = self.request.user
         instance = super().save(commit)
         # calling post.image_icon_set.exists() several time, cause runs several query
@@ -51,8 +52,8 @@ class PostForm(forms.ModelForm):
             paths, instances = obj.create_images(path='/media/posts_images/icons/')
             post.image_icon_set.all().delete() if image_icon_exits else None
             Image_icon.objects.bulk_create(instances) if instances else None
-        from .serializers import PostDetailMongo, PostDetailMongoSerializer
-        save_to_mongo(self.request, PostDetailMongo, self.instance, PostDetailMongoSerializer, not bool(instance))
+        from .serializers import PostDetailMongoSerializer
+        save_to_mongo(PostDetailMongo, self.instance, PostDetailMongoSerializer, not bool(instance), self.request)
         return post
 
 
@@ -60,8 +61,9 @@ image_qusmark_text = _('Image rate should be 1:1')
 weight_qusmark_text = _('weight in gram')
 length_qusmark_text = _('size in millimeter')
 class ProductForm(custforms.ProductModelForm):
-    def __init__(self, data=None, files=None, auto_id='id_%s', prefix=None, initial=None, error_class=ErrorList, label_suffix=None, empty_permitted=False, instance=None, use_required_attribute=None, renderer=None):
+    def __init__(self, data=None, files=None, auto_id='id_%s', prefix=None, initial=None, error_class=ErrorList, label_suffix=None, empty_permitted=False, instance=None, use_required_attribute=None, renderer=None, request=None):
         initial = initial if initial else {}
+        self.request = request
         length, width, height = [float(i) for i in instance.size.split(',')] if instance and instance.size else (None,None,None)
         initial = {**initial, 'length': length, 'width': width, 'height': height} if length else initial
         super(). __init__(data, files, auto_id, prefix, initial, error_class, label_suffix, empty_permitted, instance, use_required_attribute, renderer)
@@ -82,7 +84,19 @@ class ProductForm(custforms.ProductModelForm):
         length, width, height = self.cleaned_data.get('length'), self.cleaned_data.get('width'), self.cleaned_data.get('height')
         self.cleaned_data['size'] = str(length) + ',' + str(width) + ',' + str(height) if length and width and height else ''
         self.instance.size = self.cleaned_data['size']
-        return super().save(commit)
+        instance = super().save(commit)
+        # calling product.image_icon_set.exists() several time, cause runs several query
+        product = instance if instance else self.instance
+        image_icon_exits = product.image_icon_set.exists()
+        if self.files.get('file') or self.files.get('image_icon_set-0-image'):  # in product updating, we update product images icons when frontend provide self.data['file'] or admin sends first image image_icon_set-0-image (means in admin we can edit image icons only if we change first image icon). supposep roduct1.image_icon_set.all() == [image240, image420, image40,.., imagedefault] . now if you go to admin/product/product1 and edit one of image icones and submit what will happen? program will save 7 another image for one that if this condition wasnt.
+            obj = ImageCreation(self.data, self.files, [240, 420, 640, 720, 960, 1280, 'default'])
+            obj.set_instances(Image_icon, path='products', product=product)
+            paths, instances = obj.create_images(path='/media/products_images/icons/')
+            product.image_icon_set.all().delete() if image_icon_exits else None
+            Image_icon.objects.bulk_create(instances) if instances else None
+        from .serializers import ProductDetailMongoSerializer
+        save_to_mongo(ProductDetainMongo, self.instance, ProductDetailMongoSerializer, not bool(instance), self.request)
+        return product
 
 
 class CommentForm(forms.ModelForm):

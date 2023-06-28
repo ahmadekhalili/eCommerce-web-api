@@ -83,7 +83,7 @@ class PostAdmin(TranslationAdmin):
             obj.visible = False
             obj.save()
         else:                     # development mode
-            super().delete_model
+            super().delete_model(request, obj)
 
 admin.site.register(Post, PostAdmin)
 
@@ -231,7 +231,7 @@ class ProductAdmin(ModelAdminCust):
         language_code = get_language()                                  # get current language code
         activate('en')                                                  # all keys should save in database in `en` laguage(for showing data you can select eny language) otherwise it was problem understading which language should select to run query on them like in:  s = serializers.ProductDetailMongoSerializer(form.instance, context={'request': request}).data['shopfilteritems']:     {'رنگ': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} it is false for saving, we should change language by  `activate('en')` and now true form for saving:  {'color': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} and query like: s['color']
         if not change:
-            s = serializers.ProductDetailMongoSerializer(form.instance, context={'request': request}).data
+            s = my_serializers.ProductDetailMongoSerializer(form.instance, context={'request': request}).data
             content = JSONRenderer().render(s)
             stream = io.BytesIO(content)
             data = {**JSONParser().parse(stream), **data}                           # s is like: {'id': 12, 'name': 'test2', 'slug': 'test2', ...., 'categories': [OrderedDict([('name', 'Workout'), ('slug', 'Workout')])]} and 'OrderedDict' will cease raise error when want save in mongo so we fixed it in data, so data is like:  {'id': 12, 'name': 'test', 'slug': 'test', ...., 'categories': [{'name': 'Workout', 'slug': 'Workout'}]}   note in Response(some_serializer) some_serializer will fixed auto by Response class like our way
@@ -320,7 +320,7 @@ class ProductAdmin(ModelAdminCust):
             obj.visible = False
             obj.save()
         else:                     # development mode
-            super().delete_model
+            super().delete_model(request, obj)
 
 admin.site.register(Product, ProductAdmin)
 
@@ -362,7 +362,7 @@ class CommentAdmin(admin.ModelAdmin):
             obj.status = '4'
             obj.save()
         else:                     # development mode
-            super().delete_model
+            super().delete_model(request, obj)
 
     def save_related(self, request, form, formsets, change):         # here update product in mongo database  (ProductDetainMongo.json.comment_set) according to Comment changes. for example if we have comment_1 (comment_1.product=<Product (1)>)   comment_1.content changes to 'another_content'  ProductDetainMongo:  [{id: 1, json: {comment_set: [{ id: 2, status: '1', published_date: '2022-08-07T17:33:38.724203', content: 'another_content', author: { id: 1, user_name: 'ادمین' }, reviewer: null, post: null, product: 12 }], ...}}, {id: 2, ...}]
         super().save_related(request, form, formsets, change)
