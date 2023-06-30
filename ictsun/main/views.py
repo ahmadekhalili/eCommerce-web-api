@@ -121,12 +121,12 @@ class HomePage(views.APIView):
 
 
 
-class PostMap(views.APIView):
+class PostMap(views.APIView):       # only uses for generating sitemap by frontend.
     def get(self, request, *args, **kwargs):
         '''
         output 12 last created posts(visible=True)
         '''
-        posts = Post.objects.values('id', 'slug')
+        posts = Post.objects.filter(visible=True).values('id', 'slug')
         sessionid = request.session.session_key
         return Response({'sessionid': sessionid, 'posts': list(posts)})
 
@@ -200,7 +200,7 @@ class PostList(views.APIView):
         posts = get_posts(*rang).select_related('category')
         serializers = {'posts': my_serializers.PostListSerializer(posts, many=True, context={'request': request}).data}             #you must put context={'request': request} in PostListSerializer argument for working request.build_absolute_uri  in PostListSerializer, otherwise request will be None in PostListSerializer and raise error
         sessionid = request.session.session_key
-        page_count = ceil(Post.objects.count() / step)        # round up number, like: ceil(2.2)==3 ceil(3)==3
+        page_count = ceil(Post.objects.filter(visible=True).count() / step)        # round up number, like: ceil(2.2)==3 ceil(3)==3
         return Response({'sessionid': sessionid, **serializers, 'pages': page_count})
 
     def post(self, request, *args, **kwargs):
