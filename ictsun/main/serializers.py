@@ -94,7 +94,7 @@ class Image_iconSerializer(serializers.ModelSerializer):
 
 
 
-class CategoryChainedSerializer(serializers.ModelSerializer):         #this is used for chane roost like: 'digital' > 'phone' > 'sumsung'
+class CategoryChainedSerializer(serializers.ModelSerializer):         #this is used for chane roost like: 'digital' > 'phone' > 'sumsung', also used in CategoryAdmin.save_to_mongo
     url = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
@@ -285,6 +285,7 @@ class ProductListSerializer(serializers.ModelSerializer):
 
 class PostDetailSerializer(serializers.ModelSerializer):
     published_date = serializers.SerializerMethodField(read_only=True)
+    updated = serializers.SerializerMethodField(read_only=True)
     tags = serializers.ListField(child=serializers.CharField(max_length=30))
     comment_set = serializers.SerializerMethodField(read_only=True)
     image_icons = serializers.SerializerMethodField(read_only=True)
@@ -301,6 +302,9 @@ class PostDetailSerializer(serializers.ModelSerializer):
 
     def get_published_date(self, obj):
         return round(jdatetime.datetime.fromgregorian(datetime=obj.published_date).timestamp())
+
+    def get_updated(self, obj):
+        return round(jdatetime.datetime.fromgregorian(datetime=obj.updated).timestamp())
 
     def get_comment_set(self, obj):
         # for every post, comments should be like:

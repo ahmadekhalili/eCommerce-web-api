@@ -23,10 +23,8 @@ import jdatetime
 from .model_methods import set_levels_afterthis_all_childes_id, update_product_stock, save_to_mongo
 from customed_files.django.classes import model_fields
 from users.models import User
-# note1: changing classes places may raise error when creating tables(makemigrations), for example changing Content with Post will raise error(Content use Post in its field and shuld be definded after Post)
-# note2: if you add or remove a field, you have to apply it in translation.py 'fields' if was required.
-# note3: if you make changes Product or it's related objects (etc. Brand, Category, ...) you have to apply changes to it's serialisers like ProductListSerializer, ProductDetailMongoSerializer and mongo product saving (in admin.py) if required.
-# note4: if you make changes in a model, you have to apply changes to it's serializers if needed.
+# note1: serializers.py  translation.py  forms.py  admin/save_to_mongo shouuld change after changes models.py
+# note2: related objects of Product or Post (etc. Brand, Category, ...) you have to apply changes to it's serialisers like ProductListSerializer, ProductDetailMongoSerializer and mongo product/post saving (in admin.py) if required.
 
 
 group_choices = [(key, str(key)) for key in range(1, 11)]
@@ -184,6 +182,7 @@ class Post(models.Model):
     instagram_link = models.CharField(_('instagram link'), max_length=255, blank=True, default='')        # instagram link of specefied post (for every post we have one associated post)
     visible = models.BooleanField(_('visible'), default=True)
     published_date = models.DateTimeField(_('published date'), auto_now_add=True)
+    updated = models.DateTimeField(_('updated date'), auto_now=True)
     tags = postgre_fields.ArrayField(models.CharField(max_length=150, blank=True), blank=True)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('category'))
     author = models.ForeignKey(User, related_name='written_posts', on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('author'))

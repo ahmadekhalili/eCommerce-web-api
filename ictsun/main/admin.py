@@ -59,7 +59,7 @@ class ImageIconInline(admin.TabularInline):
 class PostAdmin(TranslationAdmin):
     prepopulated_fields = {'slug':('title',)}
     inlines = [CommentInline, ImageIconInline]
-    readonly_fields = ('get_published_date',)
+    readonly_fields = ('get_published_date', 'get_updated')
     form = my_forms.PostForm
 
     class Media:                                 # this cause languages shown separatly in admin panel. (it should be use always, otherwise all field of all languages shown under each other at once)
@@ -72,11 +72,17 @@ class PostAdmin(TranslationAdmin):
             'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
         }
 
-    def get_published_date(self, obj):                                       #auto_now_add and auto_now fields must be in read_only otherwise raise error (fill by django not user) and you cant control output of read_only fields with widget (from its form) so for this fiels you cant specify eny widget!!
+    def get_published_date(self, obj):                                       #auto_now_add and auto_now fields must be in read_only otherwise raise error (must fill by django not form) and you cant control output of read_only fields with widget (from its form) so for this fiels you cant specify eny widget!!
         date = jdatetime.datetime.fromgregorian(datetime=obj.published_date).strftime('%Y %B %-d').split()
         return format_html('{} {}&rlm; {}، ساعت {}:{}'.format(date[2], _(date[1]), date[0], obj.published_date.minute, obj.published_date.hour))
     get_published_date.allow_tags = True
     get_published_date.short_description = _('published date')
+
+    def get_updated(self, obj):                                       #auto_now_add and auto_now fields must be in read_only otherwise raise error (must fill by django not form) and you cant control output of read_only fields with widget (from its form) so for this fiels you cant specify eny widget!!
+        date = jdatetime.datetime.fromgregorian(datetime=obj.updated).strftime('%Y %B %-d').split()
+        return format_html('{} {}&rlm; {}، ساعت {}:{}'.format(date[2], _(date[1]), date[0], obj.updated.minute, obj.updated.hour))
+    get_updated.allow_tags = True
+    get_updated.short_description = _('updated date')
 
     def delete_model(self, request, obj):
         if not settings.DEBUG:    # productions mode
@@ -459,11 +465,10 @@ class CategoryAdmin(TranslationAdmin):
                 col_name, model = 'main_productdetailmongo', Product
             children_ids = category.all_childes_id.split(',') if category.all_childes_id else []
             category_children_ids = [category.id] + list(Category.objects.filter(id__in=children_ids).values_list('id', flat=True))   # why we need children of category?  supose we edit `digital` category in admin, we should update all products with category digital or child of `digital`.  for example: product1.category = <Smart phone...>,  product1 in mongo db: product1['json']['categories'] is like [{ name: 'digital', slug: 'digital' }, { name: 'phone', slug: 'phone'}, { name: 'smart phone', slug: 'smart_phone'}],  now if we edit digital product1 should update!
-            products_ids = list(model.objects.filter(category_id__in=category_children_ids).values_list('id', flat=True))             # doc in Filter_AttributeAdmin.save_related
+            ids = list(model.objects.filter(category_id__in=category_children_ids).values_list('id', flat=True))             # doc in Filter_AttributeAdmin.save_related
             mycol = shopdb_mongo[col_name]
-            mycol.update_many({'id': {'$in': products_ids}}, {'$set': {'json.categories.$[element]': {'name': category.name, 'slug': category.slug}}}, array_filters=[{'element': {'name': form.previouse_name, 'slug': form.previouse_slug}}])
-            del form.previouse_name
-            del form.previouse_slug
+            mycol.update_many({'id': {'$in': ids}}, {'$set': {'json.categories.$[element]': my_serializers.CategoryChainedSerializer(category).data}}, array_filters=[{'element': my_serializers.CategoryChainedSerializer(form.previouse_cat).data}])
+            del form.previouse_cat
 
     '''
     @csrf_protect_m

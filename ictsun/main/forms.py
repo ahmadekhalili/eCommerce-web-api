@@ -7,6 +7,7 @@ from django.core.files import File
 from django.utils.text import slugify
 
 import json
+from copy import copy
 from modeltranslation.utils import get_translation_fields as g_t
 
 from customed_files.django.classes import custforms
@@ -36,7 +37,7 @@ class PostForm(forms.ModelForm):
 
     class Meta:
         model = Post
-        fields = '__all__'#['title', 'meta_title', 'meta_description', 'brief_description', 'detailed_description', 'instagram_link', 'published_date', 'tags', 'category', 'author']
+        fields = '__all__'#['title', 'meta_title', 'meta_description', 'brief_description', 'detailed_description', 'instagram_link', 'published_date', 'updated', 'tags', 'category', 'author']
 
     def save(self, commit=True):
         setattr(self.instance, 'slug', slugify(self.data['title'], allow_unicode=True)) if self.data.get('title') else None   # fill slug field in forms submitted by frontend (front should not fill slug). frontend send data like: 'title': value, 'meta_title': value...   while admin panel send like 'title_fa': value, 'slug_fa': value, 'meta_title': value
@@ -115,9 +116,9 @@ class CategoryForm(forms.ModelForm):
         fields = '__all__'
 
     def is_valid(self):
-        self.previouse_name = self.instance.name            # used in main.admin.CategoryAdmin.save_to_mongo
-        self.previouse_slug = self.instance.slug
-        return self.is_bound and not self.errors
+        # used in main.admin.CategoryAdmin.save_to_mongo, also self.instance is mutable and must use copy.
+        self.previouse_cat = copy(self.instance)
+        return super().is_valid()
 
 
 
