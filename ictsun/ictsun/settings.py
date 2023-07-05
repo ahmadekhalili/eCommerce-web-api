@@ -49,6 +49,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'ckeditor',
     'ckeditor_uploader',
+    'django.contrib.sitemaps',
+    'django.contrib.sites',
     #'rest_framework.authtoken',
 ]
 
@@ -171,7 +173,6 @@ LANGUAGES = (
 "gregorian" or "jalali". in gregorian images saves like: products_images/2023/06/03  in jalali like:
 products_images/1402/03/12. unlike LANGUAGE_CODE, you should change IMAGES_PATH_TYPE in first project production starts.
 '''
-IMAGES_PATH_TYPE = 'jalali'
 
 PHONENUMBER_DEFAULT_REGION = 'IR'
 PHONENUMBER_DB_FORMAT = 'NATIONAL'
@@ -204,10 +205,18 @@ CORS_ALLOW_HEADERS = []       # add custom headers here
 
 #CSRF_TRUSTED_ORIGINS = ['http://192.168.114.100:3000', 'http://192.168.114.152:8000']
 
-CART_SESSION_ID = 'cart'
-
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 #DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880            # 5 mg size for uploading posts like product.detailed_description = HTMLField(..)     (default is 2.5) so we can write more posts with more images and ...
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
+
+# specify one of 'sites' to use. with django.contrib.sites we can create several 'sites' in admin panel like:
+# '127.0.0.1:8000' and 'ictsun.ir'
+SITE_ID = 1
+
+# custom added vars (vars that aren't used by eny application or library and is only for personal usage)
+CART_SESSION_ID = 'cart'
+IMAGES_PATH_TYPE = 'jalali'
+POST_STEP = 6       # 6 means you will see 6 post in every PostList page, used in PostList view and main/sitemap.py
+PRODUCT_STEP = 12

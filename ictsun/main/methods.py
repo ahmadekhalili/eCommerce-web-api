@@ -19,6 +19,7 @@ from requests.packages.urllib3.util.ssl_ import create_urllib3_context
 from PIL import Image as PilImage
 from pathlib import Path
 from itertools import cycle
+from math import ceil
 
 from .models import Product, Post, Category
 
@@ -202,6 +203,17 @@ class make_next:                             #for adding next to list you shold 
         return nex
 
 
+def get_parsed_data(instance, serializer, request=None):   # instance like: comment1, serializer like: CommentSerializer
+    s = serializer(instance, context={'request': request}).data
+    content = JSONRenderer().render(s)
+    stream = io.BytesIO(content)
+    return JSONParser().parse(stream)
+
+
+def get_page_count(model, step, **kwargs):
+    return ceil(model.objects.filter(visible=True, **kwargs).count() / step)  # ceil round up number, like: ceil(2.2)==3 ceil(3)==3
+
+
 class ImageCreation:
     def __init__(self, data, files, sizes, name=None):
         # data==request.data. it's not good idea name of file be same with alt (alt هس like: "food-vegetables-healthy"(
@@ -274,11 +286,3 @@ class ImageCreation:
             pass
         else:
             raise Exception('opened_image is not object of PilImage or python built in .open()')
-
-
-
-def get_parsed_data(instance, serializer, request=None):   # instance like: comment1, serializer like: CommentSerializer
-    s = serializer(instance, context={'request': request}).data
-    content = JSONRenderer().render(s)
-    stream = io.BytesIO(content)
-    return JSONParser().parse(stream)

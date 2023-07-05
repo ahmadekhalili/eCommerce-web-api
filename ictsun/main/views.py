@@ -26,7 +26,8 @@ import pymongo
 
 from . import serializers as my_serializers
 from . import forms as my_forms
-from .methods import get_products, get_posts, get_posts_products_by_category, make_next, ImageCreation, get_parsed_data
+from .methods import get_products, get_posts, get_posts_products_by_category, make_next, ImageCreation, \
+    get_parsed_data, get_page_count
 from .models import *
 from users.serializers import UserSerializer, UserChangeSerializer
 from cart.serializers import CartProductSerializer
@@ -121,14 +122,33 @@ class HomePage(views.APIView):
 
 
 
-class PostMap(views.APIView):       # only uses for generating sitemap by frontend.
+class PostList(views.APIView):
     def get(self, request, *args, **kwargs):
         '''
         output 12 last created posts(visible=True)
         '''
-        posts = Post.objects.filter(visible=True).values('id', 'slug')
+        category_slug = kwargs.get('category')
+        page = int(kwargs.get('page', 1))
+        step = settings.POST_STEP
+        if category_slug:
+            category = get_object_or_404(Category, slug=category_slug)
+            posts = get_posts_products_by_category(category)
+            sessionid = request.session.session_key
+            serializers = {'posts': my_serializers.PostListSerializer(posts, many=True, context={'request': request}).data}             #you must put context={'request': request} in PostListSerializer argument for working request.build_absolute_uri  in PostListSerializer, otherwise request will be None in PostListSerializer and raise error
+            return Response({'sessionid': sessionid, **serializers})
+        rang = (page * step - step, page * step)
+        posts = get_posts(*rang).select_related('category')
+        serializers = {'posts': my_serializers.PostListSerializer(posts, many=True, context={'request': request}).data}             #you must put context={'request': request} in PostListSerializer argument for working request.build_absolute_uri  in PostListSerializer, otherwise request will be None in PostListSerializer and raise error
         sessionid = request.session.session_key
-        return Response({'sessionid': sessionid, 'posts': list(posts)})
+        page_count = get_page_count(Post, step)
+        return Response({'sessionid': sessionid, **serializers, 'pages': page_count})
+
+    def post(self, request, *args, **kwargs):
+        form = my_forms.PostForm(request.POST, request.FILES, request=request)
+        if form.is_valid():
+            instance = form.save()
+            return Response(my_serializers.PostDetailSerializer(instance, context={'request': request}).data)
+        return Response(form.errors)
 
 
 
@@ -139,6 +159,8 @@ class ProductList(views.APIView):
         output shown 24 last created product and 4 last created post(visible=True, and select products with available=True in first).
         '''
         category_slug = kwargs.get('category')
+        page = int(kwargs.get('page', 1))
+        step = settings.PRODUCT_STEP
         if category_slug:
             ## 1- category. url example:  /products/category=sumsung (or  /products/?category=sumsung dont differrent) just dont put '/' in end of url!!!!
             category = get_object_or_404(Category, slug=category_slug)
@@ -171,54 +193,14 @@ class ProductList(views.APIView):
             orders = ['-price'] if sort == 'expensivest' else ['price'] if sort == 'cheapest' else ['-ordered_quantity'] if sort == 'bestselling' else ['-id'] if sort == 'newest' else None
             products = products.annotate(ordered_quantity=Coalesce(Sum(Case(When(order_items__order__paid=True, then=F('order_items__quantity')))), 0)) if 'bestselling' in sort else products    #Coalesce duty? answer: when Sum has not resualt, return None(and it makes raise problem in ordering), now return 0 instead None if dont find eny quantity for specefic product.
 
-        products = get_products(0, 24, products, orders)                                         #note(just for remembering): in nested order_by like: products.order_by('-ordered_quantity').order_by('-available')   ordering start from last order_by here: -available but in one order_by start from first element like:  products..order_by('-available', '-id')  ordering start from "-available" 
+        rang = (page * step - step, page * step)
+        products = get_products(*rang, products, orders)                                         #note(just for remembering): in nested order_by like: products.order_by('-ordered_quantity').order_by('-available')   ordering start from last order_by here: -available but in one order_by start from first element like:  products..order_by('-available', '-id')  ordering start from "-available"
         products_serialized = {'products': my_serializers.ProductListSerializer(products, many=True, context={'request': request}).data}
         sidebarcategory_checkbox_serialized = my_serializers.CategoryChainedSerializer(sidebarcategory_checkbox, many=True).data
         sidebarcategory_link_serialized = my_serializers.CategoryChainedSerializer(sidebarcategory_link, many=True).data
         sessionid = request.session.session_key
-        
-        return Response({'sessionid': sessionid, **products_serialized, **{'sidebarcategory_checkbox': sidebarcategory_checkbox_serialized}, **{'sidebarcategory_link': sidebarcategory_link_serialized}, 'brands': brands_serialized, 'filters': filters_serialized})
-
-
-
-
-class PostList(views.APIView):
-    def get(self, request, *args, **kwargs):
-        '''
-        output 12 last created posts(visible=True)
-        '''
-        category_slug = kwargs.get('category')
-        page = int(kwargs.get('page', 1))
-        step = 6               # 6 means you will see 6 post in every page, used in page_count in rang
-        if category_slug:
-            category = get_object_or_404(Category, slug=category_slug)
-            posts = get_posts_products_by_category(category)
-            sessionid = request.session.session_key
-            serializers = {'posts': my_serializers.PostListSerializer(posts, many=True, context={'request': request}).data}             #you must put context={'request': request} in PostListSerializer argument for working request.build_absolute_uri  in PostListSerializer, otherwise request will be None in PostListSerializer and raise error
-            return Response({'sessionid': sessionid, **serializers})
-        rang = (page * step - step, page * step)
-        posts = get_posts(*rang).select_related('category')
-        serializers = {'posts': my_serializers.PostListSerializer(posts, many=True, context={'request': request}).data}             #you must put context={'request': request} in PostListSerializer argument for working request.build_absolute_uri  in PostListSerializer, otherwise request will be None in PostListSerializer and raise error
-        sessionid = request.session.session_key
-        page_count = ceil(Post.objects.filter(visible=True).count() / step)        # round up number, like: ceil(2.2)==3 ceil(3)==3
-        return Response({'sessionid': sessionid, **serializers, 'pages': page_count})
-
-    def post(self, request, *args, **kwargs):
-        form = my_forms.PostForm(request.POST, request.FILES, request=request)
-        if form.is_valid():
-            instance = form.save()
-            return Response(my_serializers.PostDetailSerializer(instance, context={'request': request}).data)
-        return Response(form.errors)
-'''
-output is same like ProductList(views.APIView) but can work without context={'request': request} initializing in serializer(ListAPIView put request auto).
-class ProductList(generics.ListAPIView):
-    queryset = Product.objects.filter(id__lt=100).select_related('rating')
-    serializer_class = my_serializers.ProductListSerializer
-    def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-        serializer = self.get_serializer(queryset, many=True).data      
-        return Response(serializer)
-'''
+        page_count = get_page_count(Product, step)
+        return Response({'sessionid': sessionid, **products_serialized, **{'sidebarcategory_checkbox': sidebarcategory_checkbox_serialized}, **{'sidebarcategory_link': sidebarcategory_link_serialized}, 'brands': brands_serialized, 'filters': filters_serialized, 'pages': page_count})
 
 
 
