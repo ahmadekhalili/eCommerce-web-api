@@ -244,7 +244,7 @@ class ImageCreation:
     def set_instances(self, model, **kwargs):
         # model like: Image_icon, kwargs is model fields, for Image_icon like: path='posts', post=post1
         # this method must call before create_images() if you want same image by model field instead pillow.save()
-        self.instances = [model(alt=f'{self.get_alt(size)}', **kwargs) for size in self.sizes]
+        self.instances = [model(alt=self.get_alt(size), **kwargs) for size in self.sizes]
         return self.instances
 
     def _save_image(self, opened_image, path, full_name, format, instance, att_name):
