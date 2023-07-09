@@ -27,5 +27,3 @@ urlpatterns = [
     path('states/<key>/', views.TownsByState.as_view(), name='towns-by-state'),
     path('upload/', views.UploadImage.as_view(), name='upload-image'),
 ]
-
-print('1111111111111111111111111', urlpatterns[7].pattern._route)

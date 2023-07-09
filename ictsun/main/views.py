@@ -44,7 +44,8 @@ def index(request):
         #request.session[translation.LANGUAGE_SESSION_KEY] = user_language
         #Accept-Language
         a = my_forms.PostForm()
-        b = ''
+        images = Image.objects.all()
+        b = [(i.product, i.id) for i in images]
 
         #formset_factory(my_forms.ImageForm)()
         #formset = formset_factory(my_forms.CategoryForm, extra=2)
@@ -330,8 +331,17 @@ class UploadImage(views.APIView):
     def post(self, request, *args, **kwargs):
         '''
         here we create different sizes of image has sent inside "request.data['file']" and save them to hard and
-        return their urls like: {'default': '/media/../..7a0-default.JPEG', 240: '/media/../..7a0-240.JPEG', ...}
+        return their urls, and also 'image_id', so front have to send back image_id in saving post or product like:
+        {'default': '/media/../..7a0-default.JPEG', 240: '/media/../..7a0-240.JPEG', ..., 'image_id': 1}
         request.data['file'] sent by front is InMemoryUploadedFile object, like data sent by <input type="file"...>
         '''
-        obj = ImageCreation(data=request.data, files=request.data, sizes=[240, 420, 640, 720, 960, 1280, 'default'])
-        return Response(obj.create_images(path='/media/posts_images/')[0])
+        import uuid
+        name, sizes = uuid.uuid4().hex[:12], [240, 420, 640, 720, 960, 1280]
+        obj = ImageCreation(data=request.data, files=request.data, sizes=sizes)
+        image = Image(image=request.data['file'], alt=obj.get_alt('default'), path='posts')
+        obj.instances = [ImageSizes(alt=obj.get_alt(size), size=size, father=image) for size in sizes] # set instances manually (instead method obj.set_instances)
+        paths, instances = obj.create_images(path='/media/posts_images/')
+        image.save()
+        ImageSizes.objects.bulk_create(instances)
+        paths['default'], paths['image_id'] = image.image.url, image.id
+        return Response(paths)

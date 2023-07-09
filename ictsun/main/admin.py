@@ -607,7 +607,13 @@ class ShopFilterItemAdmin(TranslationAdmin):
 admin.site.register(ShopFilterItem, ShopFilterItemAdmin)
 
 
+class ImageSizesInline(admin.TabularInline):
+    model = ImageSizes
+    fields = ('image', 'alt', 'size')
+
+
 class ImageAdmin(TranslationAdmin):
+    inlines = [ImageSizesInline]
     class Media:                                 # this cause languages shown separatly in admin panel. (it should be use always, otherwise all field of all languages shown under each other at once)
         js = (
             'http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
@@ -622,47 +628,19 @@ class ImageAdmin(TranslationAdmin):
         super().save_related(request, form, formsets, change)
         self.save_to_mongo(request, form, change)
 
-    def save_to_mongo(self, request, form, change):     # here update product in mongo database  (ProductDetainMongo.json.smallimages) according to Image changes. for example if image_1.alt changes to 'another_alt'  ProductDetainMongo.json.smallimages:  [{ id: 1, image: '...', alt: 'Macbook m1-2', father: {id: 27, image: '...', alt: 'another_alt'}}, {id: 2, ...}}    note: image is subset of smallimage,we used smallimage instead image and dont different because eny changes on image appears on smallimage too.
+    def save_to_mongo(self, request, form, change):     # here update product in mongo database  (ProductDetainMongo.json.images) according to Image changes. for example if image_1.alt changes to 'another_alt'  ProductDetainMongo.json.images:  [{ id: 1, image: '...', alt: 'another_alt'}
         if change:
-            smallimage = form.instance.smallimage
-            smallimage_id, product_id = smallimage.id, smallimage.product.id
-            s = my_serializers.SmallImageSerializer(smallimage, context={'request': request}).data
+            image = form.instance
+            image_id, product_id = image.id, image.product.id
+            s = my_serializers.ImageSerializer(image, context={'request': request}).data
             content = JSONRenderer().render(s)
             stream = io.BytesIO(content)
             data = JSONParser().parse(stream)
             mycol = shopdb_mongo["main_productdetailmongo"]
-            mycol.update_one({'id': product_id}, {'$set': {'json.smallimages.$[element]': data}}, array_filters=[{'element.id': smallimage_id}])
+            mycol.update_one({'id': product_id}, {'$set': {'json.images.$[element]': data}}, array_filters=[{'element.id': image_id}])
 
 admin.site.register(Image, ImageAdmin)
 
-
-class SmallImageAdmin(TranslationAdmin):
-    class Media:                                 # this cause languages shown separatly in admin panel. (it should be use always, otherwise all field of all languages shown under each other at once)
-        js = (
-            'http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
-            'http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js',
-            'modeltranslation/js/tabbed_translation_fields.js',
-        )
-        css = {
-            'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
-        }
-
-    def save_related(self, request, form, formsets, change):
-        super().save_related(request, form, formsets, change)
-        self.save_to_mongo(request, form, change)
-
-    def save_to_mongo(self, request, form, change):    # here update product in mongo database  (ProductDetainMongo.json.smallimages) according to SmallImage changes. for example if smallimage_1.alt changes to 'another_alt'  ProductDetainMongo.json.smallimages:  [{ id: 1, image: '...', alt: 'another_alt', father: {id: 27, image: '...', alt: 'Macbook m1-2'}}, {id: 2, ...}}
-        if change:
-            smallimage = form.instance
-            smallimage_id, product_id = smallimage.id, smallimage.product.id
-            s = my_serializers.SmallImageSerializer(smallimage, context={'request': request}).data
-            content = JSONRenderer().render(s)
-            stream = io.BytesIO(content)
-            data = JSONParser().parse(stream)
-            mycol = shopdb_mongo["main_productdetailmongo"]
-            mycol.update_one({'id': product_id}, {'$set': {'json.smallimages.$[element]': data}}, array_filters=[{'element.id': smallimage_id}])
-
-admin.site.register(SmallImage, SmallImageAdmin)
 
 
 # admin.site.register(Image_icon) image icons should edit in post and product pages (for integration for mongo creation)

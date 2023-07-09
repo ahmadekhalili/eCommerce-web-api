@@ -187,6 +187,7 @@ class Post(models.Model):
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('category'))
     author = models.ForeignKey(User, related_name='written_posts', on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('author'))
     #comment_set                                                   #backward relation
+    #image_set
     #image_icon_set               # for one image_icon, several image_icons created with different sizes. default size used in top of a post page and for post icon use smaller (in 160px).
 
     class Meta:
@@ -260,7 +261,6 @@ class Product(models.Model):                                     #.order_by('-av
     #image_icon_set
     #comment_set
     #product_filter_attributes_set
-    #smallimages
     #shopfilteritems
     ##order_items
     objects = ProductManager()
@@ -385,9 +385,6 @@ class Image_icon(models.Model):
         return self.alt if self.alt else self.image.path
 
 
-
-
-
 def image_path_selector(instance, filename):                        #note: if you use method in upload_to, strftime ("%Y/%m/%d/") dont work and should provided manualy.
     if settings.IMAGES_PATH_TYPE == 'jalali':
         date = jdatetime.datetime.fromgregorian(date=datetime.now()).strftime('%Y %-m %-d').split()
@@ -396,53 +393,38 @@ def image_path_selector(instance, filename):                        #note: if yo
     return f'products_images/{date[0]}/{date[1]}/{date[2]}/{filename}'
 
 class Image(models.Model):
-    image = models.ImageField(_('image'), upload_to=image_path_selector)
+    image = models.ImageField(_('image'), upload_to=image_path_selector, blank=True, null=True)    # here save default size of image to prevent additional query to ImageSizes class.
     alt = models.CharField(_('alt'), max_length=55, unique=True, null=True)                    # alt should not be dublicate because we used alt instead image id in def __str__(self)
+    path = models.CharField(_('path'), max_length=20, default='products')                  # can be value like: "products"  or  "posts" ....
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, blank=True, null=True, verbose_name=_('post'))
     product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True, verbose_name=_('product'))
+    #imagesizes
 
-    class Meta:
+    class Meta:        # ordering by ('post', 'product') should be done in admin separately for image posts and products
         verbose_name = _('Image')
         verbose_name_plural = _('Images')
 
     def __str__(self):
-        return self.alt
+        try:
+            name = self.post.title if self.post_id else self.product.name
+        except:
+            name = self.id
+        return f'{name} - {self.alt}'
 
 
-
-
-def small_path_selector(instance, filename):                        #note: if you use method in upload_to, strftime ("%Y/%m/%d/") dont work and should provided manualy.
-    if settings.IMAGES_PATH_TYPE == 'jalali':
-        date = jdatetime.datetime.fromgregorian(date=datetime.now()).strftime('%Y %-m %-d').split()
-    else:
-        date = datetime.now().strftime('%Y %-m %-d').split()
-    return f'products_images/{date[0]}/{date[1]}/{date[2]}/smallimages/{filename}'
-
-class SmallImage(models.Model):
-    image = models.ImageField(_('image'), upload_to=small_path_selector)
-    alt = models.CharField(_('alt'), max_length=55, unique=True, blank=True, null=True)
-    father = models.OneToOneField(Image, on_delete=models.CASCADE, verbose_name=_('father'))
-    product = models.ForeignKey(Product, related_name='smallimages', on_delete=models.CASCADE, verbose_name=_('product'))
+# here saves different sizes of Image model (except default size that saves in Image.image)
+class ImageSizes(models.Model):
+    image = models.ImageField(_('image'), upload_to=image_path_selector, blank=True, null=True)    # here save differente size of image
+    alt = models.CharField(_('alt'), max_length=55, unique=True, null=True)
+    size = models.CharField(_('size'), max_length=20)
+    father = models.ForeignKey(Image, related_name='imagesizes', on_delete=models.CASCADE, blank=True, null=True, verbose_name=_('image'))
 
     class Meta:
-        verbose_name = _('SmallImage')
-        verbose_name_plural = _('SmallImages')
+        verbose_name = _('Image size')
+        verbose_name_plural = _('Images sizes')
 
     def __str__(self):
-        return self.alt
-
-def save_smallimage(sender, **kwargs):
-    if kwargs['created'] and kwargs['instance'].product:
-        image = kwargs['instance']
-        smallimage = SmallImage(alt=image.alt, father=image, product=image.product)
-        smallimage.image.save(os.path.basename(image.image.path), File(open(image.image.path, 'rb')))                         #why save image handy and dont save like SmallImage.objects.create(image=image.image, ....)?  is worse because directory creating(like /media/2020/5/2/small/) and url of that image you expected by "upload_to" copied from image.image and dont see do SmallImage.image at all!!!. so why? because  you're assigning an image directly not uploading file(for saving image Image.image we upload its image by a form) so note upload_to and creating directory you specefid in it will done just when you upload image or save handi that image!!!!
-        smallimage.save()
-        file = PilImage.open(smallimage.image.path)
-        resized = file.resize((160, 160))
-        resized.save(smallimage.image.path)
-
-post_save.connect(save_smallimage, sender=Image)
-
-
+        return f'{self.alt} {self.size}'
 
 
 statuses = [('1', _('not checked')), ('2', _('confirmed')), ('3', _('not confirmed')), ('4', _('deleted'))]

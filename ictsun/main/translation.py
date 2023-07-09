@@ -70,10 +70,10 @@ class ImageTranslation(TranslationOptions):
 translator.register(Image, ImageTranslation)
 
 
-class SmallImageTranslation(TranslationOptions):
+class ImageSizesTranslation(TranslationOptions):
     fields = ('alt',)
 
-translator.register(SmallImage, SmallImageTranslation)
+translator.register(ImageSizes, ImageSizesTranslation)
 
 
 class StateTranslation(TranslationOptions):

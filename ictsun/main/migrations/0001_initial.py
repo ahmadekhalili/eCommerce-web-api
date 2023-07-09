@@ -278,22 +278,6 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='SmallImage',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('image', models.ImageField(upload_to=main.models.small_path_selector, verbose_name='image')),
-                ('alt', models.CharField(blank=True, max_length=55, null=True, unique=True, verbose_name='alt')),
-                ('alt_fa', models.CharField(blank=True, max_length=55, null=True, unique=True, verbose_name='alt')),
-                ('alt_en', models.CharField(blank=True, max_length=55, null=True, unique=True, verbose_name='alt')),
-                ('father', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='main.image', verbose_name='father')),
-                ('product', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='smallimages', to='main.product', verbose_name='product')),
-            ],
-            options={
-                'verbose_name': 'SmallImage',
-                'verbose_name_plural': 'SmallImages',
-            },
-        ),
-        migrations.CreateModel(
             name='ShopFilterItem',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),

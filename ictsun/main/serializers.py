@@ -53,25 +53,8 @@ class ImageSerializer(serializers.ModelSerializer):
         fields = ['id', 'image', *g_t('alt')]
         
     def get_image(self, obj):
-        request = self.context.get('request', None)
         try:
             url = obj.image.url                 #request.build_absolute_uri()  is like "http://127.0.0.1:8000/product_list/"     and   request.build_absolute_uri(obj.image_icon.url) is like:  "http://192.168.114.6:8000/product_list/media/3.jpg" (request.build_absolute_uri() + obj.image_icon.url)
-        except:
-            url = ''
-        return url
-
-
-class SmallImageSerializer(serializers.ModelSerializer):
-    image = serializers.SerializerMethodField()  
-    father = ImageSerializer()
-    class Meta:
-        model = SmallImage
-        fields = ['id', 'image', *g_t('alt'), 'father']
-        
-    def get_image(self, obj):
-        request = self.context.get('request', None)
-        try:
-            url = obj.image.url
         except:
             url = ''
         return url
@@ -337,19 +320,14 @@ class ProductDetailSerializer(serializers.ModelSerializer):       # important: f
     categories = serializers.SerializerMethodField()
     brand = serializers.SerializerMethodField()
     rating = serializers.SerializerMethodField()
-    smallimages = SmallImageSerializer(many=True)
+    images = ImageSerializer(many=True)
     comment_count = serializers.SerializerMethodField()
     shopfilteritems = serializers.SerializerMethodField()
     related_products = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
-        fields = ['id', *g_t('name'), *g_t('slug'), *g_t('meta_title'), *g_t('meta_description'), *g_t('brief_description'), *g_t('detailed_description'), *g_t('price'), *g_t('available'), 'categories', 'brand', 'rating', *g_t('stock'), *g_t('weight'), 'smallimages', 'comment_count', 'shopfilteritems', 'related_products']
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        request = self.context.get('request')
-        self.fields['smallimages'].context['request'] = request
+        fields = ['id', *g_t('name'), *g_t('slug'), *g_t('meta_title'), *g_t('meta_description'), *g_t('brief_description'), *g_t('detailed_description'), *g_t('price'), *g_t('available'), 'categories', 'brand', 'rating', *g_t('stock'), *g_t('weight'), 'images', 'comment_count', 'shopfilteritems', 'related_products']
 
     def get_categories(self, obj):
         category_and_fathers = get_category_and_fathers(obj.category)
