@@ -72,7 +72,7 @@ def get_category_and_fathers(category):
     return None  # returns None is safe for use inside serializer like: CategoryChainedSerializer(None, many=True).data
 
 
-def get_category_and_children(category):
+def get_category_and_children(category):      # obtain category and children by queries (very heavy)
     for_query = [category]
     children = [category]
     while(for_query):
@@ -83,11 +83,10 @@ def get_category_and_children(category):
     return children
 
 
-
 def get_posts_products_by_category(category):
     if category.level < Category._meta.get_field('level').validators[1].limit_value:
-        category_children_ids = list(filter(None, category.all_childes_id.split(',')))           #why we used filter? category.all_childes_id.split(',') may return: [''] that raise error in statements like  filter(in__in=['']) so we ez remove blank str of list by filter.
-        category_children_ids = [category.id] + category_children_ids
+        # why we used filter? category.all_childes_id.split(',') may return: [''] that raise error in statements like  filter(in__in=['']) so we ez remove blank str of list by filter.
+        category_children_ids = [category.id] + list(filter(None, category.all_childes_id.split(',')))
     else:
         category_children_ids = [category.id]
     if category.post_product == 'product':
@@ -210,8 +209,13 @@ def get_parsed_data(instance, serializer, request=None):   # instance like: comm
     return JSONParser().parse(stream)
 
 
-def get_page_count(model, step, **kwargs):
-    return ceil(model.objects.filter(visible=True, **kwargs).count() / step)  # ceil round up number, like: ceil(2.2)==3 ceil(3)==3
+def get_page_count(model_instances, step, **kwargs):  # model_instances can be a model class or instances of model class
+    from djnago.db.models import Model
+    if not isinstance(model_instances, Model):        # model_instances is like: Post, Product or other model class
+        return ceil(model_instances.objects.filter(visible=True, **kwargs).count() / step)  # ceil round up number, like: ceil(2.2)==3 ceil(3)==3
+
+    else:                                             # model_instances is like <Queryset Post(1), Post(2), ....> or other model instances
+        return ceil(model_instances.count() / step)
 
 
 class ImageCreation:

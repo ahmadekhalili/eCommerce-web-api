@@ -21,7 +21,9 @@ from django.conf.urls.static import static
 from django.conf.urls.i18n import i18n_patterns
 from django.views.i18n import JavaScriptCatalog
 
+from apscheduler.schedulers.background import BackgroundScheduler
 
+from sitemap import create_sitemap
 
 
 urlpatterns = i18n_patterns(
@@ -41,3 +43,7 @@ urlpatterns = i18n_patterns(
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
+# run get_sitemaps() to create sitemap.xml in main dir every day in 03:00 local system time.
+scheduler = BackgroundScheduler()
+scheduler.add_job(create_sitemap, 'cron', hour=3)
+scheduler.start()

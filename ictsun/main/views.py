@@ -134,14 +134,15 @@ class PostList(views.APIView):
         if category_slug:
             category = get_object_or_404(Category, slug=category_slug)
             posts = get_posts_products_by_category(category)
-            sessionid = request.session.session_key
-            serializers = {'posts': my_serializers.PostListSerializer(posts, many=True, context={'request': request}).data}             #you must put context={'request': request} in PostListSerializer argument for working request.build_absolute_uri  in PostListSerializer, otherwise request will be None in PostListSerializer and raise error
-            return Response({'sessionid': sessionid, **serializers})
+
+        else:
+            posts = None
+
         rang = (page * step - step, page * step)
-        posts = get_posts(*rang).select_related('category')
+        posts = get_posts(*rang, posts).select_related('category')
         serializers = {'posts': my_serializers.PostListSerializer(posts, many=True, context={'request': request}).data}             #you must put context={'request': request} in PostListSerializer argument for working request.build_absolute_uri  in PostListSerializer, otherwise request will be None in PostListSerializer and raise error
         sessionid = request.session.session_key
-        page_count = get_page_count(Post, step)
+        page_count = get_page_count(posts, step)
         return Response({'sessionid': sessionid, **serializers, 'pages': page_count})
 
     def post(self, request, *args, **kwargs):
@@ -200,7 +201,7 @@ class ProductList(views.APIView):
         sidebarcategory_checkbox_serialized = my_serializers.CategoryChainedSerializer(sidebarcategory_checkbox, many=True).data
         sidebarcategory_link_serialized = my_serializers.CategoryChainedSerializer(sidebarcategory_link, many=True).data
         sessionid = request.session.session_key
-        page_count = get_page_count(Product, step)
+        page_count = get_page_count(products, step)
         return Response({'sessionid': sessionid, **products_serialized, **{'sidebarcategory_checkbox': sidebarcategory_checkbox_serialized}, **{'sidebarcategory_link': sidebarcategory_link_serialized}, 'brands': brands_serialized, 'filters': filters_serialized, 'pages': page_count})
 
 

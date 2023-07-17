@@ -212,7 +212,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
 
 # specify one of 'sites' to use. with django.contrib.sites we can create several 'sites' in admin panel like:
-# '127.0.0.1:8000' and 'ictsun.ir'
+# '127.0.0.1:8000' and 'ictsun.ir', this uses in Site.objects.get_current(), in request.build_absolute_uri,
+# and reverse()
 SITE_ID = 1
 
 # custom added vars (vars that aren't used by eny application or library and is only for personal usage)
@@ -220,3 +221,4 @@ CART_SESSION_ID = 'cart'
 IMAGES_PATH_TYPE = 'jalali'
 POST_STEP = 6       # 6 means you will see 6 post in every PostList page, used in PostList view and main/sitemap.py
 PRODUCT_STEP = 12
+DEFAULT_SCHEME = 'http'   # uses in sitmape.py because we dont have access to request and request.scheme
