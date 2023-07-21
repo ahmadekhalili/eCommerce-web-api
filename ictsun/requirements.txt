@@ -18,8 +18,9 @@ jdatetime==4.0.0                   # jalali datetime in python
 django-ckeditor==6.4.0             # install django-ckeditor (should add "ckeditor"  and "ckeditor_uploader" in settings/INSTALLED_APPS) 
 pymongo==3.13.0                    # pymongo version should a version before 4, otherwise raise error (has conflict with djongo 1.3.6). note: "djongo" install pymongo v4*,  pymongo installation should be before "djongo" to prevent that installation. 3.13.0 is last version before 4 not 3.9   3.9 raise error in ubuntu 22
 djongo==1.3.6
-#uwsgi==2.0.21                     # uwsgi installation failed always and cause stop other installations (even when uwsgi installs successfully).
 django-modeltranslation            # adds translation for fields values in nice graphic, in admin panel. latest version should be installed, because now latest version 0.18.9 support django 3.2+ so need keep installing newer version.
+apscheduler                        # enable schedule tasks, like create sitemap.xml every day (in urls.py)
+gunicorn
 #drf-yasg==1.21.3                  # it's a django framework that create swagger schema form django models for showing in swagger ui. we don't need it because we write swagger schema handy.  this use OpenAPI2 and will not update to UpenAPI3 soon, there is another package drf-spectacular (v0.23.1 now) use OpenAPI3 with more pupolar devolopers. may after releasing stable version of drf-spectacular this chosen.
 # package: folder name and import name, for example in BeautifulSoup library, bs4 is a folder name in site-packages and imported like (from bs4 import ...) so bs4 is package
 # library: official name of that software in internet (doc, goodle ...)

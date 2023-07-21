@@ -202,6 +202,14 @@ class make_next:                             #for adding next to list you shold 
         return nex
 
 
+def get_unique_list(items):       # remove duplicates from list and return list
+    no_duplicate = []
+    for item in items:
+        if item not in no_duplicate:
+            no_duplicate.append(item)
+    return no_duplicate
+
+
 def get_parsed_data(instance, serializer, request=None):   # instance like: comment1, serializer like: CommentSerializer
     s = serializer(instance, context={'request': request}).data
     content = JSONRenderer().render(s)
@@ -210,11 +218,12 @@ def get_parsed_data(instance, serializer, request=None):   # instance like: comm
 
 
 def get_page_count(model_instances, step, **kwargs):  # model_instances can be a model class or instances of model class
-    from djnago.db.models import Model
-    if not isinstance(model_instances, Model):        # model_instances is like: Post, Product or other model class
-        return ceil(model_instances.objects.filter(visible=True, **kwargs).count() / step)  # ceil round up number, like: ceil(2.2)==3 ceil(3)==3
-
-    else:                                             # model_instances is like <Queryset Post(1), Post(2), ....> or other model instances
+    from django.db.models import Model
+    import inspect
+    if inspect.isclass(model_instances):    # model_instances is like: Post, Product or other model class
+        ceil(model_instances.objects.filter(visible=True, **kwargs).count() / step)
+    else:        # model_instances is like <Queryset Post(1), Post(2), ....> or other model instances
+        # ceil round up number, like: ceil(2.2)==3 ceil(3)==3
         return ceil(model_instances.count() / step)
 
 

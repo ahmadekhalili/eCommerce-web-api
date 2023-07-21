@@ -27,7 +27,7 @@ import pymongo
 from . import serializers as my_serializers
 from . import forms as my_forms
 from .methods import get_products, get_posts, get_posts_products_by_category, make_next, ImageCreation, \
-    get_parsed_data, get_page_count
+    get_parsed_data, get_page_count, get_unique_list
 from .models import *
 from users.serializers import UserSerializer, UserChangeSerializer
 from cart.serializers import CartProductSerializer
@@ -43,9 +43,8 @@ def index(request):
         #translation.activate(user_language)
         #request.session[translation.LANGUAGE_SESSION_KEY] = user_language
         #Accept-Language
-        a = my_forms.PostForm()
-        images = Image.objects.all()
-        b = [(i.product, i.id) for i in images]
+        a = ''
+        b = ''
 
         #formset_factory(my_forms.ImageForm)()
         #formset = formset_factory(my_forms.CategoryForm, extra=2)
@@ -117,9 +116,6 @@ class HomePage(views.APIView):
         sessionid = request.session.session_key
         return Response({'sessionid': sessionid, **products_serialized, **posts_serialized})
 
-    def post(self, request, *args, **kwargs):
-        return Response({'loooooooooool': request.session['name']})
-
 
 
 
@@ -167,12 +163,15 @@ class ProductList(views.APIView):
             ## 1- category. url example:  /products/category=sumsung (or  /products/?category=sumsung dont differrent) just dont put '/' in end of url!!!!
             category = get_object_or_404(Category, slug=category_slug)
             products = get_posts_products_by_category(category)
-            category_and_allitschiles = Category.objects.filter(id__in=list(filter(None, category.all_childes_id.split(',')))+[category.id])   #why we used filter? category.all_childes_id.split(',') may return: [''] that raise error in statements like  filter(in__in=['']) so we ez remove blank str of list by filter.
-            sidebarcategory_checkbox = category_and_allitschiles.filter(level__in=[category.level, category.level+1]) if category.levels_afterthis == 1 else None
-            sidebarcategory_link = category_and_allitschiles.filter(level__in=[category.level, category.level+1]) if category.levels_afterthis > 1 else None
-            category_ids = category_and_allitschiles.values_list('id', flat=True)
-            brands_serialized = my_serializers.BrandSerializer(Brand.objects.filter(category__in=category_ids), many=True).data
-            filters_serialized = my_serializers.FilterSerializer(Filter.objects.filter(category__in=category_ids).prefetch_related('filter_attributes'), many=True).data       # in FilterSerializer has field 'filter_attributes' so if we dont put this prefetch, program will run 1+len(filters) queries (for example supose we have this filters:  <object(1) Filter>, <object(2) Filter> queries number was run for serializing filters: our program run one query for this two object and second for: <object(1) Filter>.filter_attributes.all() and third for <object(2) Filter>.filter_attributes.all() so run 3 query for this 2 filter object! but now just run 2 for eny filter objects.
+            category_and_allitschiles = list(Category.objects.filter(id__in=list(filter(None, category.all_childes_id.split(',')))+[category.id]).prefetch_related('filters__filter_attributes', 'brands'))
+            if category.levels_afterthis == 1:            
+                sidebarcategory_checkbox, sidebarcategory_link = [cat for cat in category_and_allitschiles if cat.level == category.level or cat.level == category.level + 1], None
+            if category.levels_afterthis > 1:
+                sidebarcategory_link, sidebarcategory_checkbox = [cat for cat in category_and_allitschiles if cat.level == category.level or cat.level == category.level + 1], None
+            brands = get_unique_list([child for cat in category_and_allitschiles for child in cat.brands.all()])
+            filters = get_unique_list([child for cat in category_and_allitschiles for child in cat.filters.all()])
+            brands_serialized = my_serializers.BrandSerializer(brands, many=True).data
+            filters_serialized = my_serializers.FilterSerializer(filters, many=True).data       # in FilterSerializer has field 'filter_attributes' so if we dont put this prefetch, program will run 1+len(filters) queries (for example supose we have this filters:  <object(1) Filter>, <object(2) Filter> queries number was run for serializing filters: our program run one query for this two object and second for: <object(1) Filter>.filter_attributes.all() and third for <object(2) Filter>.filter_attributes.all() so run 3 query for this 2 filter object! but now just run 2 for eny filter objects.
 
         else:                                      #none category.   url example:  /products/
             products = Product.objects.filter()
