@@ -1,11 +1,17 @@
 from django.conf import settings
 from django.shortcuts import render
+from django.contrib.sites.models import Site
 from django.contrib.auth import login, logout
+from django.utils.translation import gettext_lazy as _
 from django.contrib.sessions.backends.db import SessionStore
 
 from rest_framework import views
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+
+import requests
+import uuid
+import jwt
 
 from .serializers import UserSerializer, UserChangeSerializer
 from .methods import login_validate
@@ -43,35 +49,68 @@ class LogIn(views.APIView):
 
 
 
+class SendSMS(views.APIView):
+    def get(self, request, *args, **kwargs):
+        r = Response({})
+        r.set_cookie('age', 'MY age VALUE')
+        return r
 
-from rest_framework import serializers
-from rest_framework.exceptions import ErrorDetail, ValidationError, ErrorDetail
-class SignUp(views.APIView):
     def post(self, request, *args, **kwargs):
+        '''
+        here we generate a code. 1- sms it to client phone 2- set encoded of code to client cookie.
+        after entering code by client, we compare code is entered with code in cookie.
+        '''
+        if request.data.get('phone'):
+            to = str(request.data['phone'])     # phone format should be like: 0910233....
+            message = '''
+            کد فعال سازی شما {} می باشد.
+            {}
+            '''
+            cd = uuid.uuid4().hex[:4]
+            encoded = jwt.encode({'phone': to, 'code': cd}, settings.SECRET_HS, algorithm="HS256")
+            domain = Site.objects.get_current()
+            data = {'from': '50004001337664', 'to': to, 'text': message.format(cd, domain)}
+            response = requests.post('https://console.melipayamak.com/api/send/simple/9b40f9cf113c4d3fad0da51284014d04',
+                                     json=data)      # here sms is sent (by console way).
+            r = Response({'cookie_token': encoded, **response.json()})
+            r.set_cookie('token', encoded)        # cookie is set directly to client browser.
+            return r
+        return Response({'message': _('please specify your phone number.')})
+
+
+class SignUp(views.APIView):
+    def post(self, request, *args, **kwargs):    # create user only with phone (and sms verification)
         '''
         input in POST = {"csrfmiddlewaretoken": "...", "phone": "...", "password1": "...", "password2": "..."}__________
         input in header cookie = {"csrftoken": "..."}
         '''
-        SessionAuthenticationCustom().enforce_csrf(request)
-        phone, password1, password2 = request.data.get('phone'), request.data.get('password1'), request.data.get('password2')
-        serializer = UserSerializer(data={'phone': phone, 'password': password1})
-        serializer.is_valid(raise_exception=True)                           # raise errors better than User.objects.create_user(...) forr example creating user with dublicate phone, create_user raise error:  duplicate key value violates unique constraint "users_user_phone_key"...     while is_valid raise: "unique": "کاربر با این شماره تلفن از قبل موجود است."
-        serializer.save()
-        return Response(serializer.data)
+        #SessionAuthenticationCustom().enforce_csrf(request)
+        posted_cd = request.data['code']
+        # decoded contain phone and code (sent via SMS)
+        decoded = jwt.decode(request.COOKIES['token'], settings.SECRET_HS, algorithms=["HS256"])
+        if decoded['code'] == posted_cd:         # both variables have to be str
+            serializer = UserSerializer(User.objects.create(phone=decoded['phone']))
+            return Response({'message': _('user successfully created.'), **serializer.data})
+        return Response({'message': _('verification code is incorrect')})
 
 
-
-
-class UserChange(views.APIView):
+class UserUpdate(views.APIView):
     permission_classes = [IsAuthenticated]
-    def put(self, request, *args, **kwargs):                #connect like this:   http PUT http://192.168.114.21:3000/users/userchange/ cookie:"sessionid=87y70z4bnj6kj9698qbpas1a0w3ncfpx; csrftoken=SSp1m9eJ7mHuIncE88iEwF2VzspDFi7uOWlXamzNjd1vDZT9YjxrFgNjyDUIs7wQ" first_name="تچیز" csrfmiddlewaretoken=KZNz210BMpQLjRurCxxMtDnILetmQxMDG3JvQelFYgaMetbWsIMzCe86KpYrDmbZ        important: if you dont pot partial=True always raise error 
+    def put(self, request, *args, **kwargs):                #connect like this:   http PUT http://192.168.114.21:3000/users/update/ cookie:"sessionid=87y70z4bnj6kj9698qbpas1a0w3ncfpx; csrftoken=SSp1m9eJ7mHuIncE88iEwF2VzspDFi7uOWlXamzNjd1vDZT9YjxrFgNjyDUIs7wQ" first_name="تچیز" csrfmiddlewaretoken=KZNz210BMpQLjRurCxxMtDnILetmQxMDG3JvQelFYgaMetbWsIMzCe86KpYrDmbZ        important: if you dont pot partial=True always raise error
         '''
-        input = submited userchangeform must sent here (/userchange/) like <from action="domain.com/users/userchange/" ...>__________
+        input = submited userchangeform must sent here (/update/) like <from action="domain.com/users/update/" ...>__________
         output(in success) = front must request user (/supporter_datas/user/) to optain user with new changes.__________
         output(in failure) = {"is_superuser": ["Must be a valid boolean."],"email": ["Enter a valid email address."]}
         '''
-        if request.data.get('postal_code'):
-            profile_order = ProfileOrder.objects.filter(user=request.user, main=True)
+        user = request.user
+        if request.data.get('password'):       # set password (in first time)
+            user.set_password(request.data['password'])
+            user.save()
+            serializer = UserSerializer(user)
+            return Response({'message': _('password has been set successfully'), **serializer.data})
+
+        elif request.data.get('postal_code'):
+            profile_order = ProfileOrder.objects.filter(user=user, main=True)
             serializer = ProfileOrderSerializer(profile_order[0], data={'postal_code': request.data['postal_code']}, partial=True) if profile_order else {}
             if serializer:
                 if serializer.is_valid():
@@ -82,12 +121,13 @@ class UserChange(views.APIView):
             else:
                 return Response({})
 
-        serializer = UserSerializer(request.user, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(dict([(key, serializer.data.get(key)) for key in request.data if serializer.data.get(key)]))             #{**CartCategoryView().get(request, datas_selector='user').data}
         else:
-            return Response(serializer.errors)
+            serializer = UserSerializer(request.user, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(dict([(key, serializer.data.get(key)) for key in request.data if serializer.data.get(key)]))             #{**CartCategoryView().get(request, datas_selector='user').data}
+            else:
+                return Response(serializer.errors)
 
 
 

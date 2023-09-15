@@ -43,8 +43,18 @@ def index(request):
         #translation.activate(user_language)
         #request.session[translation.LANGUAGE_SESSION_KEY] = user_language
         #Accept-Language
+        import jwt
+        from cryptography.hazmat.primitives import serialization
+        from cryptography.hazmat.backends import default_backend
+
+        pv = open('/home/akh/a/private_key.pem', 'rb').read()
+        pub = open('/home/akh/a/public_key.pem', 'rb').read()
+        passphrase = b"your password"
+        #private_key = serialization.load_pem_private_key(pem_bytes, password=passphrase, backend=default_backend())
+        encoded = jwt.encode({"some": "payload"}, pv, algorithm="RS256")
+        decoded = jwt.decode(encoded, pub, algorithms=["RS256"])
         a = ''
-        b = ''
+        b = decoded  #jwt.decode(encoded, public_key, algorithms=["HS256"])
 
         #formset_factory(my_forms.ImageForm)()
         #formset = formset_factory(my_forms.CategoryForm, extra=2)
