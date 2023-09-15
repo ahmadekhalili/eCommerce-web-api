@@ -57,7 +57,7 @@ class User(AbstractUser):                #User post_save in cart.models.SesKey, 
     username = None                     #note: (blank=True, unique=True) raise error!! blank should be False
     phone = PhoneNumberField(_('phone number'), blank=False, null=False, unique=True)
     national_code = models.CharField(_('national code'), max_length=20, validators=[validate_national_code], blank=False, null=True, unique=True, db_index=False)
-    email = models.EmailField(_('email address'), blank=True, null=True)
+    email = models.EmailField(_('email address'), blank=True, null=True, unique=True, default=None)
     job = models.CharField(_('job'), max_length=50, blank=True, null=True)
     address = models.CharField(_('address'), max_length=255, blank=True, null=True)
     visible = models.BooleanField(_('delete'), default=True, db_index=True)                  #we use visible for deleting an object, for deleting visible=False, in fact we must dont delete any object.  

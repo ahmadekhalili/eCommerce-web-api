@@ -222,3 +222,4 @@ IMAGES_PATH_TYPE = 'jalali'
 POST_STEP = 6       # 6 means you will see 6 post in every PostList page, used in PostList view and main/sitemap.py
 PRODUCT_STEP = 12
 DEFAULT_SCHEME = 'http'   # uses in sitmape.py because we dont have access to request and request.scheme
+SECRET_HS = 'mysecret'    # used in HS256 in users send sms
