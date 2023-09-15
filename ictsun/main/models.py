@@ -305,7 +305,7 @@ from main.signals import FillCategoryfilters_brands         # this cause "m2m_ch
 
 
 
-class ProductDetainMongo(djongo_models.Model):
+class ProductDetailMongo(djongo_models.Model):
     id = djongo_models.IntegerField(blank=False, null=False, primary_key=True)
     json = djongo_models.JSONField()
     #name = djongo_models.CharField(_('name'), max_length=60)
@@ -334,7 +334,7 @@ def save_product_mongo(sender, **kwargs):
     change = False if kwargs['created'] else True
     product = kwargs['instance']
     from .serializers import ProductDetailMongoSerializer
-    save_to_mongo(ProductDetainMongo, product, ProductDetailMongoSerializer, change)
+    save_to_mongo(ProductDetailMongo, product, ProductDetailMongoSerializer, change)
 
 post_save.connect(save_product_mongo, sender=Product)
 
