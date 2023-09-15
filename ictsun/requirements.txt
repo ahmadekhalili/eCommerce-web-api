@@ -22,6 +22,7 @@ django-modeltranslation            # adds translation for fields values in nice 
 apscheduler                        # enable schedule tasks, like create sitemap.xml every day (in urls.py)
 gunicorn
 pyjwt[crypto]                      # for encode and decode we use pyjwt library and crypto for help encode more advance algoritms (like RSA and ECDSA)
+django-environ                     # add environment variables in settings.py
 #drf-yasg==1.21.3                  # it's a django framework that create swagger schema form django models for showing in swagger ui. we don't need it because we write swagger schema handy.  this use OpenAPI2 and will not update to UpenAPI3 soon, there is another package drf-spectacular (v0.23.1 now) use OpenAPI3 with more pupolar devolopers. may after releasing stable version of drf-spectacular this chosen.
 # package: folder name and import name, for example in BeautifulSoup library, bs4 is a folder name in site-packages and imported like (from bs4 import ...) so bs4 is package
 # library: official name of that software in internet (doc, goodle ...)
