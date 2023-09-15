@@ -1,5 +1,5 @@
 ﻿python manage.py createstates                               #create states and its towns(main/models/State)   (configured  here: main/management/commands/createstates)  (states used here: main.admin.ShippingAdmin._changeform_view) (reference: https://docs.djangoproject.com/en/3.1/howto/custom-management-commands/)
 PROJECT_VERBOSE_NAME = 'MRGol'                      #set english project name here and run makemessages and input its traslation in django.po and run compilemessages comment.      we used this in places like:  main/templates/registration/log_out.html      main/admin.py/admin.site.site_header & admin.site.site_title       also note this can be used as context_processors in templates like {{ project_verbose_name }}  
 in django admins, fields of list_filter  should import in class Media js file too.
-for enable ordering admin / orders app / shipping must be created (one object needed) otherwise raise error in eny orders creation
-
+for add product orders: orders/shipping must be created (one object needed) otherwise raise error in eny orders creation
+fill .env (beside settings.py, also fix its permission to 600 if required)

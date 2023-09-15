@@ -10,10 +10,15 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 import os
+import environ
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Initialise environment variables
+env = environ.Env()
+environ.Env.read_env()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
@@ -96,21 +101,21 @@ WSGI_APPLICATION = 'ictsun.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'akh_db',
-        'USER': 'akh_db',                          
-        'PASSWORD': '134313731374aA',
+        'NAME': env('POSTGRES_NAME'),
+        'USER': env('POSTGRES_USER'),
+        'PASSWORD': env('POSTGRES_PASSWORD'),
         'HOST': '172.17.0.3',
         'PORT': '5432',
     },
     'mongo': {
         'ENGINE': 'djongo',
-        'NAME': 'shop',
+        'NAME': env('MONGO_NAME'),
         'CLIENT': {
             'host': '172.17.0.2',
             'port': 27017,
-            'username': 'akh2',
-            'password': '134313731374aA',
-            'authSource': 'shop',
+            'username': env('MONGO_USER'),
+            'password': env('MONGO_PASSWORD'),
+            'authSource': env('MONGO_SOURCE'),
             'authMechanism': 'SCRAM-SHA-256'
         },
     }
