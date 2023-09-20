@@ -17,7 +17,7 @@ from .widgets import *
 from .methods import get_mt_input_classes, ImageCreation
 from .model_methods import save_to_mongo
 from .models import Post, Product, Category, Filter, Image, Comment, Filter_Attribute, Brand, ShopFilterItem, \
-    Image_icon, PostDetailMongo, ProductDetainMongo
+    Image_icon, PostDetailMongo, ProductDetailMongo
 # note1: if edit or add a form field exits in translation.py, like add Categoryform.name field, make sure in admin panel shown correctly (in 'tabbed' mode). if not shown correctly, you have to add a widget with required modeltreanslation classes like in ProductForm.alt_fa.widget.attrs
 
 
