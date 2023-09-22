@@ -28,11 +28,14 @@ from users.models import User
 
 
 group_choices = [(key, str(key)) for key in range(1, 11)]
+genre_choices = [(_('attribute'), 'attribute'), (_('filter'), 'filter')]
+symbole_choices = [('None', 'None'), (_('icon'), 'icon'), (_('color'), 'color')]  # None has default translation
 class Filter(models.Model):
     group = models.PositiveIntegerField(_('group'), choices=group_choices)
     name = models.CharField(_('name'), unique=True, max_length=25)        # name for quering.
     verbose_name = models.CharField(_('verbose name'), max_length=25)     # name for showing. (to user).  for example you have two filter with names: "system amel goshi", "system amele laptop" but both of them have 'system amel' as verbose name.
-    #selling = models.BooleanField(_('selling filter'), default=False)
+    genre = models.CharField(_('genre'), max_length=25, choices=group_choices)
+    symbole = models.CharField(_('symbole'), max_length=25, choices=symbole_choices)
     #filter_attributes
     #category_set
 
@@ -142,6 +145,8 @@ Category_Brands._meta.auto_created = True
 class Filter_Attribute(models.Model):
     name = models.CharField(_('name'), max_length=25)
     slug = models.SlugField(_('slug'), allow_unicode=True, db_index=False)
+    # if filter.symbole was 'icon' symbole_value have to be icon url and if was 'color', symbole_value have to be hash color
+    symbole_value = models.CharField(_('symbole value'), max_length=255)
     filterr = models.ForeignKey(Filter, on_delete=models.CASCADE, related_name='filter_attributes', verbose_name=_('filter'))                 #filter is reserved name by python
     #product_set
     #product_filter_attributes_set
