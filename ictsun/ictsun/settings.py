@@ -104,14 +104,14 @@ DATABASES = {
         'NAME': env('POSTGRES_NAME'),
         'USER': env('POSTGRES_USER'),
         'PASSWORD': env('POSTGRES_PASSWORD'),
-        'HOST': '172.17.0.3',
+        'HOST': env('POSTGRES_HOST'),
         'PORT': '5432',
     },
     'mongo': {
         'ENGINE': 'djongo',
         'NAME': env('MONGO_NAME'),
         'CLIENT': {
-            'host': '172.17.0.2',
+            'host': '127.0.0.1',
             'port': 27017,
             'username': env('MONGO_USER'),
             'password': env('MONGO_PASSWORD'),

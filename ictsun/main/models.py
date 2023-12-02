@@ -34,7 +34,7 @@ class Filter(models.Model):
     group = models.PositiveIntegerField(_('group'), choices=group_choices)
     name = models.CharField(_('name'), unique=True, max_length=25)        # name for quering.
     verbose_name = models.CharField(_('verbose name'), max_length=25)     # name for showing. (to user).  for example you have two filter with names: "system amel goshi", "system amele laptop" but both of them have 'system amel' as verbose name.
-    genre = models.CharField(_('genre'), max_length=25, choices=group_choices)
+    genre = models.CharField(_('genre'), max_length=25, choices=genre_choices)
     symbole = models.CharField(_('symbole'), max_length=25, choices=symbole_choices)
     #filter_attributes
     #category_set
