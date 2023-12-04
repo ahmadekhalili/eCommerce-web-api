@@ -28,7 +28,7 @@ from users.models import User
 
 
 group_choices = [(key, str(key)) for key in range(1, 11)]
-genre_choices = [(_('attribute'), 'attribute'), (_('filter'), 'filter')]
+genre_choices = [(_('attribute'), 'attribute'), (_('filter'), 'filter'), (_('both'), 'both')]
 symbole_choices = [('None', 'None'), (_('icon'), 'icon'), (_('color'), 'color')]  # None has default translation
 class Filter(models.Model):
     group = models.PositiveIntegerField(_('group'), choices=group_choices)
