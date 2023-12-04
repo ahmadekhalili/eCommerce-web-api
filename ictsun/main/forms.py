@@ -127,7 +127,7 @@ name_qusmark_text = _("name for quering. it should be unique. (it is equel to ve
 verbose_qusmark_text = _("name for showing to user. (it is equel to name of filter in most cases)")
 class FilterForm(forms.ModelForm):
     name_fa = forms.CharField(validators=[MaxLengthValidator(limit_value=25)], widget=TextInputQuesMark(attrs={'class': get_mt_input_classes('name_fa')}, qus_text=name_qusmark_text), label=_('name'))
-    name_en = forms.CharField(validators=[MaxLengthValidator(limit_value=25)], widget=TextInputQuesMark(attrs={'class': get_mt_input_classes('name_en')}, qus_text=name_qusmark_text), required=False, label=_('name'))
+    name_en = forms.CharField(validators=[MaxLengthValidator(limit_value=25)], widget=TextInputQuesMark(attrs={'class': get_mt_input_classes('name_en')}, qus_text=name_qusmark_text), required=False, empty_value=None, label=_('name'))
     verbose_name_fa = forms.CharField(validators=[MaxLengthValidator(limit_value=25)], widget=TextInputQuesMark(attrs={'class': get_mt_input_classes('verbose_name_fa')}, qus_text=verbose_qusmark_text), label=_('verbose_name'))
     verbose_name_en = forms.CharField(validators=[MaxLengthValidator(limit_value=25)], widget=TextInputQuesMark(attrs={'class': get_mt_input_classes('verbose_name_en')}, qus_text=verbose_qusmark_text), required=False, label=_('verbose_name'))
 
@@ -153,7 +153,7 @@ class Filter_AttributeForm(forms.ModelForm):
 class ImageIconForm(forms.ModelForm):
     image = forms.ImageField(widget=image_icon_widget(qus_text=image_qusmark_text, input=''), required=True, label=_('image icon'))
     #alt_fa = forms.CharField(max_length=55, widget=forms.TextInput(attrs={'class': get_mt_input_classes('alt_fa')}), label=_('alt'))
-    #alt_en = forms.CharField(max_length=55, widget=forms.TextInput(attrs={'class': get_mt_input_classes('alt_en')}), required=False, label=_('alt'))   # if you don't put required=False, this field will be required in modeltranslation tab.
+    #alt_en = forms.CharField(max_length=55, widget=forms.TextInput(attrs={'class': get_mt_input_classes('alt_en')}), required=False, empty_value=None, label=_('alt'))   # if you don't put required=False, this field will be required in modeltranslation tab.
 
     class Meta:
         model = Image_icon
@@ -165,7 +165,7 @@ class ImageIconForm(forms.ModelForm):
 class ImageForm(forms.ModelForm):
     image = forms.ImageField(widget=image_widget, required=True, label=_('image'))
     alt_fa = forms.CharField(widget=TextInputQuesMark(attrs={'class': get_mt_input_classes('alt_fa')}, qus_text=name_qusmark_text), max_length=55, label=_('alt'))
-    alt_en = forms.CharField(widget=TextInputQuesMark(attrs={'class': get_mt_input_classes('alt_en')}, qus_text=name_qusmark_text), max_length=55, required=False, label=_('alt'))
+    alt_en = forms.CharField(widget=TextInputQuesMark(attrs={'class': get_mt_input_classes('alt_en')}, qus_text=name_qusmark_text), max_length=55, required=False, empty_value=None, label=_('alt'))
 
     class Meta: 
         model = Image
