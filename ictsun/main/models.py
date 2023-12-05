@@ -146,7 +146,7 @@ class Filter_Attribute(models.Model):
     name = models.CharField(_('name'), max_length=25)
     slug = models.SlugField(_('slug'), allow_unicode=True, db_index=False)
     # if filter.symbole was 'icon' symbole_value have to be icon url and if was 'color', symbole_value have to be hash color
-    symbole_value = models.CharField(_('symbole value'), max_length=255)
+    symbole_value = models.CharField(_('symbole value'), max_length=255, blank=True)
     filterr = models.ForeignKey(Filter, on_delete=models.CASCADE, related_name='filter_attributes', verbose_name=_('filter'))                 #filter is reserved name by python
     #product_set
     #product_filter_attributes_set

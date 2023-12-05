@@ -47,7 +47,7 @@ translator.register(Post, PostTranslation)                # age field is require
 
 
 class ProductTranslation(TranslationOptions):
-    exclude = ['id', 'visible', 'created', 'updated', 'category', 'brand', 'rating', 'size']    # 'id' mustn't be in fields otherwise raise error. created and updated should implement in future.
+    exclude = ['id', 'visible', 'created', 'updated', 'filter_attributes', 'category', 'brand', 'rating', 'size']    # 'id' mustn't be in fields otherwise raise error. created and updated should implement in future.
     all_fields = [field.name for field in Product._meta.fields] + [field.name for field in Product._meta.many_to_many]
 
     def fields_generator(exclude, all_fields):       # we can't use exclude and product_fields in list comprehence without this method.
