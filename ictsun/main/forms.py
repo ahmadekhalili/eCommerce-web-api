@@ -76,7 +76,7 @@ class ProductForm(custforms.ProductModelForm):
 
     class Meta:                                          #take fields from admin.fiedset but this is needed for validation.
         model = Product
-        fields = ['name', 'slug', 'meta_title', 'meta_description', 'brief_description', 'detailed_description', 'price', 'available', 'visible', 'filter_attributes', 'category', 'rating', 'weight_fa', 'weight_en', 'length', 'width', 'height']
+        fields = ['name', 'slug', 'meta_title', 'meta_description', 'brief_description', 'detailed_description', 'price', 'available', 'visible', 'filter_attributes', 'category', 'brand', 'rating', 'weight_fa', 'weight_en', 'length', 'width', 'height']
 
     def save(self, commit=True):
         length, width, height = self.cleaned_data.get('length'), self.cleaned_data.get('width'), self.cleaned_data.get('height')

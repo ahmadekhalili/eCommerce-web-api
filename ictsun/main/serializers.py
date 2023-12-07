@@ -304,6 +304,8 @@ class PostDetailSerializer(serializers.ModelSerializer):
 
 class PostDetailMongoSerializer(PostDetailSerializer):
     # .save() require kwarg request
+    # if for any reason we pot save_to_mongo to PostForm.save instead here error will raise when save new post, because
+    # post.published_date required, but form.instance.published_date only available after return instance in form.save
     def save(self, **kwargs):
         change = bool(self.instance)
         instance = super().save(**kwargs)
@@ -335,7 +337,10 @@ class ProductDetailSerializer(serializers.ModelSerializer):       # important: f
         return CategoryChainedSerializer(category_and_fathers, many=True).data
 
     def get_brand(self, obj):
-        return obj.brand.name
+        try:
+            return obj.brand.name
+        except:
+            return ''
 
     def get_rating(self, obj):
         rate = obj.rating.rate
@@ -387,6 +392,14 @@ class ProductDetailMongoSerializer(ProductDetailSerializer):    # we create/edit
             else:
                 filter_filter_attribute[filter_attribute.filterr.name] = [filter_attribute.name]
         return filter_filter_attribute
+
+    # .save() require kwarg request
+    def save(self, **kwargs):
+        # we save product in mongo in place: 1- admin.
+        change = bool(self.instance)
+        instance = super().save(**kwargs)
+        save_to_mongo(ProductDetailMongo, instance, self, change, kwargs['request'])
+        return instance
 
 
 class StateSerializer(serializers.ModelSerializer):

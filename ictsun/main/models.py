@@ -221,15 +221,7 @@ class PostDetailMongo(djongo_models.Model):
         except:
             return 'nameless'                              # return None can't accept (error)
 
-def save_post_mongo(sender, **kwargs):
-    # if we pot save_to_mongo to PostForm.save instead here error will raise when save new post, because
-    # post.published_date required, but form.instance.published_date only available after return instance in form.save
-    change = False if kwargs['created'] else True
-    post = kwargs['instance']
-    from .serializers import PostDetailMongoSerializer
-    save_to_mongo(PostDetailMongo, post, PostDetailMongoSerializer, change)
 
-post_save.connect(save_post_mongo, sender=Post)
 
 
 class ProductManager(models.Manager):                             #we have two seperate way for creating an object,  .create( product.objects.create ) and .save( p=product(..) p.save() ), it is important for us in two way rating creation suported same.
@@ -333,15 +325,7 @@ class ProductDetailMongo(djongo_models.Model):
         except:
             return 'nameless'                             # return None can't accept (error)
 
-def save_product_mongo(sender, **kwargs):
-    # if we pot save_to_mongo to PostForm.save instead here error will raise when save new post, because
-    # post.published_date required, but form.instance.published_date only available after return instance in form.save
-    change = False if kwargs['created'] else True
-    product = kwargs['instance']
-    from .serializers import ProductDetailMongoSerializer
-    save_to_mongo(ProductDetailMongo, product, ProductDetailMongoSerializer, change)
 
-post_save.connect(save_product_mongo, sender=Product)
 
 
 class ShopFilterItem(models.Model):
@@ -401,8 +385,9 @@ class Image(models.Model):
     image = models.ImageField(_('image'), upload_to=image_path_selector, blank=True, null=True)    # here save default size of image to prevent additional query to ImageSizes class.
     alt = models.CharField(_('alt'), max_length=55, unique=True, null=True)                    # alt should not be dublicate because we used alt instead image id in def __str__(self)
     path = models.CharField(_('path'), max_length=20, default='products')                  # can be value like: "products"  or  "posts" ....
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, blank=True, null=True, verbose_name=_('post'))
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True, verbose_name=_('product'))
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='images', blank=True, null=True, verbose_name=_('post'))
+    # related_name='images' is required because uses in serializers.ProductDetailSerializer.images
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images', null=True, verbose_name=_('product'))
     #imagesizes
 
     class Meta:        # ordering by ('post', 'product') should be done in admin separately for image posts and products
