@@ -20,10 +20,10 @@ from ckeditor_uploader.fields import RichTextUploadingField
 
 import jdatetime
 
-from .model_methods import set_levels_afterthis_all_childes_id, update_product_stock, save_to_mongo
+from .model_methods import set_levels_afterthis_all_childes_id, update_product_stock
 from customed_files.django.classes import model_fields
 from users.models import User
-# note1: serializers.py  translation.py  forms.py  admin/save_to_mongo shouuld change after changes models.py
+# note1: serializers.py  translation.py  forms.py  admin/save_to_mongo should change after changes models.py
 # note2: related objects of Product or Post (etc. Brand, Category, ...) you have to apply changes to it's serialisers like ProductListSerializer, ProductDetailMongoSerializer and mongo product/post saving (in admin.py) if required.
 
 
@@ -145,8 +145,7 @@ Category_Brands._meta.auto_created = True
 class Filter_Attribute(models.Model):
     name = models.CharField(_('name'), max_length=25)
     slug = models.SlugField(_('slug'), allow_unicode=True, db_index=False)
-    # if filter.symbole was 'icon' symbole_value have to be icon url and if was 'color', symbole_value have to be hash color
-    symbole_value = models.CharField(_('symbole value'), max_length=255, blank=True)
+    symbole_value = models.CharField(_('symbole value'), max_length=255, blank=True)                  # if filter.symbole was 'icon' symbole_value have to be icon url and if was 'color', symbole_value have to be hash color
     filterr = models.ForeignKey(Filter, on_delete=models.CASCADE, related_name='filter_attributes', verbose_name=_('filter'))                 #filter is reserved name by python
     #product_set
     #product_filter_attributes_set
@@ -303,7 +302,7 @@ from main.signals import FillCategoryfilters_brands         # this cause "m2m_ch
 
 
 class ProductDetailMongo(djongo_models.Model):
-    id = djongo_models.IntegerField(blank=False, null=False, primary_key=True)
+    id = models.IntegerField(blank=False, null=False, primary_key=True)
     json = djongo_models.JSONField()
     #name = djongo_models.CharField(_('name'), max_length=60)
     #slug = djongo_models.CharField(_('slug'), max_length=60)

@@ -12,8 +12,7 @@ import jdatetime
 import re
 
 from .models import *
-from .methods import get_category_and_fathers, ImageCreation
-from .model_methods import save_to_mongo
+from .methods import get_category_and_fathers, ImageCreation, save_to_mongo
 from users.models import User
 from users.serializers import UserNameSerializer, UserSerializer
 from users.methods import user_name_shown
@@ -170,11 +169,10 @@ class ShopFilterItemSerializer(serializers.ModelSerializer):
 
 
 class Filter_AttributeListSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Filter_Attribute
         fields = '__all__'
-        
+
     def to_representation(self, obj):
         fields = super().to_representation(obj)
         del fields['filterr']
@@ -185,11 +183,40 @@ class Filter_AttributeListSerializer(serializers.ModelSerializer):
 
 class FilterSerializer(serializers.ModelSerializer):
     filter_attributes = Filter_AttributeListSerializer(many=True)
+
     class Meta:
         model = Filter
-        fields = ['id', *g_t('name'), 'filter_attributes']
+        fields = ['id', *g_t('name'), *g_t('verbose_name'), 'genre', 'symbole', 'filter_attributes']
 
 
+
+
+class FilterFromFilterAttribute(serializers.ModelSerializer):
+    # here we receive filter_attribute and return filter fields +it's filter attributes like:
+    # FilterFromFilterAttribute(some_filter_attributes, many=True).data and returns like:
+    # [{'id': 1, 'verbose_name_fa': 'filter1'..., 'filter_attributes': [{'id': 1, 'name': 'filter_attr1'}, ...]},
+    #  {'id': 2, 'verbose_name_fa': 'filter2'..., 'filter_attributes': [...]}]
+    filter_attributes = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Filter
+        fields = ['id', *g_t('verbose_name'), 'genre', 'symbole', 'filter_attributes']
+
+    def __new__(cls, *args, **kwargs):
+        filter_attributes = next(iter(args), None) or kwargs.get('instance')
+        if isinstance(filter_attributes[0], Filter_Attribute):           # __new__ calls several times recursively so statement(in below) like: super().__new__(cls, some_filters, **kwargs) can raise error if we don't put this condition.
+            filter_filter_attribute = {}  # is like: {filter1: [filter_attribute1, filter_attribute2], filter2: [...]}
+            for filter_attribute in filter_attributes:
+                if filter_filter_attribute.get(filter_attribute.filterr):
+                    filter_filter_attribute[filter_attribute.filterr] += [filter_attributes]
+                else:
+                    filter_filter_attribute[filter_attribute.filterr] = [filter_attribute]
+            cls.filter_filter_attribute = filter_filter_attribute
+            return super().__new__(cls, list(filter_filter_attribute.keys()), **kwargs)
+        return super().__new__(cls, *args, **kwargs)
+
+    def get_filter_attributes(self, obj):
+        return Filter_AttributeListSerializer(self.filter_filter_attribute[obj], many=True).data
 
 
 class BrandSerializer(serializers.ModelSerializer):
@@ -377,7 +404,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):       # important: f
 
 
 class ProductDetailMongoSerializer(ProductDetailSerializer):    # we create/edit mongo product by receive data from this
-    filters = serializers.SerializerMethodField()  
+    filters = serializers.SerializerMethodField()
     comment_set = CommentSerializer(read_only=True, many=True)
 
     class Meta:

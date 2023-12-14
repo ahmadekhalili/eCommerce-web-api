@@ -1,8 +1,10 @@
 from rest_framework.renderers import JSONRenderer
 from rest_framework.parsers import JSONParser
-from rest_framework.serializers import Serializer
 
 import io
+
+# important: here we put methods need to import in models.py, because here we have not to import any model class due to
+# circle errors.
 
 
 def circle_categories(category=None, previous_category=None):          #only one of category / previous_category should provide.
@@ -50,7 +52,7 @@ def is_circle(category):
     else:
         return False
 
-        
+
 def set_levels_afterthis_all_childes_id(previous_father_queryset, category_queryset, max_limit_value, delete=False):
     category = category_queryset[0]
     previous_category = previous_father_queryset[0] if previous_father_queryset else None              #if previous_father_queryset, previous_father_queryset[0] raise error.  dont change previous_category variabe name, "recursive effect".
@@ -125,57 +127,6 @@ def update_product_stock(self, product, saving):         # self is ShopFilterIte
 
 
 
-
-def save_to_mongo(model, instance, serializer, change, request=None):
-    # model like ProductDetailMongo, instance like post1, serializer like PostDetailSerializer or PostDetailSerializer()
-    # below serializer calls inside ModelSerializer like PostDetailMongoSerializer
-    if isinstance(serializer, Serializer):
-        serializer.request, serializer.instance = request, instance
-        serialized = serializer.data
-    else:                                     # here serializer is like: PostDetailMongoSerializer
-        serialized = serializer(instance, context={'request': request}).data
-    from django.utils.translation import activate, get_language
-    data = {}
-    if request:             # when Modeladmin use form request is None (admin calls form without request)
-        for tuple in request.POST.items():                              # find all additional fields added in admin panel and add to 'data' in order to save them to db
-            if len(tuple[0]) > 6 and tuple[0][:6] == 'extra_':
-                data[tuple[0]] = tuple[1]
-    language_code = get_language()                                  # get current language code
-    activate('en')                                                  # all keys should save in database in `en` laguage(for showing data you can select eny language) otherwise it was problem understading which language should select to run query on them like in:  s = my_serializers.ProductDetailMongoSerializer(form.instance, context={'request': request}).data['shopfilteritems']:     {'رنگ': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} it is false for saving, we should change language by  `activate('en')` and now true form for saving:  {'color': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} and query like: s['color']
-    if not change:
-        content = JSONRenderer().render(serialized)
-        stream = io.BytesIO(content)
-        data = {**JSONParser().parse(stream), **data}                           # s is like: {'id': 12, 'name': 'test2', 'slug': 'test2', ...., 'categories': [OrderedDict([('name', 'Workout'), ('slug', 'Workout')])]} and 'OrderedDict' will cease raise error when want save in mongo so we fixed it in data, so data is like:  {'id': 12, 'name': 'test', 'slug': 'test', ...., 'categories': [{'name': 'Workout', 'slug': 'Workout'}]}   note in Response(some_serializer) some_serializer will fixed auto by Response class like our way
-        model(id=data['id'], json=data).save(using='mongo')
-    else:
-        content = JSONRenderer().render(serialized)
-        stream = io.BytesIO(content)
-        data = {**JSONParser().parse(stream), **data}
-        mongo_model = model.objects.using('mongo').get(id=data['id'])
-        mongo_model.json = data
-        mongo_model.save(using='mongo')
-    activate(language_code)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 '''
 note:deprecated method find_levels_afterthis
 def find_levels_afterthis(previous_father_queryset, max_limit_value):  #this method find lelevls_afterthis handy
@@ -201,5 +152,4 @@ def find_levels_afterthis(previous_father_queryset, max_limit_value):  #this met
                                 for category in category.child_categories.all():
                                     x = 8
     return x
-
 '''

@@ -15,7 +15,6 @@ from users.models import User
 from . import serializers
 from .widgets import *
 from .methods import get_mt_input_classes, ImageCreation
-from .model_methods import save_to_mongo
 from .models import Post, Product, Category, Filter, Image, Comment, Filter_Attribute, Brand, ShopFilterItem, \
     Image_icon, PostDetailMongo, ProductDetailMongo
 # note1: if edit or add a form field exits in translation.py, like add Categoryform.name field, make sure in admin panel shown correctly (in 'tabbed' mode). if not shown correctly, you have to add a widget with required modeltreanslation classes like in ProductForm.alt_fa.widget.attrs
@@ -116,7 +115,7 @@ class CategoryForm(forms.ModelForm):
         fields = '__all__'
 
     def is_valid(self):
-        # used in main.admin.CategoryAdmin.save_to_mongo, also self.instance is mutable and must use copy.
+        # used in main.admin.CategoryAdmin to save to mongo, also self.instance is mutable and must use copy.
         self.previouse_cat = copy(self.instance)
         return super().is_valid()
 

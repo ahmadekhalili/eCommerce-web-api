@@ -27,7 +27,9 @@ from customed_files.django.classes.ModelAdmin import ModelAdminCust
 from . import serializers as my_serializers
 from . import forms as my_forms
 from .models import *
-from .methods import make_next, get_category_and_fathers, get_parsed_data
+from .methods import make_next, get_category_and_fathers, get_parsed_data, save_to_mongo, brand_save_to_mongo, \
+    comment_save_to_mongo, category_save_to_mongo, filter_attribute_save_to_mongo, shopfilteritem_save_to_mongo, \
+    image_save_to_mongo
 from .contexts import PROJECT_VERBOSE_NAME
 from .model_methods import set_levels_afterthis_all_childes_id
 
@@ -111,14 +113,7 @@ class BrandAdmin(TranslationAdmin):
 
     def save_related(self, request, form, formsets, change):             # here update product in mongo database  (ProductDetailMongo.json.brand) according to Brand changes. for example if brand_1.name changes to 'Apl'  ProductDetailMongo:  [{ id: 1, json: {brand: 'Apl', ...}}, {id: 2, ...}]
         super().save_related(request, form, formsets, change)
-        self.save_to_mongo(form, change)
-
-    def save_to_mongo(self, form, change):
-        if change:
-            brand = form.instance
-            products_ids = list(Product.objects.filter(brand=brand).values_list('id', flat=True))             # doc in Filter_AttributeAdmin.save_related
-            mycol = shopdb_mongo["main_productdetailmongo"]
-            mycol.update_many({'id': {'$in': products_ids}}, {'$set': {'json.brand': brand.name}})
+        brand_save_to_mongo(shopdb_mongo, form.instance, change, request)
 
 admin.site.register(Brand, BrandAdmin)
 
@@ -227,30 +222,7 @@ class ProductAdmin(ModelAdminCust):
 
     def save_related(self, request, form, formsets, change):            # this is for adding product and it's changes in mongo database (ProductDetailMongo model)
         super().save_related(request, form, formsets, change)             # manytomany fields will remove from form.instance._meta.many_to_many after calling save_m2m()
-        self.save_to_mongo(request, form, change)
-
-    def save_to_mongo(self, request, form, change):
-        data = {}
-        for tuple in request.POST.items():                              # find all additional fields added in admin panel and add to 'data' in order to save them to db
-            if len(tuple[0]) > 6 and tuple[0][:6] == 'extra_':
-                data[tuple[0]] = tuple[1]
-        language_code = get_language()                                  # get current language code
-        activate('en')                                                  # all keys should save in database in `en` laguage(for showing data you can select eny language) otherwise it was problem understading which language should select to run query on them like in:  s = serializers.ProductDetailMongoSerializer(form.instance, context={'request': request}).data['shopfilteritems']:     {'رنگ': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} it is false for saving, we should change language by  `activate('en')` and now true form for saving:  {'color': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} and query like: s['color']
-        if not change:
-            s = my_serializers.ProductDetailMongoSerializer(form.instance, context={'request': request}).data
-            content = JSONRenderer().render(s)
-            stream = io.BytesIO(content)
-            data = {**JSONParser().parse(stream), **data}                           # s is like: {'id': 12, 'name': 'test2', 'slug': 'test2', ...., 'categories': [OrderedDict([('name', 'Workout'), ('slug', 'Workout')])]} and 'OrderedDict' will cease raise error when want save in mongo so we fixed it in data, so data is like:  {'id': 12, 'name': 'test', 'slug': 'test', ...., 'categories': [{'name': 'Workout', 'slug': 'Workout'}]}   note in Response(some_serializer) some_serializer will fixed auto by Response class like our way
-            ProductDetailMongo(id=data['id'], json=data).save(using='mongo')
-        else:
-            s = my_serializers.ProductDetailMongoSerializer(form.instance, context={'request': request}).data
-            content = JSONRenderer().render(s)
-            stream = io.BytesIO(content)
-            data = {**JSONParser().parse(stream), **data}
-            mongo_product = ProductDetailMongo.objects.using('mongo').get(id=data['id'])
-            mongo_product.json = data
-            mongo_product.save(using='mongo')
-        activate(language_code)
+        save_to_mongo(ProductDetailMongo, form.instance, my_serializers.ProductDetailMongoSerializer, change, request)
 
     @csrf_protect_m
     def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
@@ -372,20 +344,7 @@ class CommentAdmin(admin.ModelAdmin):
 
     def save_related(self, request, form, formsets, change):         # here update product in mongo database  (ProductDetailMongo.json.comment_set) according to Comment changes. for example if we have comment_1 (comment_1.product=<Product (1)>)   comment_1.content changes to 'another_content'  ProductDetailMongo:  [{id: 1, json: {comment_set: [{ id: 2, status: '1', published_date: '2022-08-07T17:33:38.724203', content: 'another_content', author: { id: 1, user_name: 'ادمین' }, reviewer: null, post: null, product: 12 }], ...}}, {id: 2, ...}]
         super().save_related(request, form, formsets, change)
-        self.save_to_mongo(request, form, change)
-
-    def save_to_mongo(self, request, form, change):
-        if change:
-            comment = form.instance
-            if comment.post_id:
-                mongo_db_name = "main_postdetailmongo"
-                foreignkey = comment.post_id
-            else:
-                mongo_db_name = "main_productdetailmongo"
-                foreignkey = comment.product_id
-            data, comment_id = get_parsed_data(comment, my_serializers.CommentSerializer), comment.id
-            mycol = shopdb_mongo[mongo_db_name]
-            mycol.update_one({'id': foreignkey}, {'$set': {'json.comment_set.$[element]': data}}, array_filters=[{'element.id': comment_id}])
+        comment_save_to_mongo(shopdb_mongo, form.instance, my_serializers.CommentSerializer, change, request)
 
 admin.site.register(Comment, CommentAdmin)
 
@@ -454,21 +413,7 @@ class CategoryAdmin(TranslationAdmin):
 
     def save_related(self, request, form, formsets, change):         # here update product in mongo database  (ProductDetailMongo.json.categories) according to Category changes. for example if <Category digital>.name changes to 'digggital'  all products with category 'digital' os children of 'digital' like 'phone' or 'smart phone' will changes like product_1 (product_1.category=<Category digital>), product_2 (product_2.category=<Category phone>), product_3 (product_3.category=<Category smart phone>):   ProductDetailMongo:  [{ id: 1, json: {categories: [{ name: 'digggital', slug: 'digital' }], ...}}, { id: 2, json: {categories: [{ name: 'digital', slug: 'digital' }, { name: 'phone', slug: 'phone' }], ...}}, { id: 3, json: {categories: [{ name: 'digggital', slug: 'digital' }, { name: 'phone', slug: 'phone' }, { name: 'smart phone', slug: 'smart-phone' }], ...}}]
         super().save_related(request, form, formsets, change)
-        self.save_to_mongo(request, form, change)
-
-    def save_to_mongo(self, request, form, change):
-        if change:
-            category = form.instance
-            if category.post_product == 'post':
-                col_name, model = 'main_postdetailmongo', Post
-            else:
-                col_name, model = 'main_productdetailmongo', Product
-            children_ids = category.all_childes_id.split(',') if category.all_childes_id else []
-            category_children_ids = [category.id] + list(Category.objects.filter(id__in=children_ids).values_list('id', flat=True))   # why we need children of category?  supose we edit `digital` category in admin, we should update all products with category digital or child of `digital`.  for example: product1.category = <Smart phone...>,  product1 in mongo db: product1['json']['categories'] is like [{ name: 'digital', slug: 'digital' }, { name: 'phone', slug: 'phone'}, { name: 'smart phone', slug: 'smart_phone'}],  now if we edit digital product1 should update!
-            ids = list(model.objects.filter(category_id__in=category_children_ids).values_list('id', flat=True))             # doc in Filter_AttributeAdmin.save_related
-            mycol = shopdb_mongo[col_name]
-            mycol.update_many({'id': {'$in': ids}}, {'$set': {'json.categories.$[element]': my_serializers.CategoryChainedSerializer(category).data}}, array_filters=[{'element': my_serializers.CategoryChainedSerializer(form.previouse_cat).data}])
-            del form.previouse_cat
+        category_save_to_mongo(shopdb_mongo, form, my_serializers.CategoryChainedSerializer, change)
 
     '''
     @csrf_protect_m
@@ -561,16 +506,7 @@ class Filter_AttributeAdmin(TranslationAdmin):
 
     def save_related(self, request, form, formsets, change):
         super().save_related(request, form, formsets, change)
-        self.save_to_mongo(request, form, change)
-
-    def save_to_mongo(self, request, form, change):         # here update ProductDetailMongo.json.filters.{filter_name} with new filter_attribute.name like: {id: 1, json: {filters: {'color': ['abi', 'zar']}, ...}} >== {id:1, json: {filters: {'color': ['sefid', 'zar']}, ...}}   filter_attribute = form.instance     previouse filter_attribute.name only exists before runing form.is_valid() in _changeform_view  so we saved previouse name in Filter_AttributeForm.is_valid
-        if change:
-            filter_attribute = form.instance
-            filter_name, filterattribute_name = filter_attribute.filterr.name, filter_attribute.name
-            products_ids = list(filter_attribute.product_set.values_list('id', flat=True))                 # products_ids is like ['1', '2', '5', ...]
-            mycol = shopdb_mongo["main_productdetailmongo"]
-            mycol.update_many({'id': {'$in': products_ids}}, {'$set': {'json.filters.{}.$[element]'.format(filter_name): filterattribute_name}}, array_filters=[{'element': form.previouse_name}])      # note1: form.previouse_name should be in databse otherwise comment will not work       2:  we can't use like:  mycol.update_many({'id': {'$in': products_ids}}, {'$set': {'json.filters.{}.{}'.format(filter_name, form.previouse_name): filterattribute_name}})  because json.filters.filter_name is list not dict  also can't use string type f: f'...' and should use ''.fromat
-            del form.previouse_name
+        filter_attribute_save_to_mongo(shopdb_mongo, form, change)
 
 admin.site.register(Filter_Attribute, Filter_AttributeAdmin)
 
@@ -595,14 +531,7 @@ class ShopFilterItemAdmin(TranslationAdmin):
 
     def save_related(self, request, form, formsets, change):
         super().save_related(request, form, formsets, change)
-        self.save_to_mongo(request, form, change)
-
-    def save_to_mongo(self, request, form, change):     # here update product in mongo database  (ProductDetailMongo.json.shopfilteritems) according to ShopFilterItem changes. for example if shopfilteritem_1.name changes to 'Apl'  ProductDetailMongo:  [{ id: 1, json: {brand: 'Apl', ...}}, {id: 2, ...}]
-        if change:
-            shopfilteritem = form.instance
-            product_id, filter_name = shopfilteritem.product.id, shopfilteritem.filter_attribute.filterr.name            # doc in Filter_AttributeAdmin.save_related
-            mycol = shopdb_mongo["main_productdetailmongo"]
-            mycol.update_many({'id': product_id}, {'$set': {'json.shopfilteritems.{}.$[element]'.format(filter_name): my_serializers.ShopFilterItemSerializer(shopfilteritem).data}}, array_filters=[{'element.id': shopfilteritem.id}])
+        shopfilteritem_save_to_mongo(shopdb_mongo, form, my_serializers.ShopFilterItemSerializer, change)
 
 admin.site.register(ShopFilterItem, ShopFilterItemAdmin)
 
@@ -626,18 +555,7 @@ class ImageAdmin(TranslationAdmin):
 
     def save_related(self, request, form, formsets, change):
         super().save_related(request, form, formsets, change)
-        self.save_to_mongo(request, form, change)
-
-    def save_to_mongo(self, request, form, change):     # here update product in mongo database  (ProductDetailMongo.json.images) according to Image changes. for example if image_1.alt changes to 'another_alt'  ProductDetailMongo.json.images:  [{ id: 1, image: '...', alt: 'another_alt'}
-        if change:
-            image = form.instance
-            image_id, product_id = image.id, image.product.id
-            s = my_serializers.ImageSerializer(image, context={'request': request}).data
-            content = JSONRenderer().render(s)
-            stream = io.BytesIO(content)
-            data = JSONParser().parse(stream)
-            mycol = shopdb_mongo["main_productdetailmongo"]
-            mycol.update_one({'id': product_id}, {'$set': {'json.images.$[element]': data}}, array_filters=[{'element.id': image_id}])
+        image_save_to_mongo(shopdb_mongo, form.instance, my_serializers.ImageSerializer, change, request)
 
 admin.site.register(Image, ImageAdmin)
 
