@@ -14,15 +14,15 @@ from customed_files.django.classes import custforms
 from users.models import User
 from . import serializers
 from .widgets import *
-from .methods import get_mt_input_classes, ImageCreation
+from .methods import get_mt_input_classes, ImageCreationSizes
 from .models import Post, Product, Category, Filter, Image, Comment, Filter_Attribute, Brand, ShopFilterItem, \
     Image_icon, PostDetailMongo, ProductDetailMongo
-# note1: if edit or add a form field exits in translation.py, like add Categoryform.name field, make sure in admin panel shown correctly (in 'tabbed' mode). if not shown correctly, you have to add a widget with required modeltreanslation classes like in ProductForm.alt_fa.widget.attrs
+# note1: if edit or add a form field exits in translation.py, like add Categoryform.name field, make sure in admin panel shown correctly (in 'tabbed' mode). if not shown correctly, you have to add a widget with required modeltreanslation classes like in ProductAdminForm.alt_fa.widget.attrs
 
 
 
-class PostForm(forms.ModelForm):
-    # in form calling, request is required like: PostForm(data=request.POST, request=request)
+class PostAdminForm(forms.ModelForm):
+    # in form calling, request is required like: PostAdminForm(data=request.POST, request=request)
     def __init__(self, data=None, files=None, auto_id='id_%s', prefix=None, initial=None, error_class=ErrorList, label_suffix=None, empty_permitted=False, instance=None, use_required_attribute=None, renderer=None, request=None):
         self.request = request
         super(). __init__(data, files, auto_id, prefix, initial, error_class, label_suffix, empty_permitted, instance, use_required_attribute, renderer)
@@ -46,10 +46,9 @@ class PostForm(forms.ModelForm):
         # calling post.image_icon_set.exists() several time, cause runs several query
         post = instance if instance else self.instance
         image_icon_exits = post.image_icon_set.exists()
-        if self.files.get('file') or self.files.get('image_icon_set-0-image'):  # in post updating, we update post images icons when frontend provide self.data['file'] or admin sends first image image_icon_set-0-image (means in admin we can edit image icons only if we change first image icon). suppose post1.image_icon_set.all() == [image240, image420, image40,.., imagedefault] . now if you go to admin/post/post1 and edit one of image icones and submit what will happen? program will save 7 another image for one that if this condition wasnt.
-            obj = ImageCreation(self.data, self.files, [240, 420, 640, 720, 960, 1280, 'default'])
-            obj.set_instances(Image_icon, path='posts', post=post)
-            paths, instances = obj.create_images(path='/media/posts_images/icons/')
+        if self.files.get('image_icon_set-0-image'):  # in post updating, we update post images icons when admin sends first image image_icon_set-0-image (means in admin we can edit image icons only if we change first image icon). suppose post1.image_icon_set.all() == [image240, image420, image40,.., imagedefault] . now if you go to admin/post/post1 and edit one of image icones and submit what will happen? program will save 7 another image for one that if this condition wasnt.
+            obj = ImageCreationSizes([240, 420, 640, 720, 960, 1280, 'default'], model=Image_icon, model_fields={'path': 'posts', 'post': post})
+            paths, instances = obj.create_images(file=self.files['image_icon_set-0-image'], path='/media/posts_images/icons/')
             post.image_icon_set.all().delete() if image_icon_exits else None
             Image_icon.objects.bulk_create(instances) if instances else None
         return post
@@ -58,7 +57,7 @@ class PostForm(forms.ModelForm):
 image_qusmark_text = _('Image rate should be 1:1')
 weight_qusmark_text = _('weight in gram')
 length_qusmark_text = _('size in millimeter')
-class ProductForm(custforms.ProductModelForm):
+class ProductAdminForm(custforms.ProductModelForm):
     def __init__(self, data=None, files=None, auto_id='id_%s', prefix=None, initial=None, error_class=ErrorList, label_suffix=None, empty_permitted=False, instance=None, use_required_attribute=None, renderer=None):
         initial = initial if initial else {}
         length, width, height = [float(i) for i in instance.size.split(',')] if instance and instance.size else (None,None,None)
@@ -85,10 +84,9 @@ class ProductForm(custforms.ProductModelForm):
         # calling product.image_icon_set.exists() several time, cause runs several query
         product = instance if instance else self.instance
         image_icon_exits = product.image_icon_set.exists()
-        if self.files.get('file') or self.files.get('image_icon_set-0-image'):  # in product updating, we update product images icons when frontend provide self.data['file'] or admin sends first image image_icon_set-0-image (means in admin we can edit image icons only if we change first image icon). supposep roduct1.image_icon_set.all() == [image240, image420, image40,.., imagedefault] . now if you go to admin/product/product1 and edit one of image icones and submit what will happen? program will save 7 another image for one that if this condition wasnt.
-            obj = ImageCreation(self.data, self.files, [240, 420, 640, 720, 960, 1280, 'default'])
-            obj.set_instances(Image_icon, path='products', product=product)
-            paths, instances = obj.create_images(path='/media/products_images/icons/')
+        if self.files.get('image_icon_set-0-image'):  # if you want save product image icons via from, you must use admin panel otherwise you may use serializer. for create/change image icon of a product we only check first image sends: image_icon_set-0-image (means in admin we can edit image icons only if we change first image icon). supposep roduct1.image_icon_set.all() == [image240, image420, image40,.., imagedefault] . now if you go to admin/product/product1 and edit one of image icones and submit what will happen? program will save 7 another image for one that if this condition wasnt.
+            obj = ImageCreationSizes([240, 420, 640, 720, 960, 1280, 'default'], model=Image_icon, model_fields={'path': 'products', 'product': product})
+            paths, instances = obj.create_images(file=self.files['image_icon_set-0-image'], path='/media/products_images/icons/')
             product.image_icon_set.all().delete() if image_icon_exits else None
             Image_icon.objects.bulk_create(instances) if instances else None
         return product

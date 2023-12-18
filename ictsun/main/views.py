@@ -26,7 +26,7 @@ import pymongo
 
 from . import serializers as my_serializers
 from . import forms as my_forms
-from .methods import get_products, get_posts, get_posts_products_by_category, make_next, ImageCreation, \
+from .methods import get_products, get_posts, get_posts_products_by_category, make_next, ImageCreationSizes, \
     get_parsed_data, get_page_count, get_unique_list
 from .models import *
 from users.serializers import UserSerializer, UserChangeSerializer
@@ -142,7 +142,7 @@ class PostList(views.APIView):
         return Response({'sessionid': sessionid, **serializers, 'pages': page_count})
 
     def post(self, request, *args, **kwargs):
-        form = my_forms.PostForm(request.POST, request.FILES, request=request)
+        form = my_forms.PostAdminForm(request.POST, request.FILES, request=request)
         if form.is_valid():
             instance = form.save()
             return Response(my_serializers.PostDetailSerializer(instance, context={'request': request}).data)
@@ -221,7 +221,7 @@ class PostDetail(views.APIView):
 
     def post(self, request, *args, **kwargs):               # you have to submit data by form not json.
         post = get_object_or_404(Post, id=kwargs['pk'])
-        form = my_forms.PostForm(request.POST, request.FILES, instance=post, request=request)
+        form = my_forms.PostAdminForm(request.POST, request.FILES, instance=post, request=request)
         if form.is_valid():
             instance = form.save()
             return Response(my_serializers.PostDetailSerializer(instance, context={'request': request}).data)
@@ -337,10 +337,10 @@ class UploadImage(views.APIView):
         '''
         import uuid
         name, sizes = uuid.uuid4().hex[:12], [240, 420, 640, 720, 960, 1280]
-        obj = ImageCreation(data=request.data, files=request.data, sizes=sizes)
+        obj = ImageCreationSizes(sizes=sizes)
         image = Image(image=request.data['file'], alt=obj.get_alt('default'), path='posts')
-        obj.instances = [ImageSizes(alt=obj.get_alt(size), size=size, father=image) for size in sizes] # set instances manually (instead method obj.set_instances)
-        paths, instances = obj.create_images(path='/media/posts_images/')
+        obj.instances = [ImageSizes(alt=obj.get_alt(size), size=size, father=image) for size in sizes]
+        paths, instances = obj.create_images(file=request.data['file'], path='/media/posts_images/')
         image.save()
         ImageSizes.objects.bulk_create(instances)
         paths['default'], paths['image_id'] = image.image.url, image.id

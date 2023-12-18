@@ -22,7 +22,7 @@ from pathlib import Path
 from itertools import cycle
 from math import ceil
 
-from .models import Product, Post, Category
+from .models import Product, Post, Category, Image_icon
 
 
 
@@ -228,15 +228,21 @@ def get_page_count(model_instances, step, **kwargs):  # model_instances can be a
         return ceil(model_instances.count() / step)
 
 
-class ImageCreation:
-    def __init__(self, data, files, sizes, name=None):
-        # data==request.data. it's not good idea name of file be same with alt (alt هس like: "food-vegetables-healthy"(
+class ImageCreationSizes:
+    # in this class we receive image binary/base64 and save it to disk with specified sizes. if a model specified,
+    # that models field will be filled instead, for example: image1.image = size1, image2.image = size2, ...
+    def __init__(self, sizes, name=None, model=None, model_fields=None):
+        # model like: Image_icon, model_fields is it's fields (dict type). if you specify model and model_fields,
+        # image creation  will be done by model field(instance.att_name.save()) instead of PilImage.save()
         self.base_path = str(Path(__file__).resolve().parent.parent)  # is like: /home/akh/eCommerce-web-api/ictsun
-        self.data = data
-        self.files = files
         self.sizes = sizes
         self.name = name if name else uuid.uuid4().hex[:12]  # generate random unique string (length 12)
-        self.instances = None
+        if model:
+            try:  # if alt provided, if alt=None generate random alt
+                alt = model_fields['alt'] if model_fields['alt'] else uuid.uuid4().hex[:6]
+                self.instances = [model(alt=f'{alt}-{size}', **model_fields) for size in self.sizes]
+            except:  # if alt not provided (maybe model has not alt field)
+                self.instances = [model(**model_fields) for size in self.sizes]
 
     def get_file_stream(self):
         file = self.files['file'].read() if self.files.get('file') else self.files['image_icon_set-0-image'].read()
@@ -250,16 +256,10 @@ class ImageCreation:
             date = datetime.now().strftime('%Y %-m %-d').split()
         return f'{middle_path}{date[0]}/{date[1]}/{date[2]}/'
 
-    def get_alt(self, size):
-        # if submited data provide 'alt' (send inside input) we use it otherwise generate 6 letter random unique.
-        pre_alt = self.data.get('alt', uuid.uuid4().hex[:6])
+    def get_alt(self, size, text=None):
+        # text == pre alt
+        pre_alt = text if text else uuid.uuid4().hex[:6]
         return f'{pre_alt}-{size}'
-
-    def set_instances(self, model, **kwargs):
-        # model like: Image_icon, kwargs is model fields, for Image_icon like: path='posts', post=post1
-        # this method must call before create_images() if you want same image by model field instead pillow.save()
-        self.instances = [model(alt=self.get_alt(size), **kwargs) for size in self.sizes]
-        return self.instances
 
     def _save_image(self, opened_image, path, full_name, format, instance, att_name):
         if isinstance(opened_image, PilImage.Image):
@@ -272,13 +272,18 @@ class ImageCreation:
             else:                  # save image to hard by pillow.save()
                 opened_image.save(self.base_path + path + full_name)
 
-    def create_images(self, opened_image=None, path=None, att_name='image'):
+    def create_images(self, file=None, opened_image=None, path=None, att_name='image'):
         '''
+        file can be binary (multipart form-data) or base64.
         path is like: /media/posts_images/icons/  returned value is like:
-        {'default': '/media/../..7a0-default.JPEG', 240: '/media/../..7a0-240.JPEG', ...}. if you specify instances,
-        image creation will done by model field(instance.att_name.save()) instead of PilImage.save()
+        {'default': '/media/../..7a0-default.JPEG', 240: '/media/../..7a0-240.JPEG', ...}.
         '''
-        opened_image = PilImage.open(self.get_file_stream()) if not opened_image else opened_image
+        try:         # binary file (multipart form-data)
+            stream = io.BytesIO(file.read())
+        except:      # base64 file
+            import base64
+            stream = io.BytesIO(base64.b64decode(file.split(';base64,')[1]))
+        opened_image = PilImage.open(stream) if not opened_image else opened_image
         path = self.get_path() if not path else self.get_path(path)
         iter_instances = cycle(self.instances) if self.instances else None
         if isinstance(opened_image, PilImage.Image):
@@ -288,7 +293,7 @@ class ImageCreation:
             height, width = opened_image.size                 # opened_image.size is like: (1080, 1920)
             aspect_ratio = height / width
             for height in self.sizes:
-                resized = opened_image.resize((height, int(height / aspect_ratio))) if isinstance(height, int) else opened_image
+                resized = opened_image.resize((height, int(height / aspect_ratio))) if isinstance(height, int) else opened_image  # height can be 'default' str type
                 full_name = f'{self.name}-{height}' + f'.{format}'
                 instance = next(iter_instances) if self.instances else None
                 self._save_image(resized, path, full_name, format, instance, att_name)

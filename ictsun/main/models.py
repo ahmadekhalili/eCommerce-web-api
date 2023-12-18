@@ -252,7 +252,7 @@ class Product(models.Model):                                     #.order_by('-av
     rating = models.OneToOneField(Rating, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('rating'))
     stock = models.PositiveIntegerField(_('stock'), default=0)                        # important: stock before creating first shopfilteritem of product shoud be 0 otherwise it will sum with shopfilteritem.stock, example: supose we have product1.stock = 10  now after creating shopfilteritem1 with stock=12 product1.stock will be 10+12   (address: in ShopFilterItem.save and model_methods.py/update_product_stock
     weight = models.FloatField(_('weight'), null=True, blank=False)                   # weight is in gram and used in orders/methods/profile_order_detail/PostDispatchPrice  but if you dont specify weight in saving a product, it will be None and will ignore in PostDispatchPrice. its better null=True easier in creating products in tests.
-    size = models.CharField(_('size'), max_length=25, blank=True)          # value should be in mm  and like '100,150,150'  this field seperate to 3 field in ProductForm in __init__ and save func), also we use size in methods.PostDispatchPrice  to define which box size should choice for posting.
+    size = models.CharField(_('size'), max_length=25, blank=True)          # value should be in mm  and like '100,150,150'  this field seperate to 3 field in ProductAdminForm in __init__ and save func), also we use size in methods.PostDispatchPrice  to define which box size should choice for posting.
     #image_set                                                    backward relation field
     #image_icon_set
     #comment_set

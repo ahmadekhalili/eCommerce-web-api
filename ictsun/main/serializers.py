@@ -12,7 +12,7 @@ import jdatetime
 import re
 
 from .models import *
-from .methods import get_category_and_fathers, ImageCreation, save_to_mongo
+from .methods import get_category_and_fathers, ImageCreationSizes, save_to_mongo
 from users.models import User
 from users.serializers import UserNameSerializer, UserSerializer
 from users.methods import user_name_shown
@@ -331,14 +331,13 @@ class PostDetailSerializer(serializers.ModelSerializer):
 
 class PostDetailMongoSerializer(PostDetailSerializer):
     # .save() require kwarg request
-    # if for any reason we pot save_to_mongo to PostForm.save instead here error will raise when save new post, because
+    # if for any reason we pot save_to_mongo to PostAdminForm.save instead here error will raise when save new post, because
     # post.published_date required, but form.instance.published_date only available after return instance in form.save
     def save(self, **kwargs):
         change = bool(self.instance)
         instance = super().save(**kwargs)
-        obj = ImageCreation(data=self.data, files=self.data, sizes=[240, 420, 640, 720, 960, 1280, 'default'])
-        obj.set_instances(Image_icon, path='posts', post=instance)
-        paths, instances = obj.create_images(path='/media/posts_images/icons/')
+        obj = ImageCreationSizes(sizes=[240, 420, 640, 720, 960, 1280, 'default'], model=Image_icon, model_fields={'path': 'posts', 'post': instance})
+        paths, instances = obj.create_images(file=self.data['file'], path='/media/posts_images/icons/')
         if instances:
             Image_icon.objects.bulk_create(instances)
         save_to_mongo(PostDetailMongo, instance, self, change, kwargs['request'])

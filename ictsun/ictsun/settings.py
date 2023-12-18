@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'modeltranslation',
     'debug_toolbar',
     'django_extensions',
+    'drf_spectacular',
     'main.apps.MainConfig',
     'users.apps.UsersConfig',
     'cart.apps.CartConfig',
@@ -146,7 +147,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'customed_files.rest_framework.classes.authentication.SessionAuthenticationCustom',
     ),
-    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema'
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema'  # 'rest_framework.schemas.coreapi.AutoSchema'
     }
 
 #'DEFAULT_SCHEMA_CLASS ': 'rest_framework.schemas.openapi.AutoSchema'
@@ -187,6 +188,13 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 # STATIC_ROOT = BASE_DIR / "static"      # for run command "python manage.py collectstatic" required
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'My Project API',
+    'DESCRIPTION': 'My project description',
+    'VERSION': '0.9',
+    'SERVE_INCLUDE_SCHEMA': False,
+}
 
 LOCALE_PATHS = (BASE_DIR / 'locale', )
 

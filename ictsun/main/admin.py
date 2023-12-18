@@ -62,7 +62,7 @@ class PostAdmin(TranslationAdmin):
     prepopulated_fields = {'slug':('title',)}
     inlines = [CommentInline, ImageIconInline]
     readonly_fields = ('get_published_date', 'get_updated')
-    form = my_forms.PostForm
+    form = my_forms.PostAdminForm
 
     class Media:                                 # this cause languages shown separatly in admin panel. (it should be use always, otherwise all field of all languages shown under each other at once)
         js = (
@@ -159,7 +159,7 @@ class ProductAdmin(ModelAdminCust):
     filter_horizontal = ('filter_attributes',)
     inlines = [ImageInline, CommentInline, ImageIconInline]
     readonly_fields = ('rating', 'get_created', 'get_updated')
-    form = my_forms.ProductForm
+    form = my_forms.ProductAdminForm
     fieldsets = (
         (None, {
             'fields': ('name', 'slug', 'brief_description', 'detailed_description', 'price', 'available', 'category', 'filter_attributes', 'rating', 'stock', 'brand', 'weight', 'get_created', 'get_updated')
@@ -573,4 +573,4 @@ admin.site.register(State)
         a = super().get_form(request, obj=None, change=False, **kwargs)
         return a
 '''
-#video note: my_forms.ProductForm.base_fields you can eazy see django modelform chose whitch fields for you foreignkey for manytomany or ... mode fields.
+#video note: my_forms.ProductAdminForm.base_fields you can eazy see django modelform chose whitch fields for you foreignkey for manytomany or ... mode fields.
