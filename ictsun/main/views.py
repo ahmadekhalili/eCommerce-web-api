@@ -203,6 +203,12 @@ class ProductList(views.APIView):
         page_count = get_page_count(products, step)
         return Response({'sessionid': sessionid, **products_serialized, **{'sidebarcategory_checkbox': sidebarcategory_checkbox_serialized}, **{'sidebarcategory_link': sidebarcategory_link_serialized}, 'brands': brands_serialized, 'filters': filters_serialized, 'pages': page_count})
 
+    def post(self, request, *args, **kwargs):
+        serializer = my_serializers.ProductDetailSerializer(data=request.data)
+        if serializer.is_valid():
+            instance = serializer.save()
+            return Response(my_serializers.ProductDetailSerializer(instance, context={'request': request}).data)
+        return Response(serializer.errors)
 
 
 
@@ -240,7 +246,7 @@ class ProductDetail(views.APIView):
         select_related_father_category = 'category'
         for i in range(Category._meta.get_field('level').validators[1].limit_value-1):
             select_related_father_category += '__father_category'
-        product = Product.objects.filter(id=kwargs['pk']).select_related(select_related_father_category, 'brand', 'rating').prefetch_related('comment_set', 'image_set')
+        product = Product.objects.filter(id=kwargs['pk']).select_related(select_related_father_category, 'brand', 'rating').prefetch_related('comment_set', 'images')
         for p in product:                                                         #using like product[0].comment_set revalute and use extra queries
             if request.user.is_authenticated:
                 comment_of_user = p.comment_set.filter(author=request.user, product=p)        #this line dont affect select_related and prefetch_related on product and they steal work perfect.                           
@@ -253,7 +259,6 @@ class ProductDetail(views.APIView):
         product_serializer = my_serializers.ProductDetailSerializer(product, many=True, context={'request': request}).data    #product is query set so we need pu like product[0] or put product with many=True (product[0] make revaluate
         product_serializer = product_serializer[0] if product_serializer else {}
         sessionid = request.session.session_key
-        
         return Response({**product_serializer, 'comment_of_user': comment_of_user_serialized, 'comments': comments_serialized})
 
 

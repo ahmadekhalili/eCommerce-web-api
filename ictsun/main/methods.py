@@ -70,7 +70,7 @@ def get_category_and_fathers(category):
             if category:
                 category_and_fathers += [category]
         return category_and_fathers
-    return None  # returns None is safe for use inside serializer like: CategoryChainedSerializer(None, many=True).data
+    raise AttributeError('category is None')
 
 
 def get_category_and_children(category):      # obtain category and children by queries (very heavy)
@@ -404,3 +404,25 @@ def image_save_to_mongo(shopdb_mongo, image, serializer, change, request=None):
         data = JSONParser().parse(stream)
         mycol = shopdb_mongo["main_productdetailmongo"]
         mycol.update_one({'json.images.id': image_id}, {'$set': {'json.images.$': data}})
+
+
+def save_product(data, super_func, super_func_args, pre_instance=None):
+    # this function calls inside ProductForm.save or ProductDetailSerializer.save to create/update product (main attrs)
+    # 'data' in form is 'cleaned_data' and in serializer is 'validated_data'
+    # 'super_func' is like: super().save and 'super_func_args' is it's args (dict type).
+    # pre_instance is self.instance before saving instance in db (before calling super). in creation, it is None
+    length, width, height = data.get('length'), data.get('width'), data.get('height')
+    data['size'] = str(length) + ',' + str(width) + ',' + str(height) if length and width and height else ''
+    if pre_instance and data.get('size'):    # in update, we have pre_instance
+        pre_instance.size = data['size']
+    instance = super_func(*super_func_args)
+    # calling product.image_icon_set.exists() several time, cause runs several query
+    product = instance if instance else pre_instance
+    image_icon_exits = product.image_icon_set.exists()
+    file = data.get('file') or data.get('image_icon_set-0-image')
+    if file:  # in product updating, we update product images icons when frontend provide self.data['file'] or admin sends first image image_icon_set-0-image (means in admin we can edit image icons only if we change first image icon). supposep roduct1.image_icon_set.all() == [image240, image420, image40,.., imagedefault] . now if you go to admin/product/product1 and edit one of image icones and submit what will happen? program will save 7 another image for one that if this condition wasnt.
+        obj = ImageCreationSizes(sizes=[240, 420, 640, 720, 960, 1280, 'default'], model=Image_icon, model_fields={'path': 'products', 'product':product})
+        paths, instances = obj.create_images(file=file, path='/media/products_images/icons/')
+        product.image_icon_set.all().delete() if image_icon_exits else None
+        Image_icon.objects.bulk_create(instances) if instances else None
+    return product

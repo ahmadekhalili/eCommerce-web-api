@@ -4,15 +4,18 @@ from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
 from rest_framework import serializers
+from rest_framework.fields import empty
+from rest_framework.validators import UniqueValidator
 
 from modeltranslation.utils import get_translation_fields as g_t
+from drf_extra_fields.fields import Base64ImageField
 from datetime import datetime
 from pathlib import Path
 import jdatetime
 import re
 
 from .models import *
-from .methods import get_category_and_fathers, ImageCreationSizes, save_to_mongo
+from .methods import get_category_and_fathers, ImageCreationSizes, save_to_mongo, save_product
 from users.models import User
 from users.serializers import UserNameSerializer, UserSerializer
 from users.methods import user_name_shown
@@ -46,11 +49,18 @@ class RatingSerializer(serializers.ModelSerializer):
 
 
 class ImageSerializer(serializers.ModelSerializer):
-    image = serializers.SerializerMethodField()  
+    id = serializers.IntegerField(required=False)
+    image = Base64ImageField(allow_null=True, label='تصویر', required=False)
+
     class Meta:
         model = Image
-        fields = ['id', 'image', *g_t('alt')]
-        
+        fields = '__all__'
+
+    def to_representation(self, obj):
+        alts = g_t('alt')
+        self.fields = {'id': self.fields['id'], 'image': serializers.SerializerMethodField(), **{alt: self.fields[alt] for alt in alts}}
+        return super().to_representation(obj)
+
     def get_image(self, obj):
         try:
             url = obj.image.url                 #request.build_absolute_uri()  is like "http://127.0.0.1:8000/product_list/"     and   request.build_absolute_uri(obj.image_icon.url) is like:  "http://192.168.114.6:8000/product_list/media/3.jpg" (request.build_absolute_uri() + obj.image_icon.url)
@@ -58,9 +68,21 @@ class ImageSerializer(serializers.ModelSerializer):
             url = ''
         return url
 
+    def __init__(self, instance=None, data=empty, **kwargs):
+        super().__init__(instance, data, **kwargs)
+        # below we remove UniqueValidator of 'all' fields (alt, all_fa, ..) to prevent 'error in updating' when using
+        # mixins class based rest_framework.
+        for name, field in self.fields.items():
+            validators = field.validators.copy()
+            for i in range(0, len(validators)):
+                if name[:3] == 'alt' and isinstance(validators[i], UniqueValidator):
+                    del field.validators[i]
+        # note: field representation like 'print(field)' doesn't show validators truly, 'field.validators' is correct
+
 
 class Image_iconSerializer(serializers.ModelSerializer):
-    image = serializers.SerializerMethodField()  
+    image = serializers.SerializerMethodField()
+
     class Meta:
         model = Image_icon
         fields = ['id', 'image', *g_t('alt')]
@@ -76,7 +98,7 @@ class Image_iconSerializer(serializers.ModelSerializer):
 
 
 
-class CategoryChainedSerializer(serializers.ModelSerializer):         #this is used for chane roost like: 'digital' > 'phone' > 'sumsung', also used in CategoryAdmin.save_to_mongo
+class CategoryChainedSerializer(serializers.ModelSerializer):         #this is used for chane roost like: 'digital' > 'phone' > 'sumsung', also used in CategoryAdmin > category_save_to_mongo
     url = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
@@ -348,18 +370,18 @@ class ProductDetailSerializer(serializers.ModelSerializer):       # important: f
     categories = serializers.SerializerMethodField()
     brand = serializers.SerializerMethodField()
     rating = serializers.SerializerMethodField()
-    images = ImageSerializer(many=True)
+    images = ImageSerializer(many=True, required=False)
     comment_count = serializers.SerializerMethodField()
     shopfilteritems = serializers.SerializerMethodField()
     related_products = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
-        fields = ['id', *g_t('name'), *g_t('slug'), *g_t('meta_title'), *g_t('meta_description'), *g_t('brief_description'), *g_t('detailed_description'), *g_t('price'), *g_t('available'), 'categories', 'brand', 'rating', *g_t('stock'), *g_t('weight'), 'images', 'comment_count', 'shopfilteritems', 'related_products']
+        fields = ['id', *g_t('name'), *g_t('slug'), *g_t('meta_title'), *g_t('meta_description'), *g_t('brief_description'), *g_t('detailed_description'), *g_t('price'), *g_t('available'), 'categories', 'category', 'brand', 'rating', *g_t('stock'), *g_t('weight'), 'images', 'comment_count', 'shopfilteritems', 'related_products']
 
     def get_categories(self, obj):
         category_and_fathers = get_category_and_fathers(obj.category)
-        category_and_fathers.reverse()                           #to fixing display order in front we reversed!!
+        category_and_fathers.reverse()                           # to fixing display order in front we reversed!!
         return CategoryChainedSerializer(category_and_fathers, many=True).data
 
     def get_brand(self, obj):
@@ -399,7 +421,43 @@ class ProductDetailSerializer(serializers.ModelSerializer):       # important: f
             related_serialized.append({'name': name, 'price': price, 'url': url, 'image_icons': image_icons})
         return related_serialized
 
+    def save(self, **kwargs):
+        # you can't call self.data in save(), 'validated_data' have to be used instead
+        images = self.validated_data.pop('images') if self.validated_data.get('images') else None
+        self.images = images
+        return save_product(self.validated_data, super().save, super_func_args={**kwargs}, pre_instance=self.instance)
 
+    def create(self, validated_data):
+        product = super().create(validated_data)
+        if self.images:
+            images = [Image(**image) for image in self.images]
+            Image.objects.bulk_create(images)
+        return product
+
+    def update(self, instance, validated_data):
+        # images (in request.data) must specify 'id' (to retrieve an update that image)
+        # bulk_update can't be done because fields to update are not constant
+        # (we can specify different field for every image)
+        product = super().update(instance, validated_data)
+        if self.partial:        # update via api
+            images_ids, data_images = [image['id'] for image in self.images], {image.pop('id'): image for image in self.images}
+            for image in product.images.filter(id__in=images_ids):
+                image_data = data_images[image.id]   # image_date is like: {'image': <SimpleUploadedFile...>, 'alt_fa': '..', ..}
+                for key in image_data:
+                    setattr(image, key, image_data[key])
+                image.save()
+        else:           # update with django api (generated when using serializer.mixins)
+            data_images, product_images = {image.pop('id'): image for image in self.images}, product.images.all()
+            instances = []
+            for image in product_images:
+                for attr, value in data_images[image.id].items():
+                    setattr(image, attr, value) if getattr(image, attr) != value else None
+                instances.append(image)
+
+            if data_images:
+                fields = list(data_images[product_images[0].id].keys())
+                Image.objects.bulk_update(instances, fields)
+        return product
 
 
 class ProductDetailMongoSerializer(ProductDetailSerializer):    # we create/edit mongo product by receive data from this

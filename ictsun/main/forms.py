@@ -14,7 +14,7 @@ from customed_files.django.classes import custforms
 from users.models import User
 from . import serializers
 from .widgets import *
-from .methods import get_mt_input_classes, ImageCreationSizes
+from .methods import get_mt_input_classes, ImageCreationSizes, save_product
 from .models import Post, Product, Category, Filter, Image, Comment, Filter_Attribute, Brand, ShopFilterItem, \
     Image_icon, PostDetailMongo, ProductDetailMongo
 # note1: if edit or add a form field exits in translation.py, like add Categoryform.name field, make sure in admin panel shown correctly (in 'tabbed' mode). if not shown correctly, you have to add a widget with required modeltreanslation classes like in ProductAdminForm.alt_fa.widget.attrs
@@ -77,19 +77,7 @@ class ProductAdminForm(custforms.ProductModelForm):
         fields = ['name', 'slug', 'meta_title', 'meta_description', 'brief_description', 'detailed_description', 'price', 'available', 'visible', 'filter_attributes', 'category', 'brand', 'rating', 'weight_fa', 'weight_en', 'length', 'width', 'height']
 
     def save(self, commit=True):
-        length, width, height = self.cleaned_data.get('length'), self.cleaned_data.get('width'), self.cleaned_data.get('height')
-        self.cleaned_data['size'] = str(length) + ',' + str(width) + ',' + str(height) if length and width and height else ''
-        self.instance.size = self.cleaned_data['size']
-        instance = super().save(commit)
-        # calling product.image_icon_set.exists() several time, cause runs several query
-        product = instance if instance else self.instance
-        image_icon_exits = product.image_icon_set.exists()
-        if self.files.get('image_icon_set-0-image'):  # if you want save product image icons via from, you must use admin panel otherwise you may use serializer. for create/change image icon of a product we only check first image sends: image_icon_set-0-image (means in admin we can edit image icons only if we change first image icon). supposep roduct1.image_icon_set.all() == [image240, image420, image40,.., imagedefault] . now if you go to admin/product/product1 and edit one of image icones and submit what will happen? program will save 7 another image for one that if this condition wasnt.
-            obj = ImageCreationSizes([240, 420, 640, 720, 960, 1280, 'default'], model=Image_icon, model_fields={'path': 'products', 'product': product})
-            paths, instances = obj.create_images(file=self.files['image_icon_set-0-image'], path='/media/products_images/icons/')
-            product.image_icon_set.all().delete() if image_icon_exits else None
-            Image_icon.objects.bulk_create(instances) if instances else None
-        return product
+        return save_product(self.cleaned_data, super().save, super_func_args={'commit': commit}, pre_instance=self.instance)
 
 
 class CommentForm(forms.ModelForm):
