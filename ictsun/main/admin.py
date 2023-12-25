@@ -555,7 +555,7 @@ class ImageAdmin(TranslationAdmin):
 
     def save_related(self, request, form, formsets, change):
         super().save_related(request, form, formsets, change)
-        image_save_to_mongo(shopdb_mongo, form.instance, my_serializers.ImageSerializer, change, request)
+        image_save_to_mongo(shopdb_mongo, form.instance, my_serializers.ImageSerializer, change)
 
 admin.site.register(Image, ImageAdmin)
 

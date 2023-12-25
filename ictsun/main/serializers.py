@@ -2,6 +2,7 @@ from django.contrib.auth.models import Group
 #from django.template.defaultfilters import slugify      this  slugify has not allow_unicode argument(from git)    
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
+from django.urls import reverse
 
 from rest_framework import serializers
 from rest_framework.fields import empty
@@ -106,8 +107,7 @@ class CategoryChainedSerializer(serializers.ModelSerializer):         #this is u
         fields = ['name', 'url']
 
     def get_url(self, obj):
-        post_product = 'posts' if obj.post_product == 'post' else 'products'
-        return f'/{post_product}/{obj.slug}/'
+        return reverse('main:products-list-cat', args=[1, obj.slug]) if obj.post_product == 'products' else reverse('main:posts-list-cat', args=[1, obj.slug])
 #'/products/categories/detail/{}/{}/'.format(obj.id, slugify(obj.name, allow_unicode=True))
 
 
@@ -127,9 +127,9 @@ class Sub2CategoryListSerializer(serializers.ModelSerializer):         #serializ
 
     def get_url(self, obj):
         if obj.post_product == 'product':
-            return f'/products/{obj.slug}/'
+            return reverse('main:products-list-cat', args=[1, obj.slug])
         else:
-            return f'/posts/{obj.slug}/'
+            return reverse('main:posts-list-cat', args=[1, obj.slug])
 
 
 class Sub1CategoryListSerializer(serializers.ModelSerializer):         #serialize categories with level=2
@@ -146,9 +146,9 @@ class Sub1CategoryListSerializer(serializers.ModelSerializer):         #serializ
 
     def get_url(self, obj):
         if obj.post_product == 'product':
-            return f'/products/{obj.slug}/'
+            return reverse('main:products-list-cat', args=[1, obj.slug])
         else:
-            return f'/posts/{obj.slug}/'
+            return reverse('main:posts-list-cat', args=[1, obj.slug])
 
 
 class CategoryListSerializer(serializers.ModelSerializer):         #urs for products should be like: /products/?slug  and for post should be likst /posts/?slug   note CategoryListSerializer should be before PostListSerializer
@@ -165,9 +165,9 @@ class CategoryListSerializer(serializers.ModelSerializer):         #urs for prod
 
     def get_url(self, obj):
         if obj.post_product == 'product':
-            return f'/products/{obj.slug}/'
+            return reverse('main:products-list-cat', args=[1, obj.slug])
         else:
-            return f'/posts/{obj.slug}/'
+            return reverse('main:posts-list-cat', args=[1, obj.slug])
 
 
 
@@ -273,17 +273,17 @@ class PostListSerializer(serializers.ModelSerializer):
 
     def get_category(self, obj):                                        #we must create form like: <form method="get" action="/posts/?obj.category.slug"> .  note form must shown as link.
         pk, slug = obj.id, obj.slug
-        name, url = (obj.category.name, f'/posts/{obj.category.slug}/') if obj.category else ('', '')       #post.category has null=True so this field can be blank like when you remove and category.
+        name, url = (obj.category.name, reverse('main:posts-list-cat', args=[1, obj.category.slug])) if obj.category else ('', '')       #post.category has null=True so this field can be blank like when you remove and category.
         return {'name': name, 'url': url}
 
     def get_author(self, obj):
         pk, slug = obj.id, obj.slug
-        url = '/users/profile/admin/{}/'.format(obj.author.id) if obj.author else ''
+        url = reverse('users:admin-profile', args=[obj.author.id]) if obj.author else ''
         return {'name': user_name_shown(obj.author), 'url': url}
     
     def get_url(self, obj):
         pk, slug = obj.id, obj.slug
-        return f'/posts/detail/{pk}/{slug}/'
+        return reverse('main:post_detail', args=[pk, slug])
 
 
 
@@ -310,7 +310,7 @@ class ProductListSerializer(serializers.ModelSerializer):
     
     def get_url(self, obj):
         pk, slug = obj.id, obj.slug
-        return f'/products/detail/{pk}/{slug}/'
+        return reverse('main:product_detail', args=[pk, slug])
 
 
 
@@ -395,8 +395,8 @@ class ProductDetailSerializer(serializers.ModelSerializer):       # important: f
         return rate
 
     def get_comment_count(self, obj):
-        rate = obj.comment_set.count()
-        return rate
+        count = obj.comment_set.count()
+        return count
 
     def get_shopfilteritems(self, obj):                                         # return value is like:  "shopfilteritems": { "رنگ": [ { "id": 3, "name": "سفید", "previous_stock": 12, ...}, { "id": 8, "name": "طلایی", "previous_stock": 8, ...}]}
         shopfilteritems, data = obj.shopfilteritems.all(), {}
@@ -416,7 +416,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):       # important: f
         related_serialized = []
         for product in related_products:
             name, price, image_icons = product.name, str(product.price), product.image_icon_set.all()              #rest_framework for default convert decimal fields to str, so we convert to str too.
-            url = '/products/detail/{}/{}/'.format(product.id, product.slug)
+            url = reverse('main:product_detail', args=[product.id, product.slug])
             image_icons = [{'image': im.image.url, 'alt': im.alt} for im in image_icons]
             related_serialized.append({'name': name, 'price': price, 'url': url, 'image_icons': image_icons})
         return related_serialized

@@ -395,10 +395,10 @@ def shopfilteritem_save_to_mongo(shopdb_mongo, form, serializer, change):
         mycol.update_many({'id': product_id}, {'$set': {'json.shopfilteritems.{}.$[element]'.format(filter_name): serializer(shopfilteritem).data}}, array_filters=[{'element.id': shopfilteritem.id}])
 
 
-def image_save_to_mongo(shopdb_mongo, image, serializer, change, request=None):
+def image_save_to_mongo(shopdb_mongo, image, serializer, change):
     if change:
-        image_id, product_id = image.id, image.product.id
-        s = serializer(image, context={'request': request}).data
+        image_id = image.id
+        s = serializer(image).data
         content = JSONRenderer().render(s)
         stream = io.BytesIO(content)
         data = JSONParser().parse(stream)
