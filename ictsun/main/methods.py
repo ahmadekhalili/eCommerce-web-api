@@ -415,7 +415,7 @@ def save_product(data, super_func, super_func_args, pre_instance=None):
     data['size'] = str(length) + ',' + str(width) + ',' + str(height) if length and width and height else ''
     if pre_instance and data.get('size'):    # in update, we have pre_instance
         pre_instance.size = data['size']
-    instance = super_func(*super_func_args)
+    instance = super_func(**super_func_args)
     # calling product.image_icon_set.exists() several time, cause runs several query
     product = instance if instance else pre_instance
     image_icon_exits = product.image_icon_set.exists()
