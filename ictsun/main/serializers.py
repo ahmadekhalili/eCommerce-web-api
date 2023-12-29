@@ -422,7 +422,8 @@ class ProductDetailSerializer(serializers.ModelSerializer):       # important: f
         return related_serialized
 
     def save(self, **kwargs):
-        # you can't call self.data in save(), 'validated_data' have to be used instead
+        # you can't call self.data in save(), 'validated_data' have to be used instead. it is important save_product
+        # runs in both update, create. so in updating product.images[0].image, we are sure image sizes will change too.
         images = self.validated_data.pop('images') if self.validated_data.get('images') else None
         self.images = images
         return save_product(self.validated_data, super().save, super_func_args={**kwargs}, pre_instance=self.instance)
@@ -439,6 +440,9 @@ class ProductDetailSerializer(serializers.ModelSerializer):       # important: f
         # bulk_update can't be done because fields to update are not constant
         # (we can specify different field for every image)
         product = super().update(instance, validated_data)
+        self.update_images(product)   # update product images
+
+    def update_images(self, product):
         if self.partial:        # update via api
             images_ids, data_images = [image['id'] for image in self.images], {image.pop('id'): image for image in self.images}
             for image in product.images.filter(id__in=images_ids):
@@ -457,7 +461,6 @@ class ProductDetailSerializer(serializers.ModelSerializer):       # important: f
             if data_images:
                 fields = list(data_images[product_images[0].id].keys())
                 Image.objects.bulk_update(instances, fields)
-        return product
 
 
 class ProductDetailMongoSerializer(ProductDetailSerializer):    # we create/edit mongo product by receive data from this
