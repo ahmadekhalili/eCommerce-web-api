@@ -277,12 +277,10 @@ class PostListSerializer(serializers.ModelSerializer):
         return round(jdatetime.datetime.fromgregorian(datetime=obj.published_date).timestamp())
 
     def get_category(self, obj):                                        #we must create form like: <form method="get" action="/posts/?obj.category.slug"> .  note form must shown as link.
-        pk, slug = obj.id, obj.slug
         name, url = (obj.category.name, reverse('main:posts-list-cat', args=[1, obj.category.slug])) if obj.category else ('', '')       #post.category has null=True so this field can be blank like when you remove and category.
         return {'name': name, 'url': url}
 
     def get_author(self, obj):
-        pk, slug = obj.id, obj.slug
         url = reverse('users:admin-profile', args=[obj.author.id]) if obj.author else ''
         return {'name': user_name_shown(obj.author), 'url': url}
     
