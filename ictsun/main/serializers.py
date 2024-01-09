@@ -16,7 +16,7 @@ import jdatetime
 import re
 
 from .models import *
-from .methods import get_category_and_fathers, ImageCreationSizes, save_to_mongo, save_product
+from .methods import get_category_and_fathers, ImageCreationSizes, save_to_mongo, SaveProduct
 from users.models import User
 from users.serializers import UserNameSerializer, UserSerializer
 from users.methods import user_name_shown
@@ -82,12 +82,17 @@ class ImageSerializer(serializers.ModelSerializer):
 
 
 class Image_iconSerializer(serializers.ModelSerializer):
-    image = serializers.SerializerMethodField()
+    image = Base64ImageField(allow_null=True, label='آیکن', required=False)
 
     class Meta:
         model = Image_icon
-        fields = ['id', 'image', *g_t('alt')]
-        
+        # 'alt' must be here otherwise we will have problem in ProductDetailSerializer.save
+        fields = ['id', 'image', *g_t('alt'), 'alt']
+
+    def to_representation(self, obj):
+        self.fields['image'] = serializers.SerializerMethodField()
+        return super().to_representation(obj)
+
     def get_image(self, obj):
         request = self.context.get('request', None)
         try:
@@ -350,6 +355,10 @@ class PostDetailSerializer(serializers.ModelSerializer):
             result[size] = {'image': image_icon.image.url, 'alt': image_icon.alt}
         return result
 
+    def save(self, **kwargs):
+
+        return super().save(**kwargs)
+
 
 class PostDetailMongoSerializer(PostDetailSerializer):
     # .save() require kwarg request
@@ -358,11 +367,12 @@ class PostDetailMongoSerializer(PostDetailSerializer):
     def save(self, **kwargs):
         change = bool(self.instance)
         instance = super().save(**kwargs)
-        obj = ImageCreationSizes(sizes=[240, 420, 640, 720, 960, 1280, 'default'], model=Image_icon, model_fields={'path': 'posts', 'post': instance})
-        paths, instances = obj.create_images(file=self.data['file'], path='/media/posts_images/icons/')
+        data = {'image': self.data['file'], 'path': 'posts', 'post': instance}
+        obj = ImageCreationSizes(data=data, sizes=[240, 420, 640, 720, 960, 1280, 'default'], model=Image_icon)
+        paths, instances = obj.save(upload_to='/media/posts_images/icons/')
         if instances:
             Image_icon.objects.bulk_create(instances)
-        save_to_mongo(PostDetailMongo, instance, self, change, kwargs['request'])
+        save_to_mongo(PostDetailMongo, instance, self, change, kwargs.get('request'))
         return instance
 
 
@@ -371,13 +381,14 @@ class ProductDetailSerializer(serializers.ModelSerializer):       # important: f
     brand = serializers.SerializerMethodField()
     rating = serializers.SerializerMethodField()
     images = ImageSerializer(many=True, required=False)
+    icon = Image_iconSerializer(write_only=True, required=False)
     comment_count = serializers.SerializerMethodField()
     shopfilteritems = serializers.SerializerMethodField()
     related_products = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
-        fields = ['id', *g_t('name'), *g_t('slug'), *g_t('meta_title'), *g_t('meta_description'), *g_t('brief_description'), *g_t('detailed_description'), *g_t('price'), *g_t('available'), 'categories', 'category', 'brand', 'rating', *g_t('stock'), *g_t('weight'), 'images', 'comment_count', 'shopfilteritems', 'related_products']
+        fields = ['id', *g_t('name'), *g_t('slug'), *g_t('meta_title'), *g_t('meta_description'), *g_t('brief_description'), *g_t('detailed_description'), *g_t('price'), *g_t('available'), 'categories', 'category', 'brand', 'rating', *g_t('stock'), *g_t('weight'), 'images', 'icon', 'comment_count', 'shopfilteritems', 'related_products']
 
     def get_categories(self, obj):
         category_and_fathers = get_category_and_fathers(obj.category)
@@ -422,11 +433,12 @@ class ProductDetailSerializer(serializers.ModelSerializer):       # important: f
         return related_serialized
 
     def save(self, **kwargs):
+        # save_product calls in both serializer and admin
         # you can't call self.data in save(), 'validated_data' have to be used instead. it is important save_product
-        # runs in both update, create. so in updating product.images[0].image, we are sure image sizes will change too.
-        images = self.validated_data.pop('images') if self.validated_data.get('images') else None
-        self.images = images
-        return save_product(self.validated_data, super().save, super_func_args={**kwargs}, pre_instance=self.instance)
+        # runs in both update, create. so in updating: product.images[0].image, we are sure image sizes will change too.
+        self.images = self.validated_data.pop('images') if self.validated_data.get('images') else None
+        return SaveProduct.save_product(save_func=super().save, save_func_args={**kwargs}, instance=self.instance,
+                                        data=self.validated_data)
 
     def create(self, validated_data):
         product = super().create(validated_data)
@@ -441,16 +453,17 @@ class ProductDetailSerializer(serializers.ModelSerializer):       # important: f
         # (we can specify different field for every image)
         product = super().update(instance, validated_data)
         self.update_images(product)   # update product images
+        return product
 
     def update_images(self, product):
-        if self.partial:        # update via api
+        if self.partial and self.images:       # update via api (send only specefic field of Image model)
             images_ids, data_images = [image['id'] for image in self.images], {image.pop('id'): image for image in self.images}
             for image in product.images.filter(id__in=images_ids):
                 image_data = data_images[image.id]   # image_date is like: {'image': <SimpleUploadedFile...>, 'alt_fa': '..', ..}
                 for key in image_data:
                     setattr(image, key, image_data[key])
                 image.save()
-        else:           # update with django api (generated when using serializer.mixins)
+        elif self.images:  # update when send all images of product with all fields (using mixins.RetrieveModelMixin)
             data_images, product_images = {image.pop('id'): image for image in self.images}, product.images.all()
             instances = []
             for image in product_images:
@@ -463,7 +476,9 @@ class ProductDetailSerializer(serializers.ModelSerializer):       # important: f
                 Image.objects.bulk_update(instances, fields)
 
 
-class ProductDetailMongoSerializer(ProductDetailSerializer):    # we create/edit mongo product by receive data from this
+class ProductDetailMongoSerializer(ProductDetailSerializer):
+    # here is for representing data in /products/detail/ page. so purpose in here is not creating product in mongo, it
+    # is for data providing for product_detail page.
     filters = serializers.SerializerMethodField()
     comment_set = CommentSerializer(read_only=True, many=True)
 
@@ -482,10 +497,10 @@ class ProductDetailMongoSerializer(ProductDetailSerializer):    # we create/edit
 
     # .save() require kwarg request
     def save(self, **kwargs):
-        # we save product in mongo in place: 1- admin.
+        # we save product in mongo in places: 1- admin 2- serializer
         change = bool(self.instance)
         instance = super().save(**kwargs)
-        save_to_mongo(ProductDetailMongo, instance, self, change, kwargs['request'])
+        save_to_mongo(ProductDetailMongo, instance, self, change, kwargs.get('request'))
         return instance
 
 

@@ -14,7 +14,7 @@ from customed_files.django.classes import custforms
 from users.models import User
 from . import serializers
 from .widgets import *
-from .methods import get_mt_input_classes, ImageCreationSizes, save_product
+from .methods import get_mt_input_classes, ImageCreationSizes
 from .models import Post, Product, Category, Filter, Image, Comment, Filter_Attribute, Brand, ShopFilterItem, \
     Image_icon, PostDetailMongo, ProductDetailMongo
 # note1: if edit or add a form field exits in translation.py, like add Categoryform.name field, make sure in admin panel shown correctly (in 'tabbed' mode). if not shown correctly, you have to add a widget with required modeltreanslation classes like in ProductAdminForm.alt_fa.widget.attrs
@@ -47,8 +47,9 @@ class PostAdminForm(forms.ModelForm):
         post = instance if instance else self.instance
         image_icon_exits = post.image_icon_set.exists()
         if self.files.get('image_icon_set-0-image'):  # in post updating, we update post images icons when admin sends first image image_icon_set-0-image (means in admin we can edit image icons only if we change first image icon). suppose post1.image_icon_set.all() == [image240, image420, image40,.., imagedefault] . now if you go to admin/post/post1 and edit one of image icones and submit what will happen? program will save 7 another image for one that if this condition wasnt.
-            obj = ImageCreationSizes([240, 420, 640, 720, 960, 1280, 'default'], model=Image_icon, model_fields={'path': 'posts', 'post': post})
-            paths, instances = obj.create_images(file=self.files['image_icon_set-0-image'], path='/media/posts_images/icons/')
+            data = {'image': self.files['image_icon_set-0-image'], 'path': 'posts', 'post': post}
+            obj = ImageCreationSizes(data=data, sizes=[240, 420, 640, 720, 960, 1280, 'default'], model=Image_icon)
+            paths, instances = obj.save(upload_to='/media/posts_images/icons/')
             post.image_icon_set.all().delete() if image_icon_exits else None
             Image_icon.objects.bulk_create(instances) if instances else None
         return post
@@ -75,9 +76,6 @@ class ProductAdminForm(custforms.ProductModelForm):
     class Meta:                                          #take fields from admin.fiedset but this is needed for validation.
         model = Product
         fields = ['name', 'slug', 'meta_title', 'meta_description', 'brief_description', 'detailed_description', 'price', 'available', 'visible', 'filter_attributes', 'category', 'brand', 'rating', 'weight_fa', 'weight_en', 'length', 'width', 'height']
-
-    def save(self, commit=True):
-        return save_product(self.cleaned_data, super().save, super_func_args={'commit': commit}, pre_instance=self.instance)
 
 
 class CommentForm(forms.ModelForm):

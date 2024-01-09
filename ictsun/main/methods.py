@@ -1,5 +1,6 @@
 from django.db.models import Max, Min
 from django.conf import settings
+from django.db import transaction
 from django.core.files.uploadedfile import SimpleUploadedFile
 
 from rest_framework.renderers import JSONRenderer
@@ -231,18 +232,35 @@ def get_page_count(model_instances, step, **kwargs):  # model_instances can be a
 class ImageCreationSizes:
     # in this class we receive image binary/base64 and save it to disk with specified sizes. if a model specified,
     # that models field will be filled instead, for example: image1.image = size1, image2.image = size2, ...
-    def __init__(self, sizes, name=None, model=None, model_fields=None):
-        # model like: Image_icon, model_fields is it's fields (dict type). if you specify model and model_fields,
-        # image creation  will be done by model field(instance.att_name.save()) instead of PilImage.save()
+    def __init__(self, data, sizes, name=None, model=None, instances=None):
+        # data is like: {'image': InMemoryUploadFIle(..)} (keys are instance fields)
+        # model like: Image_icon. if you specify model, image creation  will be done by model field
+        # (instance.att_name.save()) instead of PilImage.save()
+        # 'instances' use in updating, so only available image icons will update instead of new image icon creation.
         self.base_path = str(Path(__file__).resolve().parent.parent)  # is like: /home/akh/eCommerce-web-api/ictsun
         self.sizes = sizes
-        self.name = name if name else uuid.uuid4().hex[:12]  # generate random unique string (length 12)
+        self.name = name if name else uuid.uuid4().hex[:12]
+        self.data = data.copy()   # we don't want change outside variables has been passed to our class.
+        # when data is like: {'alt': None, ...}, data['alt'] must be removed and replaced with uuid
+        try:
+            alt = self.data.pop('alt')
+            if not alt:
+                alt = uuid.uuid4().hex[:6]
+        except:
+            alt = uuid.uuid4().hex[:6]
         if model:
-            try:  # if alt provided, if alt=None generate random alt
-                alt = model_fields['alt'] if model_fields['alt'] else uuid.uuid4().hex[:6]
-                self.instances = [model(alt=f'{alt}-{size}', **model_fields) for size in self.sizes]
-            except:  # if alt not provided (maybe model has not alt field)
-                self.instances = [model(**model_fields) for size in self.sizes]
+            self.instances = [model(alt=f'{alt}-{size}', **self.data) for size in self.sizes]
+        elif instances:       # in updating a model instance (like product)
+            self.instances = list(instances)[:len(self.sizes)]
+            for size, instance in zip(self.sizes, instances):
+                instance.alt = f'{alt}-{size}'
+                [setattr(instance, key, self.data[key]) for key in self.data]
+
+    @staticmethod
+    def get_alt(size, text=None):
+        # text == pre alt
+        pre_alt = text if text else uuid.uuid4().hex[:6]
+        return f'{pre_alt}-{size}'
 
     def get_file_stream(self):
         file = self.files['file'].read() if self.files.get('file') else self.files['image_icon_set-0-image'].read()
@@ -256,35 +274,34 @@ class ImageCreationSizes:
             date = datetime.now().strftime('%Y %-m %-d').split()
         return f'{middle_path}{date[0]}/{date[1]}/{date[2]}/'
 
-    def get_alt(self, size, text=None):
-        # text == pre alt
-        pre_alt = text if text else uuid.uuid4().hex[:6]
-        return f'{pre_alt}-{size}'
-
-    def _save_image(self, opened_image, path, full_name, format, instance, att_name):
+    def _save(self, opened_image, path, full_name, format, instance, att_name):
         if isinstance(opened_image, PilImage.Image):
-            if instance:           # save image to hard by image field
+            if instance:           # save image by image field (need write to disk)
                 buffer = io.BytesIO()
                 opened_image.save(buffer, format=format)
                 setattr(instance, att_name, SimpleUploadedFile(full_name, buffer.getvalue()))
                 # field.upload_to must change to our path, also '/media/' must remove from path otherwise raise error
                 getattr(instance, att_name).field.upload_to = path.replace('/media/', '', 1)
-            else:                  # save image to hard by pillow.save()
+            else:                  # save image (write to disk) by pillow.save()
                 opened_image.save(self.base_path + path + full_name)
 
-    def create_images(self, file=None, opened_image=None, path=None, att_name='image'):
+    def save(self, opened_image=None, upload_to=None, att_name='image'):
         '''
         file can be binary (multipart form-data) or base64.
         path is like: /media/posts_images/icons/  returned value is like:
         {'default': '/media/../..7a0-default.JPEG', 240: '/media/../..7a0-240.JPEG', ...}.
         '''
         try:         # binary file (multipart form-data)
-            stream = io.BytesIO(file.read())
+            stream = io.BytesIO(self.data['image'].read())
         except:      # base64 file
-            import base64
-            stream = io.BytesIO(base64.b64decode(file.split(';base64,')[1]))
+            try:
+                import base64
+                stream = io.BytesIO(base64.b64decode(self.data['image'].split(';base64,')[1]))
+            except:       # when no image provided (like when update 'alt' field only)
+                return (['' for i in self.instances], self.instances)
+
         opened_image = PilImage.open(stream) if not opened_image else opened_image
-        path = self.get_path() if not path else self.get_path(path)
+        path = self.get_path() if not upload_to else self.get_path(upload_to)
         iter_instances = cycle(self.instances) if self.instances else None
         if isinstance(opened_image, PilImage.Image):
             paths, format = {}, opened_image.format              # opened_image.format is like: "JPG"
@@ -296,7 +313,7 @@ class ImageCreationSizes:
                 resized = opened_image.resize((height, int(height / aspect_ratio))) if isinstance(height, int) else opened_image  # height can be 'default' str type
                 full_name = f'{self.name}-{height}' + f'.{format}'
                 instance = next(iter_instances) if self.instances else None
-                self._save_image(resized, path, full_name, format, instance, att_name)
+                self._save(resized, path, full_name, format, instance, att_name)
                 # path is like: /media/posts_images/1402/3/20/qwer43asd2e4-720.JPG
                 paths[height] = path + full_name
             return (paths, self.instances)
@@ -305,6 +322,57 @@ class ImageCreationSizes:
             pass
         else:
             raise Exception('opened_image is not object of PilImage or python built in .open()')
+
+
+class SaveProduct:
+    # this class calls inside ProductAdmin.save_related or ProductDetailSerializer.save to create/update product.
+    def create_icon(data):
+        if data.get('image'):
+            obj = ImageCreationSizes(data=data, sizes=[240, 420, 640, 720, 960, 1280, 'default'], model=Image_icon)
+            paths, instances = obj.save(upload_to='/media/products_images/icons/')
+            Image_icon.objects.bulk_create(instances) if instances else None
+
+    def update_icon(product, data, partial):
+        instances, changed = [], False
+        if not partial:  # here is for admin panel, we have to update icon only when it's really changes.
+            fields = ['image', 'alt', 'path']
+            first_icon = product.image_icon_set.first()
+            for field in fields:
+                if getattr(first_icon, field) != data[field]:
+                    changed = True
+                    alt = data['alt']
+                    data['alt'] = alt[:alt.rfind('-')]
+                    break
+        # partial is True when sending data via api, 'changed' true when in admin panel one of icon fields are changed
+        if partial or changed:
+            instances = list(product.image_icon_set.all())
+            obj = ImageCreationSizes(data=data, sizes=[240, 420, 640, 720, 960, 1280, 'default'],
+                                     instances=instances)
+            paths, instances = obj.save(upload_to='/media/products_images/icons/')
+        with transaction.atomic():  # bulk_update doesn't work for 'image' field. this may improve speed a bit.
+            for instance in instances:
+                instance.save()
+
+    def save_product(save_func, save_func_args, instance=None, data=None, partial=True):
+        data = {} if not data else data
+        # 'data' in admin is cleaned_data and in serializer is validated_data, it can also be {} so save_product
+        # used only for run product.save(). 'save_func' is like: super().save and return product always (update/create)
+        # 'instance' is pre instance in creation and instance in update. 'partial' is False in admin
+        length, width, height = data.get('length'), data.get('width'), data.get('height')
+        if length and width and height:
+            data['size'] = str(length) + ',' + str(width) + ',' + str(height)
+        if data.get('size') and instance:  # in update, we have pre_instance
+            instance.size = data['size']
+        product = save_func(**save_func_args)
+        product = product if product else instance
+        icon = data.get('icon')
+        if icon:
+            image_icon_exits = product.image_icon_set.exists()
+            if not image_icon_exits:
+                SaveProduct.create_icon(data=icon)
+            else:
+                SaveProduct.update_icon(product, data=icon, partial=partial)
+        return product
 
 
 def save_to_mongo(model, instance, serializer, change, request=None):
@@ -404,25 +472,3 @@ def image_save_to_mongo(shopdb_mongo, image, serializer, change):
         data = JSONParser().parse(stream)
         mycol = shopdb_mongo["main_productdetailmongo"]
         mycol.update_one({'json.images.id': image_id}, {'$set': {'json.images.$': data}})
-
-
-def save_product(data, super_func, super_func_args, pre_instance=None):
-    # this function calls inside ProductForm.save or ProductDetailSerializer.save to create/update product (main attrs)
-    # 'data' in form is 'cleaned_data' and in serializer is 'validated_data'
-    # 'super_func' is like: super().save and 'super_func_args' is it's args (dict type).
-    # pre_instance is self.instance before saving instance in db (before calling super). in creation, it is None
-    length, width, height = data.get('length'), data.get('width'), data.get('height')
-    data['size'] = str(length) + ',' + str(width) + ',' + str(height) if length and width and height else ''
-    if pre_instance and data.get('size'):    # in update, we have pre_instance
-        pre_instance.size = data['size']
-    instance = super_func(**super_func_args)
-    # calling product.image_icon_set.exists() several time, cause runs several query
-    product = instance if instance else pre_instance
-    image_icon_exits = product.image_icon_set.exists()
-    file = data.get('file') or data.get('image_icon_set-0-image')
-    if file:  # in product updating, we update product images icons when frontend provide self.data['file'] or admin sends first image image_icon_set-0-image (means in admin we can edit image icons only if we change first image icon). supposep roduct1.image_icon_set.all() == [image240, image420, image40,.., imagedefault] . now if you go to admin/product/product1 and edit one of image icones and submit what will happen? program will save 7 another image for one that if this condition wasnt.
-        obj = ImageCreationSizes(sizes=[240, 420, 640, 720, 960, 1280, 'default'], model=Image_icon, model_fields={'path': 'products', 'product':product})
-        paths, instances = obj.create_images(file=file, path='/media/products_images/icons/')
-        product.image_icon_set.all().delete() if image_icon_exits else None
-        Image_icon.objects.bulk_create(instances) if instances else None
-    return product

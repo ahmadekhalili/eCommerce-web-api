@@ -191,7 +191,7 @@ class Post(models.Model):
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('category'))
     author = models.ForeignKey(User, related_name='written_posts', on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('author'))
     #comment_set                                                   #backward relation
-    #image_set
+    #images
     #image_icon_set               # for one image_icon, several image_icons created with different sizes. default size used in top of a post page and for post icon use smaller (in 160px).
 
     class Meta:
@@ -239,7 +239,7 @@ class Product(models.Model):                                     #.order_by('-av
     slug = models.SlugField(_('slug'), allow_unicode=True, db_index=False)             #default db_index of slug is True
     meta_title = models.CharField(_('meta title'), max_length=60, blank=True, default='')
     meta_description = models.TextField(_('meta description'), validators=[MaxLengthValidator(160)], blank=True, default='')
-    brief_description = models.TextField(_('brief description'), validators=[MaxLengthValidator(1000)])
+    brief_description = models.TextField(_('brief description'), validators=[MaxLengthValidator(1000)], blank=True)
     detailed_description = RichTextUploadingField(_('detailed description'), blank=True)
     price = models.DecimalField(_('price'), max_digits=10, decimal_places=2, default='0')    # for $ prices we need 2 decimal places like 19.99$ and for rial it's x.00 that should serialize to x    if default=0 (instead default='0') products with price=0 will saves in database as 0 instead '0.00' while all other prices are in two decimal format, this removes integrity and cause problems in like main/tests/test_add_to_session.
     available = models.BooleanField(_('available'), default=False, db_index=True)
@@ -378,7 +378,7 @@ def image_path_selector(instance, filename):                        #note: if yo
         date = jdatetime.datetime.fromgregorian(date=datetime.now()).strftime('%Y %-m %-d').split()
     else:
         date = datetime.now().strftime('%Y %-m %-d').split()
-    return f'products_images/{date[0]}/{date[1]}/{date[2]}/{filename}'
+    return f'{instance.path}_images/{date[0]}/{date[1]}/{date[2]}/{filename}'
 
 class Image(models.Model):
     image = models.ImageField(_('image'), upload_to=image_path_selector, blank=True, null=True)    # here save default size of image to prevent additional query to ImageSizes class.

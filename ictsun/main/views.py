@@ -14,6 +14,8 @@ from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework import views
+from rest_framework import mixins
+from rest_framework import generics
 
 import io
 import os
@@ -212,7 +214,11 @@ class ProductList(views.APIView):
 
 
 
-class PostDetail(views.APIView):
+class PostDetail(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin,
+                 generics.GenericAPIView):
+    queryset = Post.objects.all()
+    serializer_class = my_serializers.PostDetailMongoSerializer
+
     def get(self, request, *args, **kwargs):                #dont need define like serializer = {'post': my_serializers.PostDetailSerializer(product_categories).data} because my_serializers.PostDetailSerializer(product_categories).data dont has many=True so is dict not list and dont raise error when putin in Reaponse
         '''
         input receive from /posts/ like posts0.url = "3/یسشی/"__________
@@ -225,42 +231,55 @@ class PostDetail(views.APIView):
         sessionid = request.session.session_key
         return Response({'sessionid': sessionid, **data})               #serializer is list (because of many=True)    serializer[0] is dict
 
-    def post(self, request, *args, **kwargs):               # you have to submit data by form not json.
-        post = get_object_or_404(Post, id=kwargs['pk'])
-        form = my_forms.PostAdminForm(request.POST, request.FILES, instance=post, request=request)
-        if form.is_valid():
-            instance = form.save()
-            return Response(my_serializers.PostDetailSerializer(instance, context={'request': request}).data)
-        return Response(form.errors)
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+
+    def perform_destroy(self, instance):
+        instance.visible = False
+        instance.save()
 
 
 
 
+class ProductDetail(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin,
+                    generics.GenericAPIView):
+    queryset = Product.objects.all()
+    serializer_class = my_serializers.ProductDetailMongoSerializer
 
-class ProductDetail(views.APIView):
-    def get(self, request, *args, **kwargs):                #dont need define like serializer = {'post': my_serializers.PostDetailSerializer(product_categories).data} because my_serializers.PostDetailSerializer(product_categories).data dont has many=True so is dict not list and dont raise error when putin in Reaponse
-        '''
-        input receive from /products/ like products0.url = "1/گل-زر/"__________
-        output a product depend on pk you specify.
-        '''
+    def get(self, request, *args, **kwargs):
         select_related_father_category = 'category'
         for i in range(Category._meta.get_field('level').validators[1].limit_value-1):
             select_related_father_category += '__father_category'
         product = Product.objects.filter(id=kwargs['pk']).select_related(select_related_father_category, 'brand', 'rating').prefetch_related('comment_set', 'images')
         for p in product:                                                         #using like product[0].comment_set revalute and use extra queries
             if request.user.is_authenticated:
-                comment_of_user = p.comment_set.filter(author=request.user, product=p)        #this line dont affect select_related and prefetch_related on product and they steal work perfect.                           
+                comment_of_user = p.comment_set.filter(author=request.user, product=p)        #this line dont affect select_related and prefetch_related on product and they steal work perfect.
                 comment_of_user_serialized = my_serializers.CommentSerializer(comment_of_user, many=True).data
                 comment_of_user_serialized = comment_of_user_serialized[0] if comment_of_user_serialized else {}  #comment_of_user_serialized is list and need removing list but if comment was blank so comment_of_user_serialized == [] and [][0] will raise error.
             else:
                 comment_of_user_serialized = {}
             comments = p.comment_set.all()
         comments_serialized = my_serializers.CommentSerializer(comments, many=True).data
-        product_serializer = my_serializers.ProductDetailSerializer(product, many=True, context={'request': request}).data    #product is query set so we need pu like product[0] or put product with many=True (product[0] make revaluate
+        product_serializer = self.serializer_class(product, many=True, context={'request': request}).data    #product is query set so we need pu like product[0] or put product with many=True (product[0] make revaluate
         product_serializer = product_serializer[0] if product_serializer else {}
         sessionid = request.session.session_key
         return Response({**product_serializer, 'comment_of_user': comment_of_user_serialized, 'comments': comments_serialized})
 
+    def put(self, request, *args, **kwargs):
+        # front must point partial=True to update product with any field want.
+        # partial auto will set to serializer like: serializer(instance, data, partial=kwargs.pop('partial'))
+        kwargs['partial'] = request.data.get('partial', True)
+        return self.update(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+
+    def perform_destroy(self, instance):
+        instance.visible = False
+        instance.save()
 
 
 
@@ -341,11 +360,10 @@ class UploadImage(views.APIView):
         request.data['file'] sent by front is InMemoryUploadedFile object, like data sent by <input type="file"...>
         '''
         import uuid
-        name, sizes = uuid.uuid4().hex[:12], [240, 420, 640, 720, 960, 1280]
-        obj = ImageCreationSizes(sizes=sizes)
-        image = Image(image=request.data['file'], alt=obj.get_alt('default'), path='posts')
-        obj.instances = [ImageSizes(alt=obj.get_alt(size), size=size, father=image) for size in sizes]
-        paths, instances = obj.create_images(file=request.data['file'], path='/media/posts_images/')
+        sizes = [240, 420, 640, 720, 960, 1280]
+        image = Image(image=request.data['file'], alt=ImageCreationSizes.get_alt('default'), path='posts')
+        obj = ImageCreationSizes(data={'image': request.data['file']}, sizes=sizes, instances=[ImageSizes(alt=ImageCreationSizes.get_alt(size), size=size, father=image) for size in sizes])
+        paths, instances = obj.save(upload_to='/media/posts_images/')
         image.save()
         ImageSizes.objects.bulk_create(instances)
         paths['default'], paths['image_id'] = image.image.url, image.id
