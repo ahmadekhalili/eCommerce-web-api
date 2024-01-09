@@ -16,7 +16,7 @@ import jdatetime
 import re
 
 from .models import *
-from .methods import get_category_and_fathers, ImageCreationSizes, save_to_mongo, SaveProduct
+from .methods import get_category_and_fathers, ImageCreationSizes, save_to_mongo, SavePostProduct
 from users.models import User
 from users.serializers import UserNameSerializer, UserSerializer
 from users.methods import user_name_shown
@@ -324,8 +324,7 @@ class PostDetailSerializer(serializers.ModelSerializer):
     published_date = serializers.SerializerMethodField(read_only=True)
     updated = serializers.SerializerMethodField(read_only=True)
     tags = serializers.ListField(child=serializers.CharField(max_length=30))
-    comment_set = serializers.SerializerMethodField(read_only=True)
-    image_icons = serializers.SerializerMethodField(read_only=True)
+    icon = Image_iconSerializer(write_only=True)
 
     class Meta:
         model = Post
@@ -335,6 +334,7 @@ class PostDetailSerializer(serializers.ModelSerializer):
         fields = super().to_representation(obj)
         fields['author'] = UserNameSerializer(obj.author).data
         fields['categories'] = CategoryChainedSerializer(get_category_and_fathers(obj.category), many=True).data
+        fields['icon'] = serializers.SerializerMethodField()
         return fields
 
     def get_published_date(self, obj):
@@ -343,12 +343,7 @@ class PostDetailSerializer(serializers.ModelSerializer):
     def get_updated(self, obj):
         return round(jdatetime.datetime.fromgregorian(datetime=obj.updated).timestamp())
 
-    def get_comment_set(self, obj):
-        # for every post, comments should be like:
-        # [{'id':1,'content':'first comment', 'reply': None, 'reply_comments': [comment20, comment21,..]}, 'id': 2, ...
-        return CommentSerializer(obj.comment_set.filter(reply=None), many=True).data
-
-    def get_image_icons(self, obj):                                     #we must create form like: <form method="get" action="/posts/?obj.category.slug"> .  note form must shown as link. you can put that form in above of that post.
+    def get_icon(self, obj):                                     #we must create form like: <form method="get" action="/posts/?obj.category.slug"> .  note form must shown as link. you can put that form in above of that post.
         result = {}
         for image_icon in obj.image_icon_set.all():
             size = re.split('[.-]', image_icon.image.url)[-2]
@@ -356,22 +351,26 @@ class PostDetailSerializer(serializers.ModelSerializer):
         return result
 
     def save(self, **kwargs):
-
-        return super().save(**kwargs)
+        post = super().save(**kwargs)
+        icon = self.data.get('icon')
+        return SavePostProduct.save_post(save_func=super().save, save_func_args={**kwargs}, instance=self.instance,
+                                         data=self.validated_data)
 
 
 class PostDetailMongoSerializer(PostDetailSerializer):
+    comment_set = serializers.SerializerMethodField(read_only=True)
+
+    def get_comment_set(self, obj):
+        # for every post, comments should be like:
+        # [{'id':1,'content':'first comment', 'reply': None, 'reply_comments': [comment20, comment21,..]}, 'id': 2, ...
+        return CommentSerializer(obj.comment_set.filter(reply=None), many=True).data
+
     # .save() require kwarg request
     # if for any reason we pot save_to_mongo to PostAdminForm.save instead here error will raise when save new post, because
     # post.published_date required, but form.instance.published_date only available after return instance in form.save
     def save(self, **kwargs):
         change = bool(self.instance)
         instance = super().save(**kwargs)
-        data = {'image': self.data['file'], 'path': 'posts', 'post': instance}
-        obj = ImageCreationSizes(data=data, sizes=[240, 420, 640, 720, 960, 1280, 'default'], model=Image_icon)
-        paths, instances = obj.save(upload_to='/media/posts_images/icons/')
-        if instances:
-            Image_icon.objects.bulk_create(instances)
         save_to_mongo(PostDetailMongo, instance, self, change, kwargs.get('request'))
         return instance
 
@@ -437,8 +436,8 @@ class ProductDetailSerializer(serializers.ModelSerializer):       # important: f
         # you can't call self.data in save(), 'validated_data' have to be used instead. it is important save_product
         # runs in both update, create. so in updating: product.images[0].image, we are sure image sizes will change too.
         self.images = self.validated_data.pop('images') if self.validated_data.get('images') else None
-        return SaveProduct.save_product(save_func=super().save, save_func_args={**kwargs}, instance=self.instance,
-                                        data=self.validated_data)
+        return SavePostProduct.save_product(save_func=super().save, save_func_args={**kwargs}, instance=self.instance,
+                                            data=self.validated_data)
 
     def create(self, validated_data):
         product = super().create(validated_data)

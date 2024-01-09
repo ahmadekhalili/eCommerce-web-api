@@ -42,17 +42,7 @@ class PostAdminForm(forms.ModelForm):
         setattr(self.instance, 'slug', slugify(self.data['title'], allow_unicode=True)) if self.data.get('title') else None   # fill slug field in forms submitted by frontend (front should not fill slug). frontend send data like: 'title': value, 'meta_title': value...   while admin panel send like 'title_fa': value, 'slug_fa': value, 'meta_title': value
         if getattr(self, 'request', None):          # admin form has not request parameter
             self.instance.author = self.request.user
-        instance = super().save(commit)
-        # calling post.image_icon_set.exists() several time, cause runs several query
-        post = instance if instance else self.instance
-        image_icon_exits = post.image_icon_set.exists()
-        if self.files.get('image_icon_set-0-image'):  # in post updating, we update post images icons when admin sends first image image_icon_set-0-image (means in admin we can edit image icons only if we change first image icon). suppose post1.image_icon_set.all() == [image240, image420, image40,.., imagedefault] . now if you go to admin/post/post1 and edit one of image icones and submit what will happen? program will save 7 another image for one that if this condition wasnt.
-            data = {'image': self.files['image_icon_set-0-image'], 'path': 'posts', 'post': post}
-            obj = ImageCreationSizes(data=data, sizes=[240, 420, 640, 720, 960, 1280, 'default'], model=Image_icon)
-            paths, instances = obj.save(upload_to='/media/posts_images/icons/')
-            post.image_icon_set.all().delete() if image_icon_exits else None
-            Image_icon.objects.bulk_create(instances) if instances else None
-        return post
+        return super().save(commit)
 
 
 image_qusmark_text = _('Image rate should be 1:1')

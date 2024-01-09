@@ -324,7 +324,7 @@ class ImageCreationSizes:
             raise Exception('opened_image is not object of PilImage or python built in .open()')
 
 
-class SaveProduct:
+class SavePostProduct:
     # this class calls inside ProductAdmin.save_related or ProductDetailSerializer.save to create/update product.
     def create_icon(data):
         if data.get('image'):
@@ -353,6 +353,22 @@ class SaveProduct:
             for instance in instances:
                 instance.save()
 
+    def save_post(save_func, save_func_args, instance=None, data=None, partial=True):
+        data = {} if not data else data
+        # 'data' in admin is 'cleaned_data' and in serializer is 'validated_data', it can also be {} so save_product
+        # used only for run product.save(). 'save_func' is like: super().save or product.save
+        # instance is self.instance before saving instance in db, partial False in admin
+        post = save_func(**save_func_args)     # in updating or in admin.save_related product is None
+        post = post if post else instance
+        icon = data.get('icon')
+        if icon:
+            image_icon_exits = post.image_icon_set.exists()
+            if not image_icon_exits:
+                SavePostProduct.create_icon(data=icon)
+            else:
+                SavePostProduct.update_icon(post, data=icon, partial=partial)
+        return post
+
     def save_product(save_func, save_func_args, instance=None, data=None, partial=True):
         data = {} if not data else data
         # 'data' in admin is cleaned_data and in serializer is validated_data, it can also be {} so save_product
@@ -360,7 +376,7 @@ class SaveProduct:
         # 'instance' is pre instance in creation and instance in update. 'partial' is False in admin
         length, width, height = data.get('length'), data.get('width'), data.get('height')
         if length and width and height:
-            data['size'] = str(length) + ',' + str(width) + ',' + str(height)
+            data['size'] = str(length) + ',' + str(width) + ',' + str(height)  # data is mutable with validated_data
         if data.get('size') and instance:  # in update, we have pre_instance
             instance.size = data['size']
         product = save_func(**save_func_args)
@@ -369,9 +385,9 @@ class SaveProduct:
         if icon:
             image_icon_exits = product.image_icon_set.exists()
             if not image_icon_exits:
-                SaveProduct.create_icon(data=icon)
+                SavePostProduct.create_icon(data=icon)
             else:
-                SaveProduct.update_icon(product, data=icon, partial=partial)
+                SavePostProduct.update_icon(product, data=icon, partial=partial)
         return product
 
 

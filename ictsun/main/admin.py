@@ -29,7 +29,7 @@ from . import forms as my_forms
 from .models import *
 from .methods import make_next, get_category_and_fathers, get_parsed_data, save_to_mongo, brand_save_to_mongo, \
     comment_save_to_mongo, category_save_to_mongo, filter_attribute_save_to_mongo, shopfilteritem_save_to_mongo, \
-    image_save_to_mongo, SaveProduct
+    image_save_to_mongo, SavePostProduct
 from .contexts import PROJECT_VERBOSE_NAME
 from .model_methods import set_levels_afterthis_all_childes_id
 
@@ -85,6 +85,25 @@ class PostAdmin(TranslationAdmin):
         return format_html('{} {}&rlm; {}، ساعت {}:{}'.format(date[2], _(date[1]), date[0], obj.updated.minute, obj.updated.hour))
     get_updated.allow_tags = True
     get_updated.short_description = _('updated date')
+
+    def save_model(self, request, obj, form, change):
+        # this method calls 'obj.save()', this have to be done in save_related instead here.
+        self.obj = obj
+
+    def save_related(self, request, form, formsets, change):
+        # here save post.image_icon_set
+        for formset in formsets:
+            if type(formset).__name__ == 'Image_iconFormFormSet':
+                form.cleaned_data['icon'] = formset.cleaned_data[0]
+                if form.cleaned_data['icon']:    # formset.cleaned_data[0] is {} when don't fill icon formset
+                    del form.cleaned_data['icon']['DELETE']
+                    del form.cleaned_data['icon']['id']  # keys must be Image_icon fields all additional must delete
+                    del formsets[formsets.index(formset)]
+        # formsets is like: Image_iconFormFormSet, CommentFormFormSet.., formset is list of several icons, comments ...
+        # we must delete Image_iconFormFormSet because image saving should be done in save_product not admin.
+        SavePostProduct.save_post(save_func=self.obj.save, save_func_args={}, instance=self.obj,
+                                  data=form.cleaned_data, partial=False)
+        super().save_related(request, form, formsets, change)             # manytomany fields will remove from form.instance._meta.many_to_many after calling save_m2m()
 
     def delete_model(self, request, obj):
         if not settings.DEBUG:    # productions mode
@@ -226,7 +245,7 @@ class ProductAdmin(ModelAdminCust):
                     del formsets[formsets.index(formset)]
         # formsets is like: Image_iconFormFormSet, CommentFormFormSet.., formset is list of several icons, comments ...
         # we must delete Image_iconFormFormSet because image saving should be done in save_product not admin.
-        SaveProduct.save_product(save_func=self.obj.save, save_func_args={}, instance=self.obj,
+        SavePostProduct.save_product(save_func=self.obj.save, save_func_args={}, instance=self.obj,
                                  data=form.cleaned_data, partial=False)
         super().save_related(request, form, formsets, change)             # manytomany fields will remove from form.instance._meta.many_to_many after calling save_m2m()
         save_to_mongo(ProductDetailMongo, form.instance, my_serializers.ProductDetailMongoSerializer, change, request)
