@@ -232,6 +232,8 @@ class PostDetail(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.Dest
         return Response({'sessionid': sessionid, **data})               #serializer is list (because of many=True)    serializer[0] is dict
 
     def put(self, request, *args, **kwargs):
+        # partial auto will set to serializer like: serializer(instance, data, partial=kwargs.pop('partial'))
+        kwargs['partial'] = request.data.get('partial', True)
         return self.update(request, *args, **kwargs)
 
     def delete(self, request, *args, **kwargs):
@@ -269,7 +271,7 @@ class ProductDetail(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.D
         return Response({**product_serializer, 'comment_of_user': comment_of_user_serialized, 'comments': comments_serialized})
 
     def put(self, request, *args, **kwargs):
-        # front must point partial=True to update product with any field want.
+        # partial=True is for update product with any field want.
         # partial auto will set to serializer like: serializer(instance, data, partial=kwargs.pop('partial'))
         kwargs['partial'] = request.data.get('partial', True)
         return self.update(request, *args, **kwargs)

@@ -104,6 +104,7 @@ class PostAdmin(TranslationAdmin):
         SavePostProduct.save_post(save_func=self.obj.save, save_func_args={}, instance=self.obj,
                                   data=form.cleaned_data, partial=False)
         super().save_related(request, form, formsets, change)             # manytomany fields will remove from form.instance._meta.many_to_many after calling save_m2m()
+        save_to_mongo(PostDetailMongo, form.instance, my_serializers.PostDetailMongoSerializer, change, request)
 
     def delete_model(self, request, obj):
         if not settings.DEBUG:    # productions mode

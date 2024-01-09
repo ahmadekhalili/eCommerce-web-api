@@ -322,17 +322,17 @@ class PostDetailSerializer(serializers.ModelSerializer):
     published_date = serializers.SerializerMethodField(read_only=True)
     updated = serializers.SerializerMethodField(read_only=True)
     tags = serializers.ListField(child=serializers.CharField(max_length=30))
-    icon = Image_iconSerializer(write_only=True)
+    icon = Image_iconSerializer(write_only=True, required=False)
 
     class Meta:
         model = Post
         fields = '__all__'
 
     def to_representation(self, obj):
+        self.fields['icon'] = serializers.SerializerMethodField()
         fields = super().to_representation(obj)
         fields['author'] = UserNameSerializer(obj.author).data
         fields['categories'] = CategoryChainedSerializer(get_category_and_fathers(obj.category), many=True).data
-        fields['icon'] = serializers.SerializerMethodField()
         return fields
 
     def get_published_date(self, obj):
@@ -349,8 +349,6 @@ class PostDetailSerializer(serializers.ModelSerializer):
         return result
 
     def save(self, **kwargs):
-        post = super().save(**kwargs)
-        icon = self.data.get('icon')
         return SavePostProduct.save_post(save_func=super().save, save_func_args={**kwargs}, instance=self.instance,
                                          data=self.validated_data)
 

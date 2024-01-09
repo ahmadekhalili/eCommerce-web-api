@@ -353,27 +353,31 @@ class SavePostProduct:
             for instance in instances:
                 instance.save()
 
+    def save_icon(data, post_product, partial=True):  # post_product is post or product instance
+        if isinstance(post_product, Post):    # without these, icons will save with .product or .post None
+            data['post'] = post_product if not data.get('post') else data['post']
+        if isinstance(post_product, Product):
+            data['product'] = post_product if not data.get('post') else data['product']
+        image_icon_exits = post_product.image_icon_set.exists()
+        if not image_icon_exits:
+            SavePostProduct.create_icon(data=data)
+        else:
+            SavePostProduct.update_icon(post_product, data=data, partial=partial)
+
     def save_post(save_func, save_func_args, instance=None, data=None, partial=True):
-        data = {} if not data else data
         # 'data' in admin is 'cleaned_data' and in serializer is 'validated_data', it can also be {} so save_product
         # used only for run product.save(). 'save_func' is like: super().save or product.save
-        # instance is self.instance before saving instance in db, partial False in admin
+        # in 'instance' is pre instance in creation and instance in update. 'partial' is False in admin
+        data = {} if not data else data
         post = save_func(**save_func_args)     # in updating or in admin.save_related product is None
         post = post if post else instance
         icon = data.get('icon')
         if icon:
-            image_icon_exits = post.image_icon_set.exists()
-            if not image_icon_exits:
-                SavePostProduct.create_icon(data=icon)
-            else:
-                SavePostProduct.update_icon(post, data=icon, partial=partial)
+            SavePostProduct.save_icon(data=icon, post_product=post, partial=partial)
         return post
 
     def save_product(save_func, save_func_args, instance=None, data=None, partial=True):
         data = {} if not data else data
-        # 'data' in admin is cleaned_data and in serializer is validated_data, it can also be {} so save_product
-        # used only for run product.save(). 'save_func' is like: super().save and return product always (update/create)
-        # 'instance' is pre instance in creation and instance in update. 'partial' is False in admin
         length, width, height = data.get('length'), data.get('width'), data.get('height')
         if length and width and height:
             data['size'] = str(length) + ',' + str(width) + ',' + str(height)  # data is mutable with validated_data
@@ -383,17 +387,13 @@ class SavePostProduct:
         product = product if product else instance
         icon = data.get('icon')
         if icon:
-            image_icon_exits = product.image_icon_set.exists()
-            if not image_icon_exits:
-                SavePostProduct.create_icon(data=icon)
-            else:
-                SavePostProduct.update_icon(product, data=icon, partial=partial)
+            SavePostProduct.save_icon(data=icon, post_product=product, partial=partial)
         return product
 
 
 def save_to_mongo(model, instance, serializer, change, request=None):
     # model like PostDetailMongo, instance like post1, serializer like PostDetailSerializer or PostDetailSerializer()
-    # below serializer calls inside ModelSerializer like PostDetailMongoSerializer
+    # below serializer calls inside ModelSerializer like save_to_mongo(model, instance, self, ..)
     if isinstance(serializer, Serializer):
         serializer.request, serializer.instance = request, instance
         serialized = serializer.data
