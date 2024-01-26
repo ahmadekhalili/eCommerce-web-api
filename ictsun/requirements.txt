@@ -7,7 +7,7 @@ django-extensions==3.1.5           # this is for creating visual diagram from da
 django-phonenumber-field==6.1.0    # install package phonenumber_field (in pip list "django-phonenumber-field")
 django-cors-headers==3.11.0        # install package corsheaders, used in settings/INSTALLED_APPS and settings/CORS_ALLOW_ALL_ORIGINS and others
 Pillow==9.0.1                      # python library for working with images like: "from PIL import Image as PilImage" in main/models.py
-psycopg2==2.9.3                    # required for working django with postgres
+psycopg2==2.9.3                    # required for working django with postgres, install 'psycopg2-binary' in windows instead
 phonenumbers==8.12.44              # phonenumber_field needs phonenumbers for working, for exmaple: site-packages/phonenumber_field/formfields.py", line 1: import phonenumbers
 beautifulsoup4==4.10.0             # install bs4 package (BeautifulSoup  library), used in: ictsun/main/methods.py", line 5: from bs4 import BeautifulSoup
 requests==2.27.1                   # install requests library, used in ictsun/main/methods.py", line 6: import requests
@@ -24,6 +24,7 @@ gunicorn
 pyjwt[crypto]                      # for encode and decode we use pyjwt library and crypto for help encode more advance algoritms (like RSA and ECDSA)
 django-environ                     # add environment variables in settings.py
 drf-extra-fields                   # add Base64ImageField for django rest framework
+drf_spectacular
 #drf-yasg==1.21.3                  # it's a django framework that create swagger schema form django models for showing in swagger ui. we don't need it because we write swagger schema handy.  this use OpenAPI2 and will not update to UpenAPI3 soon, there is another package drf-spectacular (v0.23.1 now) use OpenAPI3 with more pupolar devolopers. may after releasing stable version of drf-spectacular this chosen.
 # package: folder name and import name, for example in BeautifulSoup library, bs4 is a folder name in site-packages and imported like (from bs4 import ...) so bs4 is package
 # library: official name of that software in internet (doc, goodle ...)
