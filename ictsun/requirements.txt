@@ -15,7 +15,7 @@ zeep==4.1.0                        # used in ictsun/payment/views.py", line 7: f
 coreapi==2.3.3                     # used in settings.py/REST_FRAMEWORK/DEFAULT_SCHEMA_CLASS
 celery==5.2.3                      # used in orders/tasks.py
 jdatetime==4.0.0                   # jalali datetime in python
-django-ckeditor==6.4.0             # install django-ckeditor (should add "ckeditor"  and "ckeditor_uploader" in settings/INSTALLED_APPS) 
+django-ckeditor==6.4.0             # install django-ckeditor (should add "ckeditor"  and "ckeditor_uploader" in settings/INSTALLED_APPS)
 pymongo==3.13.0                    # pymongo version should a version before 4, otherwise raise error (has conflict with djongo 1.3.6). note: "djongo" install pymongo v4*,  pymongo installation should be before "djongo" to prevent that installation. 3.13.0 is last version before 4 not 3.9   3.9 raise error in ubuntu 22
 djongo==1.3.6
 django-modeltranslation            # adds translation for fields values in nice graphic, in admin panel. latest version should be installed, because now latest version 0.18.9 support django 3.2+ so need keep installing newer version.

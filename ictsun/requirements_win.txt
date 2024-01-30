@@ -1,0 +1,31 @@
+# windows environment used just just for test (some packages aren't installed)
+django==4.0.3
+djangorestframework==3.13.1
+django-debug-toolbar==3.2.4
+django-extensions==3.1.5           # this is for creating visual diagram from database like "python manage.py graph_models -a ..", for more see tutorial/django/visualize database.txt
+django-phonenumber-field==6.1.0    # install package phonenumber_field (in pip list "django-phonenumber-field")
+django-cors-headers==3.11.0        # install package corsheaders, used in settings/INSTALLED_APPS and settings/CORS_ALLOW_ALL_ORIGINS and others
+Pillow                             # python library for working with images like: "from PIL import Image as PilImage" in main/models.py
+psycopg2-binary==2.9.9
+phonenumbers==8.12.44              # phonenumber_field needs phonenumbers for working, for exmaple: site-packages/phonenumber_field/formfields.py", line 1: import phonenumbers
+beautifulsoup4==4.10.0             # install bs4 package (BeautifulSoup  library), used in: ictsun/main/methods.py", line 5: from bs4 import BeautifulSoup
+requests==2.27.1                   # install requests library, used in ictsun/main/methods.py", line 6: import requests
+zeep                               # used in ictsun/payment/views.py", line 7: from zeep import Client
+lxml
+coreapi==2.3.3                     # used in settings.py/REST_FRAMEWORK/DEFAULT_SCHEMA_CLASS
+celery==5.2.3                      # used in orders/tasks.py
+jdatetime==4.0.0                   # jalali datetime in python
+django-ckeditor==6.4.0             # install django-ckeditor (should add "ckeditor"  and "ckeditor_uploader" in settings/INSTALLED_APPS)
+pymongo==3.13.0                    # pymongo version should a version before 4, otherwise raise error (has conflict with djongo 1.3.6). note: "djongo" install pymongo v4*,  pymongo installation should be before "djongo" to prevent that installation. 3.13.0 is last version before 4 not 3.9   3.9 raise error in ubuntu 22
+djongo==1.3.6
+django-modeltranslation            # adds translation for fields values in nice graphic, in admin panel. latest version should be installed, because now latest version 0.18.9 support django 3.2+ so need keep installing newer version.
+apscheduler                        # enable schedule tasks, like create sitemap.xml every day (in urls.py)
+gunicorn
+pyjwt                              # for encode and decode we use pyjwt library and crypto for help encode more advance algoritms (like RSA and ECDSA)
+django-environ                     # add environment variables in settings.py
+drf-extra-fields                   # add Base64ImageField for django rest framework
+drf_spectacular
+#drf-yasg==1.21.3                  # it's a django framework that create swagger schema form django models for showing in swagger ui. we don't need it because we write swagger schema handy.  this use OpenAPI2 and will not update to UpenAPI3 soon, there is another package drf-spectacular (v0.23.1 now) use OpenAPI3 with more pupolar devolopers. may after releasing stable version of drf-spectacular this chosen.
+# package: folder name and import name, for example in BeautifulSoup library, bs4 is a folder name in site-packages and imported like (from bs4 import ...) so bs4 is package
+# library: official name of that software in internet (doc, goodle ...)
+# run "pip install -r requirements.txt" to install all packages listed here.
