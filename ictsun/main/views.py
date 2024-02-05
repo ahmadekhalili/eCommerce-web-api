@@ -25,6 +25,9 @@ from pathlib import Path
 from PIL import Image as PilImage
 from math import ceil
 import pymongo
+import environ
+from pathlib import Path
+from urllib.parse import quote_plus
 
 from . import serializers as my_serializers
 from . import forms as my_forms
@@ -35,6 +38,12 @@ from users.serializers import UserSerializer, UserChangeSerializer
 from cart.serializers import CartProductSerializer
 from customed_files.states_towns import list_states_towns
 
+env = environ.Env()
+environ.Env.read_env(os.path.join(Path(__file__).resolve().parent.parent.parent, '.env'))
+username, password, db_name = quote_plus(env('MONGO_USER')), quote_plus(env('MONGO_PASSWORD')), env('MONGO_NAME')
+host = env('MONGO_HOST')
+uri = f"mongodb://{username}:{password}@{host}:27017/{db_name}?authSource={db_name}"
+mongo_db = pymongo.MongoClient(uri)['akh_db']
 
 def index(request):
     if request.method == 'GET':
@@ -227,7 +236,8 @@ class PostDetail(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.Dest
         #permission_classes = [IsAuthenticated]
         #post = Post.objects.filter(id=kwargs['pk']).select_related('author', 'category').prefetch_related('comment_set')
         #data = my_serializers.PostDetailSerializer(post, many=True).data[0]
-        data = PostDetailMongo.objects.using('mongo').get(id=kwargs['pk']).json
+        post_col = mongo_db[settings.MONGO_POST_COL]
+        data = post_col.find_one({"id": kwargs['pk']})['json']       # kwargs['pk'] must be int
         sessionid = request.session.session_key
         return Response({'sessionid': sessionid, **data})               #serializer is list (because of many=True)    serializer[0] is dict
 
@@ -321,14 +331,13 @@ class CommentCreate(views.APIView):
             data, user = dict(request.data), None if not request.user.is_authenticated else request.user
             comment = Comment.objects.create(**data, author=user)
             if comment.post_id:
-                mongo_db_name = "main_postdetailmongo"
+                mongo_db_name = settings.MONGO_POST_COL
                 foreignkey = comment.post_id
             else:
-                mongo_db_name = "main_productdetailmongo"
+                mongo_db_name = settings.MONGO_PRODUCT_COL
                 foreignkey = comment.product_id
-            shopdb_mongo, comment_id = pymongo.MongoClient("mongodb://localhost:27017/")['shop'], comment.id
             data = get_parsed_data(comment, my_serializers.CommentSerializer)
-            mycol = shopdb_mongo[mongo_db_name]
+            mycol = mongo_db[mongo_db_name], comment_id = comment
             mycol.update_one({'id': foreignkey}, {'$push': {'json.comment_set': data}})
             return Response({'status': 'نظر شما با موفقيت ثبت شد.'})
         except:

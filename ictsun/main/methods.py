@@ -391,9 +391,10 @@ class SavePostProduct:
         return product
 
 
-def save_to_mongo(model, instance, serializer, change, request=None):
-    # model like PostDetailMongo, instance like post1, serializer like PostDetailSerializer or PostDetailSerializer()
-    # below serializer calls inside ModelSerializer like save_to_mongo(model, instance, self, ..)
+def save_to_mongo(mongo_col, instance, serializer, change, request=None):
+    # mongo_col like pymongo.MongoClient("mongodb://localhost:27017/")['db_name']['post_detail'], instance like post1,
+    # serializer like PostDetailSerializer or PostDetailSerializer()
+    # below serializer calls inside ModelSerializer like save_to_mongo(mongo_db, instance, self, ..)
     if isinstance(serializer, Serializer):
         serializer.request, serializer.instance = request, instance
         serialized = serializer.data
@@ -411,21 +412,19 @@ def save_to_mongo(model, instance, serializer, change, request=None):
         content = JSONRenderer().render(serialized)
         stream = io.BytesIO(content)
         data = {**JSONParser().parse(stream), **data}                           # s is like: {'id': 12, 'name': 'test2', 'slug': 'test2', ...., 'categories': [OrderedDict([('name', 'Workout'), ('slug', 'Workout')])]} and 'OrderedDict' will cease raise error when want save in mongo so we fixed it in data, so data is like:  {'id': 12, 'name': 'test', 'slug': 'test', ...., 'categories': [{'name': 'Workout', 'slug': 'Workout'}]}   note in Response(some_serializer) some_serializer will fixed auto by Response class like our way
-        model(id=data['id'], json=data).save(using='mongo')
+        mongo_col.insert_one({'id': data['id'],  'json': data})
     else:
         content = JSONRenderer().render(serialized)
         stream = io.BytesIO(content)
         data = {**JSONParser().parse(stream), **data}
-        mongo_model = model.objects.using('mongo').get(id=data['id'])
-        mongo_model.json = data
-        mongo_model.save(using='mongo')
+        mongo_col.update_one({'id': data['id']}, {"$set": {"json": data}})
     activate(language_code)
 
 
 def brand_save_to_mongo(shopdb_mongo, brand, change, request=None):
     if change:
         products_ids = list(Product.objects.filter(brand=brand).values_list('id', flat=True))  # doc in Filter_AttributeAdmin.save_related
-        mycol = shopdb_mongo["main_productdetailmongo"]
+        mycol = shopdb_mongo[settings.MONGO_PRODUCT_COL]
         mycol.update_many({'id': {'$in': products_ids}}, {'$set': {'json.brand': brand.name}})
 
 
@@ -433,10 +432,10 @@ def comment_save_to_mongo(shopdb_mongo, comment, serializer, change, request=Non
     if change:
         comment = comment
         if comment.post_id:
-            mongo_db_name = "main_postdetailmongo"
+            mongo_db_name = settings.MONGO_POST_COL
             foreignkey = comment.post_id
         else:
-            mongo_db_name = "main_productdetailmongo"
+            mongo_db_name = settings.MONGO_PRODUCT_COL
             foreignkey = comment.product_id
         data, comment_id = get_parsed_data(comment, serializer), comment.id
         mycol = shopdb_mongo[mongo_db_name]
@@ -450,7 +449,7 @@ def category_save_to_mongo(shopdb_mongo, form, category_chain_serializer, change
         if category.post_product == 'post':
             col_name, model = 'main_postdetailmongo', Post
         else:
-            col_name, model = 'main_productdetailmongo', Product
+            col_name, model = settings.MONGO_PRODUCT_COL, Product
         children_ids = category.all_childes_id.split(',') if category.all_childes_id else []
         category_children_ids = [category.id] + list(Category.objects.filter(id__in=children_ids).values_list('id', flat=True))   # why we need children of category?  supose we edit `digital` category in admin, we should update all products with category digital or child of `digital`.  for example: product1.category = <Smart phone...>,  product1 in mongo db: product1['json']['categories'] is like [{ name: 'digital', slug: 'digital' }, { name: 'phone', slug: 'phone'}, { name: 'smart phone', slug: 'smart_phone'}],  now if we edit digital product1 should update!
         ids = list(model.objects.filter(category_id__in=category_children_ids).values_list('id', flat=True))             # doc in Filter_AttributeAdmin.save_related
@@ -465,7 +464,7 @@ def filter_attribute_save_to_mongo(shopdb_mongo, form, change):
         filter_attribute = form.instance
         filter_name, filterattribute_name = filter_attribute.filterr.name, filter_attribute.name
         products_ids = list(filter_attribute.product_set.values_list('id', flat=True))                 # products_ids is like ['1', '2', '5', ...]
-        mycol = shopdb_mongo["main_productdetailmongo"]
+        mycol = shopdb_mongo[settings.MONGO_PRODUCT_COL]
         mycol.update_many({'id': {'$in': products_ids}}, {'$set': {'json.filters.{}.$[element]'.format(filter_name): filterattribute_name}},
                           array_filters=[{'element': form.previouse_name}])      # note1: form.previouse_name should be in databse otherwise comment will not work       2:  we can't use like:  mycol.update_many({'id': {'$in': products_ids}}, {'$set': {'json.filters.{}.{}'.format(filter_name, form.previouse_name): filterattribute_name}})  because json.filters.filter_name is list not dict  also can't use string type f: f'...' and should use ''.fromat
         del form.previouse_name
@@ -475,7 +474,7 @@ def shopfilteritem_save_to_mongo(shopdb_mongo, form, serializer, change):
     if change:
         shopfilteritem = form.instance
         product_id, filter_name = shopfilteritem.product.id, shopfilteritem.filter_attribute.filterr.name  # doc in Filter_AttributeAdmin.save_related
-        mycol = shopdb_mongo["main_productdetailmongo"]
+        mycol = shopdb_mongo[settings.MONGO_PRODUCT_COL]
         mycol.update_many({'id': product_id}, {'$set': {'json.shopfilteritems.{}.$[element]'.format(filter_name): serializer(shopfilteritem).data}}, array_filters=[{'element.id': shopfilteritem.id}])
 
 
@@ -486,5 +485,5 @@ def image_save_to_mongo(shopdb_mongo, image, serializer, change):
         content = JSONRenderer().render(s)
         stream = io.BytesIO(content)
         data = JSONParser().parse(stream)
-        mycol = shopdb_mongo["main_productdetailmongo"]
+        mycol = shopdb_mongo[settings.MONGO_PRODUCT_COL]
         mycol.update_one({'json.images.id': image_id}, {'$set': {'json.images.$': data}})

@@ -102,24 +102,12 @@ WSGI_APPLICATION = 'ictsun.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': env('POSTGRES_NAME'),
-        'USER': env('POSTGRES_USER'),
-        'PASSWORD': env('POSTGRES_PASSWORD'),
-        'HOST': env('POSTGRES_HOST'),
+        'NAME': env('POSTGRES_DBNAME'),
+        'USER': env('POSTGRES_USER_NAME'),
+        'PASSWORD': env('POSTGRES_USER_PASS'),
+        'HOST': env('POSTGRES_MY_HOST'),
         'PORT': '5432',
     },
-    'mongo': {
-        'ENGINE': 'djongo',
-        'NAME': env('MONGO_NAME'),
-        'CLIENT': {
-            'host': '127.0.0.1',
-            'port': 27017,
-            'username': env('MONGO_USER'),
-            'password': env('MONGO_PASSWORD'),
-            'authSource': env('MONGO_SOURCE'),
-            'authMechanism': 'SCRAM-SHA-256'
-        },
-    }
 }
 
 DATABASE_ROUTERS = ['main.db_router.MongoRouter']
@@ -236,3 +224,5 @@ POST_STEP = 6       # 6 means you will see 6 post in every PostList page, used i
 PRODUCT_STEP = 12
 DEFAULT_SCHEME = 'http'   # uses in sitmape.py because we dont have access to request and request.scheme
 SECRET_HS = 'mysecret'    # used in HS256 in users send sms
+MONGO_POST_COL = 'postdetailmongo'      # this uses to create/get mongo collection, so can change it in first i want
+MONGO_PRODUCT_COL = 'productdetailmongo'

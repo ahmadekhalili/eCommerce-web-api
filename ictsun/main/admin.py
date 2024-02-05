@@ -19,7 +19,11 @@ from rest_framework.parsers import JSONParser
 import io
 import json
 import jdatetime
+import os
 import pymongo
+import environ
+from pathlib import Path
+from urllib.parse import quote_plus
 from modeltranslation.admin import TranslationAdmin
 from modeltranslation.utils import get_translation_fields as g_t
 
@@ -39,7 +43,12 @@ csrf_protect_m = method_decorator(csrf_protect)
 admin.site.site_header = _('{} site panel').format(PROJECT_VERBOSE_NAME)#f'پنل سايت {settings.PROJECT_VERBOSE_NAME}'    
 admin.site.site_title = _('{} admin panel').format(PROJECT_VERBOSE_NAME)
 admin.site.index_title = _('admin panel')
-shopdb_mongo = pymongo.MongoClient("mongodb://localhost:27017/")['shop']
+env = environ.Env()
+environ.Env.read_env(os.path.join(Path(__file__).resolve().parent.parent.parent, '.env'))
+username, password, db_name = quote_plus(env('MONGO_USER')), quote_plus(env('MONGO_PASSWORD')), env('MONGO_NAME')
+host = env('MONGO_HOST')
+uri = f"mongodb://{username}:{password}@{host}:27017/{db_name}?authSource={db_name}"
+mongo_db = pymongo.MongoClient(uri)['akh_db']
 
 
 class CommentInline(admin.TabularInline):
@@ -104,7 +113,7 @@ class PostAdmin(TranslationAdmin):
         SavePostProduct.save_post(save_func=self.obj.save, save_func_args={}, instance=self.obj,
                                   data=form.cleaned_data, partial=False)
         super().save_related(request, form, formsets, change)             # manytomany fields will remove from form.instance._meta.many_to_many after calling save_m2m()
-        save_to_mongo(PostDetailMongo, form.instance, my_serializers.PostDetailMongoSerializer, change, request)
+        save_to_mongo(mongo_db[settings.MONGO_POST_COL], form.instance, my_serializers.PostDetailMongoSerializer, change, request)
 
     def delete_model(self, request, obj):
         if not settings.DEBUG:    # productions mode
@@ -131,9 +140,9 @@ class BrandAdmin(TranslationAdmin):
             'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
         }
 
-    def save_related(self, request, form, formsets, change):             # here update product in mongo database  (ProductDetailMongo.json.brand) according to Brand changes. for example if brand_1.name changes to 'Apl'  ProductDetailMongo:  [{ id: 1, json: {brand: 'Apl', ...}}, {id: 2, ...}]
+    def save_related(self, request, form, formsets, change):             # here update product in mongo database  (productdetailmongo_col['json']['brand']) according to Brand changes. for example if brand_1.name changes to 'Apl'  ProductDetailMongo:  [{ id: 1, json: {brand: 'Apl', ...}}, {id: 2, ...}]
         super().save_related(request, form, formsets, change)
-        brand_save_to_mongo(shopdb_mongo, form.instance, change, request)
+        brand_save_to_mongo(mongo_db, form.instance, change, request)
 
 admin.site.register(Brand, BrandAdmin)
 
@@ -236,7 +245,7 @@ class ProductAdmin(ModelAdminCust):
         self.obj = obj
 
     def save_related(self, request, form, formsets, change):
-        # here save product.size and product.image_icon_set, and save in mongo database (ProductDetailMongo model)
+        # here save product.size and product.image_icon_set, and save in mongo database (ProductDetailMongo col)
         for formset in formsets:
             if type(formset).__name__ == 'Image_iconFormFormSet':
                 form.cleaned_data['icon'] = formset.cleaned_data[0]
@@ -249,7 +258,7 @@ class ProductAdmin(ModelAdminCust):
         SavePostProduct.save_product(save_func=self.obj.save, save_func_args={}, instance=self.obj,
                                  data=form.cleaned_data, partial=False)
         super().save_related(request, form, formsets, change)             # manytomany fields will remove from form.instance._meta.many_to_many after calling save_m2m()
-        save_to_mongo(ProductDetailMongo, form.instance, my_serializers.ProductDetailMongoSerializer, change, request)
+        save_to_mongo(mongo_db[settings.MONGO_PRODUCT_COL], form.instance, my_serializers.ProductDetailMongoSerializer, change, request)
 
     @csrf_protect_m
     def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
@@ -283,8 +292,8 @@ class ProductAdmin(ModelAdminCust):
             selected_filters = [filter_attribute.filterr for filter_attribute in selected_filter_attributes if filter_attribute]             #if obj.filter_attributes.all() was blank, filter_attribute.id  raise error so we need check with if filter_attribute
             extra_context['selected_filter_attributes'] = make_next(selected_filter_attributes)  
             extra_context['selected_filters'] = make_next(selected_filters)
-            mongo_product_query = ProductDetailMongo.objects.using('mongo').filter(id=obj.id)
-            mongo_product = mongo_product_query[0] if mongo_product_query else None  # if add product in shell, mongo_product can be None
+            # if add product in shell, mongo_product can be None
+            mongo_product = mongo_db[settings.MONGO_PRODUCT_COL].find_one({"id": obj.id})['json']
             extra_fields = {}
             if mongo_product:
                 for tuple in mongo_product.json.items():                              # find all additional fields added in admin panel and add to 'data' in order to save them to db
@@ -369,9 +378,9 @@ class CommentAdmin(admin.ModelAdmin):
         else:                     # development mode
             super().delete_model(request, obj)
 
-    def save_related(self, request, form, formsets, change):         # here update product in mongo database  (ProductDetailMongo.json.comment_set) according to Comment changes. for example if we have comment_1 (comment_1.product=<Product (1)>)   comment_1.content changes to 'another_content'  ProductDetailMongo:  [{id: 1, json: {comment_set: [{ id: 2, status: '1', published_date: '2022-08-07T17:33:38.724203', content: 'another_content', author: { id: 1, user_name: 'ادمین' }, reviewer: null, post: null, product: 12 }], ...}}, {id: 2, ...}]
+    def save_related(self, request, form, formsets, change):         # here update product in mongo database  (product_detail_mongo.json.comment_set) according to Comment changes. for example if we have comment_1 (comment_1.product=<Product (1)>)   comment_1.content changes to 'another_content'  ProductDetailMongo:  [{id: 1, json: {comment_set: [{ id: 2, status: '1', published_date: '2022-08-07T17:33:38.724203', content: 'another_content', author: { id: 1, user_name: 'ادمین' }, reviewer: null, post: null, product: 12 }], ...}}, {id: 2, ...}]
         super().save_related(request, form, formsets, change)
-        comment_save_to_mongo(shopdb_mongo, form.instance, my_serializers.CommentSerializer, change, request)
+        comment_save_to_mongo(mongo_db, form.instance, my_serializers.CommentSerializer, change, request)
 
 admin.site.register(Comment, CommentAdmin)
 
@@ -438,9 +447,9 @@ class CategoryAdmin(TranslationAdmin):
             categories_before_join, categories_after_join = set_levels_afterthis_all_childes_id(previous_father_queryset, [category], Category._meta.get_field('level').validators[1].limit_value, delete=True)
             Category.objects.bulk_update(categories_before_join, ['levels_afterthis', 'all_childes_id']) if categories_before_join else None
 
-    def save_related(self, request, form, formsets, change):         # here update product in mongo database  (ProductDetailMongo.json.categories) according to Category changes. for example if <Category digital>.name changes to 'digggital'  all products with category 'digital' os children of 'digital' like 'phone' or 'smart phone' will changes like product_1 (product_1.category=<Category digital>), product_2 (product_2.category=<Category phone>), product_3 (product_3.category=<Category smart phone>):   ProductDetailMongo:  [{ id: 1, json: {categories: [{ name: 'digggital', slug: 'digital' }], ...}}, { id: 2, json: {categories: [{ name: 'digital', slug: 'digital' }, { name: 'phone', slug: 'phone' }], ...}}, { id: 3, json: {categories: [{ name: 'digggital', slug: 'digital' }, { name: 'phone', slug: 'phone' }, { name: 'smart phone', slug: 'smart-phone' }], ...}}]
+    def save_related(self, request, form, formsets, change):         # here update product in mongo database  (product_detail_mongo.json.categories) according to Category changes. for example if <Category digital>.name changes to 'digggital'  all products with category 'digital' os children of 'digital' like 'phone' or 'smart phone' will changes like product_1 (product_1.category=<Category digital>), product_2 (product_2.category=<Category phone>), product_3 (product_3.category=<Category smart phone>):   product detail mongo col:  [{ id: 1, json: {categories: [{ name: 'digggital', slug: 'digital' }], ...}}, { id: 2, json: {categories: [{ name: 'digital', slug: 'digital' }, { name: 'phone', slug: 'phone' }], ...}}, { id: 3, json: {categories: [{ name: 'digggital', slug: 'digital' }, { name: 'phone', slug: 'phone' }, { name: 'smart phone', slug: 'smart-phone' }], ...}}]
         super().save_related(request, form, formsets, change)
-        category_save_to_mongo(shopdb_mongo, form, my_serializers.CategoryChainedSerializer, change)
+        category_save_to_mongo(mongo_db, form, my_serializers.CategoryChainedSerializer, change)
 
     '''
     @csrf_protect_m
@@ -533,7 +542,7 @@ class Filter_AttributeAdmin(TranslationAdmin):
 
     def save_related(self, request, form, formsets, change):
         super().save_related(request, form, formsets, change)
-        filter_attribute_save_to_mongo(shopdb_mongo, form, change)
+        filter_attribute_save_to_mongo(mongo_db, form, change)
 
 admin.site.register(Filter_Attribute, Filter_AttributeAdmin)
 
@@ -558,7 +567,7 @@ class ShopFilterItemAdmin(TranslationAdmin):
 
     def save_related(self, request, form, formsets, change):
         super().save_related(request, form, formsets, change)
-        shopfilteritem_save_to_mongo(shopdb_mongo, form, my_serializers.ShopFilterItemSerializer, change)
+        shopfilteritem_save_to_mongo(mongo_db, form, my_serializers.ShopFilterItemSerializer, change)
 
 admin.site.register(ShopFilterItem, ShopFilterItemAdmin)
 
@@ -582,7 +591,7 @@ class ImageAdmin(TranslationAdmin):
 
     def save_related(self, request, form, formsets, change):
         super().save_related(request, form, formsets, change)
-        image_save_to_mongo(shopdb_mongo, form.instance, my_serializers.ImageSerializer, change)
+        image_save_to_mongo(mongo_db, form.instance, my_serializers.ImageSerializer, change)
 
 admin.site.register(Image, ImageAdmin)
 

@@ -14,6 +14,10 @@ from datetime import datetime
 from pathlib import Path
 import jdatetime
 import re
+import os
+import pymongo
+import environ
+from urllib.parse import quote_plus
 
 from .models import *
 from .methods import get_category_and_fathers, ImageCreationSizes, save_to_mongo, SavePostProduct
@@ -21,7 +25,12 @@ from users.models import User
 from users.serializers import UserNameSerializer, UserSerializer
 from users.methods import user_name_shown
 
-
+env = environ.Env()
+environ.Env.read_env(os.path.join(Path(__file__).resolve().parent.parent.parent, '.env'))
+username, password, db_name = quote_plus(env('MONGO_USER')), quote_plus(env('MONGO_PASSWORD')), env('MONGO_NAME')
+host = env('MONGO_HOST')
+uri = f"mongodb://{username}:{password}@{host}:27017/{db_name}?authSource={db_name}"
+mongo_db = pymongo.MongoClient(uri)['akh_db']
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -367,7 +376,7 @@ class PostDetailMongoSerializer(PostDetailSerializer):
     def save(self, **kwargs):
         change = bool(self.instance)
         instance = super().save(**kwargs)
-        save_to_mongo(PostDetailMongo, instance, self, change, kwargs.get('request'))
+        save_to_mongo(mongo_db[settings.MONGO_POST_COL], instance, self, change, kwargs.get('request'))
         return instance
 
 
@@ -495,7 +504,7 @@ class ProductDetailMongoSerializer(ProductDetailSerializer):
         # we save product in mongo in places: 1- admin 2- serializer
         change = bool(self.instance)
         instance = super().save(**kwargs)
-        save_to_mongo(ProductDetailMongo, instance, self, change, kwargs.get('request'))
+        save_to_mongo(mongo_db[settings.MONGO_PRODUCT_COL], instance, self, change, kwargs.get('request'))
         return instance
 
 

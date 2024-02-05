@@ -15,7 +15,6 @@ import os
 import ast
 from datetime import datetime
 from PIL import Image as PilImage
-from djongo import models as djongo_models
 from ckeditor_uploader.fields import RichTextUploadingField
 
 import jdatetime
@@ -205,24 +204,6 @@ class Post(models.Model):
 
 
 
-class PostDetailMongo(djongo_models.Model):
-    id = djongo_models.IntegerField(blank=False, null=False, primary_key=True)
-    json = djongo_models.JSONField()
-    objects = djongo_models.DjongoManager()
-
-    class Meta:
-        verbose_name = _('Post')
-        verbose_name_plural = _('Posts')
-
-    def __str__(self):
-        try:
-            return self.json['title']                      # self.json.get   raise error.
-        except:
-            return 'nameless'                              # return None can't accept (error)
-
-
-
-
 class ProductManager(models.Manager):                             #we have two seperate way for creating an object,  .create( product.objects.create ) and .save( p=product(..) p.save() ), it is important for us in two way rating creation suported same.
     def create(self, *args, **kwargs):
         product = super().create(*args, **kwargs)
@@ -297,32 +278,6 @@ class Product_Filter_Attributes(models.Model):
 Product_Filter_Attributes._meta.auto_created = True
 
 from main.signals import FillCategoryfilters_brands         # this cause "m2m_changed.connect(filter_attributes_changed, sender=Product.filter_attributes.through)" loads here. changing Category.brands Category.filters automatically related to several fields, one of them is product.filter_attributes, we collected all related fields to one class 'FillCategoryfilters_bradns to clearer structure and design.
-
-
-
-
-class ProductDetailMongo(djongo_models.Model):
-    id = models.IntegerField(blank=False, null=False, primary_key=True)
-    json = djongo_models.JSONField()
-    #name = djongo_models.CharField(_('name'), max_length=60)
-    #slug = djongo_models.CharField(_('slug'), max_length=60)
-    #meta_title = djongo_models.CharField(_('meta title'), max_length=60, blank=True, default='')
-    #meta_description = djongo_models.TextField(_('meta description'), validators=[MaxLengthValidator(160)], blank=True, default='')
-    #brief_description = djongo_models.TextField(_('brief description'), validators=[MaxLengthValidator(1000)])
-    #detailed_description = RichTextUploadingField(_('detailed description'), blank=True)
-    #price = djongo_models.DecimalField(_('price'), max_digits=10, decimal_places=2, default=0) 
-    #available = djongo_models.BooleanField(_('available'), default=False)
-    objects = djongo_models.DjongoManager()
-
-    class Meta:
-        verbose_name = _('Product')
-        verbose_name_plural = _('Products')
-
-    def __str__(self):
-        try:
-            return self.json['name']                      # self.json.get   raise error.
-        except:
-            return 'nameless'                             # return None can't accept (error)
 
 
 
