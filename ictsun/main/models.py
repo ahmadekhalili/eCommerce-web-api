@@ -75,6 +75,7 @@ class Category(models.Model):                                  #note: supose roo
     all_childes_id = models.TextField(default='', blank=True)                      #list all chiles of that object in this structure: "1,2,3,4"    if this field name was chiles_id maybe raise problem with related_query_name of father_category or other.
     post_product = models.CharField(_('post or product'), max_length=10, default='product')      #this should be radio button in admin panel.
     #child_categories
+    #post_set
     #product_set
 
     class Meta:

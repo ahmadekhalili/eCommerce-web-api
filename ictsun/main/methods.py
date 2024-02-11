@@ -434,9 +434,11 @@ def comment_save_to_mongo(shopdb_mongo, comment, serializer, change, request=Non
         if comment.post_id:
             mongo_db_name = settings.MONGO_POST_COL
             foreignkey = comment.post_id
-        else:
+        elif comment.product_id:
             mongo_db_name = settings.MONGO_PRODUCT_COL
             foreignkey = comment.product_id
+        else:      # this will prevent error in comment editing when there is not any post/product
+            return None
         data, comment_id = get_parsed_data(comment, serializer), comment.id
         mycol = shopdb_mongo[mongo_db_name]
         mycol.update_one({'id': foreignkey}, {'$set': {'json.comment_set.$[element]': data}}, array_filters=[{'element.id': comment_id}])
@@ -446,10 +448,12 @@ def category_save_to_mongo(shopdb_mongo, form, category_chain_serializer, change
     # we can't import CategoryChainedSerializer due to 'circle import error'
     if change:
         category = form.instance
-        if category.post_product == 'post':
-            col_name, model = 'main_postdetailmongo', Post
-        else:
+        if category.post_set.exists():
+            col_name, model = settings.MONGO_POST_COL, Post
+        elif category.product_set.exists():
             col_name, model = settings.MONGO_PRODUCT_COL, Product
+        else:            # this will prevent error in category editing when there is not any post/product
+            return None
         children_ids = category.all_childes_id.split(',') if category.all_childes_id else []
         category_children_ids = [category.id] + list(Category.objects.filter(id__in=children_ids).values_list('id', flat=True))   # why we need children of category?  supose we edit `digital` category in admin, we should update all products with category digital or child of `digital`.  for example: product1.category = <Smart phone...>,  product1 in mongo db: product1['json']['categories'] is like [{ name: 'digital', slug: 'digital' }, { name: 'phone', slug: 'phone'}, { name: 'smart phone', slug: 'smart_phone'}],  now if we edit digital product1 should update!
         ids = list(model.objects.filter(category_id__in=category_children_ids).values_list('id', flat=True))             # doc in Filter_AttributeAdmin.save_related

@@ -224,5 +224,5 @@ POST_STEP = 6       # 6 means you will see 6 post in every PostList page, used i
 PRODUCT_STEP = 12
 DEFAULT_SCHEME = 'http'   # uses in sitmape.py because we dont have access to request and request.scheme
 SECRET_HS = 'mysecret'    # used in HS256 in users send sms
-MONGO_POST_COL = 'postdetailmongo'      # this uses to create/get mongo collection, so can change it in first i want
+MONGO_POST_COL = 'postdetailmongo'      # these are used to create/get mongo collection, so change it only in first
 MONGO_PRODUCT_COL = 'productdetailmongo'

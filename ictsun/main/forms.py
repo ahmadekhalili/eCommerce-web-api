@@ -83,6 +83,7 @@ class CommentForm(forms.ModelForm):
 class CategoryForm(forms.ModelForm):
     level = custforms.CustomIntegerField(widget=level_widget, label=_('level'))
     father_category = custforms.ModelChoiceFieldCustom(queryset=Category.objects.all(), widget=father_category_widget, required=False, label=_('father category'))       #puting ModelChoiceFieldCustom will cease: when creating new category with level 1, father category will feel auto after saving!
+    post_product = forms.CharField(widget=TextInputQuesMark(qus_text='post or product'), label=_('post or product'))
 
     class Meta:
         model = Category
