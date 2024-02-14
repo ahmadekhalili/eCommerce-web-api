@@ -49,6 +49,10 @@ class NumberInputQuesMark(QuestionMark, forms.widgets.NumberInput):
 
 
 
+class image_icon_QuesMark(QuestionMark, forms.widgets.FileInput):
+    template_name = 'main/widgets/product/image_icon_file.html'
+
+
 
 class filter_attributes_widget(forms.Select):
     template_name = 'main/widgets/filter_attributes_two_select.html'
@@ -112,10 +116,6 @@ class product_category_widget(forms.Select):
             two_select_context['selected_category_id'] = value.category.id
             
         return two_select_context
-
-
-class image_icon_widget(QuestionMark, forms.widgets.FileInput):
-    template_name = 'main/widgets/product/image_icon_file.html'
 
 
 

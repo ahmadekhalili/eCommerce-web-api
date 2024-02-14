@@ -125,7 +125,7 @@ class Filter_AttributeForm(forms.ModelForm):
 
 
 class ImageIconForm(forms.ModelForm):
-    image = forms.ImageField(widget=image_icon_widget(qus_text=image_qusmark_text, input=''), required=True, label=_('image icon'))
+    image = forms.ImageField(widget=image_icon_QuesMark(qus_text=image_qusmark_text, input=''), required=True, label=_('image icon'))
     #alt_fa = forms.CharField(max_length=55, widget=forms.TextInput(attrs={'class': get_mt_input_classes('alt_fa')}), label=_('alt'))
     #alt_en = forms.CharField(max_length=55, widget=forms.TextInput(attrs={'class': get_mt_input_classes('alt_en')}), required=False, empty_value=None, label=_('alt'))   # if you don't put required=False, this field will be required in modeltranslation tab.
 
