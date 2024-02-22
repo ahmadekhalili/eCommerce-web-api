@@ -17,7 +17,7 @@ from main.methods import get_parsed_data
 
 env = environ.Env()
 environ.Env.read_env(os.path.join(Path(__file__).resolve().parent.parent.parent, '.env'))
-shopdb_mongo = pymongo.MongoClient("mongodb://localhost:27017/")[env('MONGO_NAME')]
+shopdb_mongo = pymongo.MongoClient("mongodb://localhost:27017/")[env('MONGO_USERNAME')]
 
 
 #@admin.register(User)

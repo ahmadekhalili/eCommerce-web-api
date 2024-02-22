@@ -103,8 +103,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': env('POSTGRES_DBNAME'),
-        'USER': env('POSTGRES_USER_NAME'),
-        'PASSWORD': env('POSTGRES_USER_PASS'),
+        'USER': env('POSTGRES_USERNAME'),
+        'PASSWORD': env('POSTGRES_USERPASS'),
         'HOST': env('POSTGRES_MY_HOST'),
         'PORT': '5432',
     },
@@ -163,11 +163,6 @@ LANGUAGES = (
     ('en', gettext('English')),
 )                                             # main/management/createstates use 'fa' as default. it is important put default language in first (use in methods.conf_questwidget_class).
 
-'''
-"gregorian" or "jalali". in gregorian images saves like: products_images/2023/06/03  in jalali like:
-products_images/1402/03/12. unlike LANGUAGE_CODE, you should change IMAGES_PATH_TYPE in first project production starts.
-'''
-
 PHONENUMBER_DEFAULT_REGION = 'IR'
 PHONENUMBER_DB_FORMAT = 'NATIONAL'
 
@@ -219,7 +214,7 @@ SITE_ID = 1
 
 # custom added vars (vars that aren't used by eny application or library and is only for personal usage)
 CART_SESSION_ID = 'cart'
-IMAGES_PATH_TYPE = 'jalali'
+IMAGES_PATH_TYPE = 'jalali'  # 'jalali' or 'gregorian',  in gregorian images saves like: products_images/2023/06/03
 POST_STEP = 6       # 6 means you will see 6 post in every PostList page, used in PostList view and main/sitemap.py
 PRODUCT_STEP = 12
 DEFAULT_SCHEME = 'http'   # uses in sitmape.py because we dont have access to request and request.scheme

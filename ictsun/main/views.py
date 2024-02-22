@@ -40,7 +40,7 @@ from customed_files.states_towns import list_states_towns
 
 env = environ.Env()
 environ.Env.read_env(os.path.join(Path(__file__).resolve().parent.parent.parent, '.env'))
-username, password, db_name = quote_plus(env('MONGO_USER')), quote_plus(env('MONGO_PASSWORD')), env('MONGO_NAME')
+username, password, db_name = quote_plus(env('MONGO_USERNAME')), quote_plus(env('MONGO_USERPASS')), env('MONGO_DBNAME')
 host = env('MONGO_HOST')
 uri = f"mongodb://{username}:{password}@{host}:27017/{db_name}?authSource={db_name}"
 mongo_db = pymongo.MongoClient(uri)['akh_db']
