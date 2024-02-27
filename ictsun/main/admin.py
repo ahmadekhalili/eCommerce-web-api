@@ -600,7 +600,7 @@ admin.site.register(Image, ImageAdmin)
 # admin.site.register(Image_icon) image icons should edit in post and product pages (for integration for mongo creation)
 
 admin.site.register(State)
-
+admin.site.register(Image_icon)
 
 #admin.site.disable_action('delete_selected') 
 '''

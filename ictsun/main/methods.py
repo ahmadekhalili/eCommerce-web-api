@@ -355,9 +355,9 @@ class SavePostProduct:
 
     def save_icon(data, post_product, partial=True):  # post_product is post or product instance
         if isinstance(post_product, Post):    # without these, icons will save with .product or .post None
-            data['post'] = post_product if not data.get('post') else data['post']
+            data['path'], data['post'],  = 'posts', post_product if not data.get('post') else data['post']
         if isinstance(post_product, Product):
-            data['product'] = post_product if not data.get('post') else data['product']
+            data['path'], data['product'] = 'products', post_product if not data.get('post') else data['product']
         image_icon_exits = post_product.image_icon_set.exists()
         if not image_icon_exits:
             SavePostProduct.create_icon(data=data)
