@@ -253,7 +253,8 @@ class ImageCreationSizes:
         elif instances:       # in updating a model instance (like product)
             self.instances = list(instances)[:len(self.sizes)]
             for size, instance in zip(self.sizes, instances):
-                instance.alt = f'{alt}-{size}'
+                # if we have alt in our instance and user don't want update it, so don't change alt.
+                instance.alt = f'{alt}-{size}' if data.get('alt') or not instance.alt else instance.alt
                 [setattr(instance, key, self.data[key]) for key in self.data]
 
     @staticmethod
