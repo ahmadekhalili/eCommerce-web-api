@@ -355,6 +355,7 @@ class SavePostProduct:
                 instance.save()
 
     def save_icon(data, post_product, partial=True):  # post_product is post or product instance
+        # data = {'image': InMemoryUploadFIle(...), 'alt': ..}, 'alt' is not required
         if isinstance(post_product, Post):    # without these, icons will save with .product or .post None
             data['path'], data['post'],  = 'posts', post_product if not data.get('post') else data['post']
         if isinstance(post_product, Product):
@@ -366,6 +367,7 @@ class SavePostProduct:
             SavePostProduct.update_icon(post_product, data=data, partial=partial)
 
     def save_post(save_func, save_func_args, instance=None, data=None, partial=True):
+        # 'save_func' can be instance.save or serializer.save
         # 'data' in admin is 'cleaned_data' and in serializer is 'validated_data', it can also be {} so save_product
         # used only for run product.save(). 'save_func' is like: super().save or product.save
         # in 'instance' is pre instance in creation and instance in update. 'partial' is False in admin
