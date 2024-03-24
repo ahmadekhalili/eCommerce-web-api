@@ -1,7 +1,4 @@
-from rest_framework.renderers import JSONRenderer
-from rest_framework.parsers import JSONParser
 
-import io
 
 # important: here we put methods need to import in models.py, because here we have not to import any model class due to
 # circle errors.
@@ -85,7 +82,7 @@ def set_levels_afterthis_all_childes_id(previous_father_queryset, category_query
                             break    
 
         
-        first_category_id = category.id
+        category.id
         if category.father_category:                                                                           #if creating a category failed, we have not category and we dont want showing erros of set_levels_afterthis_all_childes_id   (we want show error of model Category)
             if is_circle(category):
                 categories = circle_categories(category=category)

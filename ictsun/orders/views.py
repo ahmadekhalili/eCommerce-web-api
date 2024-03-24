@@ -1,22 +1,18 @@
 from django.utils.translation import gettext_lazy as _
-from django.shortcuts import get_object_or_404
 
 from rest_framework import views
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
 from decimal import Decimal
-from datetime import datetime
 
-from customed_files.date_convertor import MiladiToShamsi
-from customed_files.states_towns import list_states_towns
 from main.models import Product, ShopFilterItem
 from main.model_methods import update_product_stock
 from cart.views import CartCategoryView
 from cart.cart import Cart
 from payment.views import PaymentStart
-from .models import ProfileOrder, Order, OrderItem, Dispatch
-from .serializers import ProfileOrderSerializer, OrderSerializer, OrderItemSerializer
+from .models import ProfileOrder, Order, OrderItem
+from .serializers import ProfileOrderSerializer, OrderSerializer
 from .methods import profile_order_detail
 
 

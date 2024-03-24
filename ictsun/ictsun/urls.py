@@ -34,7 +34,6 @@ urlpatterns = i18n_patterns(
     path('orders/', include('orders.urls')),
     path('payment/', include('payment.urls')),
     path('__debug__/', include(debug_toolbar.urls)),
-    path('ckeditor/', include('ckeditor_uploader.urls')),
     path('jsi18n/', JavaScriptCatalog.as_view(), name='javascript-catalog'),
     prefix_default_language=False,
 )

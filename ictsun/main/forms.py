@@ -1,22 +1,16 @@
 from django.utils.translation import gettext_lazy as _
-from django.core.exceptions import ValidationError
 from django.core.validators import MaxLengthValidator
 from django.forms.utils import ErrorList
 from django import forms
-from django.core.files import File
 from django.utils.text import slugify
 
-import json
 from copy import copy
-from modeltranslation.utils import get_translation_fields as g_t
 
 from customed_files.django.classes import custforms
 from users.models import User
-from . import serializers
 from .widgets import *
-from .methods import get_mt_input_classes, ImageCreationSizes
-from .models import Post, Product, Category, Filter, Image, Comment, Filter_Attribute, Brand, ShopFilterItem, \
-    Image_icon
+from .methods import get_mt_input_classes
+from .models import Post, Product, Category, Filter, Image, Comment, Filter_Attribute, ShopFilterItem, Image_icon
 # note1: if edit or add a form field exits in translation.py, like add Categoryform.name field, make sure in admin panel shown correctly (in 'tabbed' mode). if not shown correctly, you have to add a widget with required modeltreanslation classes like in ProductAdminForm.alt_fa.widget.attrs
 
 
@@ -181,4 +175,3 @@ class ShopFilterItemForm(forms.ModelForm):
         if dublicated:              
             raise ValidationError(_("select unique sets of filter attributes."))
 '''    
-

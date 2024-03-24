@@ -12,7 +12,6 @@ from decimal import Decimal
 
 from main.models import Product, ShopFilterItem
 from users.models import User
-from .models import SesKey
 from .cart import Cart
 
 

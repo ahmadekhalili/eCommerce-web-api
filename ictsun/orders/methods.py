@@ -1,4 +1,3 @@
-from main.methods import PostDispatchPrice
 from cart.views import CartCategoryView
 from cart.cart import Cart
 from .models import ProfileOrder, Shipping

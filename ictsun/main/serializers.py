@@ -1,6 +1,4 @@
-from django.contrib.auth.models import Group
 #from django.template.defaultfilters import slugify      this  slugify has not allow_unicode argument(from git)    
-from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django.urls import reverse
 
@@ -10,7 +8,6 @@ from rest_framework.validators import UniqueValidator
 
 from modeltranslation.utils import get_translation_fields as g_t
 from drf_extra_fields.fields import Base64ImageField
-from datetime import datetime
 from pathlib import Path
 import jdatetime
 import re
@@ -20,9 +17,8 @@ import environ
 from urllib.parse import quote_plus
 
 from .models import *
-from .methods import get_category_and_fathers, ImageCreationSizes, save_to_mongo, SavePostProduct
-from users.models import User
-from users.serializers import UserNameSerializer, UserSerializer
+from .methods import get_category_and_fathers, save_to_mongo, SavePostProduct
+from users.serializers import UserNameSerializer
 from users.methods import user_name_shown
 
 env = environ.Env()
@@ -103,7 +99,7 @@ class Image_iconSerializer(serializers.ModelSerializer):
         return super().to_representation(obj)
 
     def get_image(self, obj):
-        request = self.context.get('request', None)
+        self.context.get('request', None)
         try:
             url = obj.image.url
         except:
@@ -421,7 +417,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):       # important: f
         return data
 
     def get_related_products(self, obj):
-        request = self.context.get('request', None)
+        self.context.get('request', None)
         related_products = Product.objects.filter(category=obj.category, visible=True).exclude(id=obj.id)[0:10] if obj.category else []
         if len(related_products) < 5 and obj.category and obj.category.father_category:                 #we must care obj.category had father_category
             child_categories = obj.category.father_category.child_categories.values_list('id')      #child_categories is like [(6,) , (7,)]

@@ -1,14 +1,11 @@
 from django.db import models
-from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
 from datetime import datetime
 from phonenumber_field.modelfields import PhoneNumberField
 
-from customed_files.django.classes import model_fields
-from customed_files.states_towns import list_states_towns
-from main.models import Product, ShopFilterItem, State, Town
+from main.models import Product, ShopFilterItem, Town
 from users.models import User
 # note1: if you add or remove a field, you have to apply it in translation.py 'fields' if was required.
 # note2: if you make changes in a model, you have to apply changes to it's serializers if needed.

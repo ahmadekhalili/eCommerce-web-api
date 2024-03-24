@@ -1,4 +1,3 @@
-from django.db.models import Max, Min
 from django.conf import settings
 from django.db import transaction
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -7,7 +6,6 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.parsers import JSONParser
 from rest_framework.serializers import Serializer
 
-import copy
 import os
 import io
 import uuid
@@ -220,7 +218,6 @@ def get_parsed_data(instance, serializer, request=None):   # instance like: comm
 
 
 def get_page_count(model_instances, step, **kwargs):  # model_instances can be a model class or instances of model class
-    from django.db.models import Model
     import inspect
     if inspect.isclass(model_instances):    # model_instances is like: Post, Product or other model class
         ceil(model_instances.objects.filter(visible=True, **kwargs).count() / step)

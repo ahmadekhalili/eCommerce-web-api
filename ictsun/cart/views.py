@@ -1,6 +1,3 @@
-from django.conf import settings
-from django.shortcuts import redirect
-from django.urls import reverse
 
 from rest_framework import views
 from rest_framework.response import Response
@@ -9,7 +6,6 @@ from decimal import Decimal
 
 from .cart import Cart
 from .serializers import CartProductSerializer
-from customed_files.rest_framework.classes.authentication import SessionAuthenticationCustom
 
 
 class CartPageView(views.APIView):       #user come from 'sabad'(in header) to here. 

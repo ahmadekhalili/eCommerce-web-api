@@ -1,29 +1,16 @@
-import json
 
 from django.db.models import Sum, F, Case, When, Q
 from django.db.models.functions import Coalesce
-from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.conf import settings
-from django.utils.translation import gettext_lazy as _
-from django.utils.text import slugify
 from django.middleware.csrf import get_token
 
-from rest_framework import viewsets
-from rest_framework import generics
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework import views
 from rest_framework import mixins
 from rest_framework import generics
 
-import io
 import os
-import uuid
-import jdatetime
-from pathlib import Path
-from PIL import Image as PilImage
-from math import ceil
 import pymongo
 import environ
 from pathlib import Path
@@ -31,12 +18,10 @@ from urllib.parse import quote_plus
 
 from . import serializers as my_serializers
 from . import forms as my_forms
-from .methods import get_products, get_posts, get_posts_products_by_category, make_next, ImageCreationSizes, \
-    get_parsed_data, get_page_count, get_unique_list
+from .methods import get_products, get_posts, get_posts_products_by_category, ImageCreationSizes, get_parsed_data, \
+    get_page_count, get_unique_list
 from .models import *
-from users.serializers import UserSerializer, UserChangeSerializer
-from cart.serializers import CartProductSerializer
-from customed_files.states_towns import list_states_towns
+from users.serializers import UserSerializer
 
 env = environ.Env()
 environ.Env.read_env(os.path.join(Path(__file__).resolve().parent.parent.parent, '.env'))
@@ -277,7 +262,7 @@ class ProductDetail(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.D
         comments_serialized = my_serializers.CommentSerializer(comments, many=True).data
         product_serializer = self.serializer_class(product, many=True, context={'request': request}).data    #product is query set so we need pu like product[0] or put product with many=True (product[0] make revaluate
         product_serializer = product_serializer[0] if product_serializer else {}
-        sessionid = request.session.session_key
+        request.session.session_key
         return Response({**product_serializer, 'comment_of_user': comment_of_user_serialized, 'comments': comments_serialized})
 
     def put(self, request, *args, **kwargs):
@@ -370,7 +355,6 @@ class UploadImage(views.APIView):
         {'default': '/media/../..7a0-default.JPEG', 240: '/media/../..7a0-240.JPEG', ..., 'image_id': 1}
         request.data['file'] sent by front is InMemoryUploadedFile object, like data sent by <input type="file"...>
         '''
-        import uuid
         sizes = [240, 420, 640, 720, 960, 1280]
         image = Image(image=request.data['file'], alt=ImageCreationSizes.get_alt('default'), path='posts')
         obj = ImageCreationSizes(data={'image': request.data['file']}, sizes=sizes, instances=[ImageSizes(alt=ImageCreationSizes.get_alt(size), size=size, father=image) for size in sizes])

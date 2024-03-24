@@ -4,8 +4,7 @@ from django.utils.translation import gettext_lazy as _
 
 from customed_files.django.classes import custforms
 from customed_files.states_towns import list_states_towns
-from main.models import State
-from .models import ProfileOrder, Order, OrderItem, Shipping, Dispatch
+from .models import ProfileOrder, Order, Shipping, Dispatch
 from .widgets import shipping_town_widget
 
 states = [("", "انتخاب کنيد")] + [(L[0][0], L[0][1]) for L in list_states_towns]

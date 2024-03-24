@@ -1,13 +1,9 @@
-from django.db import models
-from django.contrib.auth import authenticate
-from django.utils.translation import gettext_lazy as _
 
 from rest_framework import serializers
-from rest_framework.exceptions import ErrorDetail, ValidationError, ErrorDetail
+from rest_framework.exceptions import ValidationError
 
 import jdatetime
 
-from customed_files import date_convertor
 from orders.models import ProfileOrder
 from .models import User
 from .methods import user_name_shown

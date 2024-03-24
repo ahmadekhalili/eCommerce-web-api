@@ -1,26 +1,15 @@
-from django.db.models.signals import post_save, m2m_changed
-from django.dispatch import receiver
-from django.core.validators import MinValueValidator, MaxValueValidator, MinLengthValidator, MaxLengthValidator
+from django.core.validators import MinValueValidator, MaxValueValidator, MaxLengthValidator
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
 from django.conf import settings
-from django.core.files import File
 from django.db import models
 from django.contrib.postgres import fields as postgre_fields
-from rest_framework.renderers import JSONRenderer
-from rest_framework.parsers import JSONParser
 
-import io
-import os
-import ast
 from datetime import datetime
-from PIL import Image as PilImage
-from ckeditor_uploader.fields import RichTextUploadingField
 
 import jdatetime
 
 from .model_methods import set_levels_afterthis_all_childes_id, update_product_stock
-from customed_files.django.classes import model_fields
 from users.models import User
 # note1: serializers.py  translation.py  forms.py  admin/save_to_mongo should change after changes models.py
 # note2: related objects of Product or Post (etc. Brand, Category, ...) you have to apply changes to it's serialisers like ProductListSerializer, ProductDetailMongoSerializer and mongo product/post saving (in admin.py) if required.
@@ -182,7 +171,7 @@ class Post(models.Model):
     meta_title = models.CharField(_('meta title'), max_length=60, blank=True, default='')
     meta_description = models.TextField(_('meta description'), validators=[MaxLengthValidator(160)], blank=True, default='')    
     brief_description = models.TextField(_('brief description'), validators=[MaxLengthValidator(1000)])
-    detailed_description = models.TextField(_('detailed description'), blank=True)    # ckeditor implemented in front, here only saved html content sended from front end.
+    detailed_description = models.TextField(_('detailed description'), blank=True)
     instagram_link = models.CharField(_('instagram link'), max_length=255, blank=True, default='')        # instagram link of specefied post (for every post we have one associated post)
     visible = models.BooleanField(_('visible'), default=True)
     published_date = models.DateTimeField(_('published date'), auto_now_add=True)
@@ -222,7 +211,7 @@ class Product(models.Model):                                     #.order_by('-av
     meta_title = models.CharField(_('meta title'), max_length=60, blank=True, default='')
     meta_description = models.TextField(_('meta description'), validators=[MaxLengthValidator(160)], blank=True, default='')
     brief_description = models.TextField(_('brief description'), validators=[MaxLengthValidator(1000)], blank=True)
-    detailed_description = RichTextUploadingField(_('detailed description'), blank=True)
+    detailed_description = models.TextField(_('detailed description'), blank=True)
     price = models.DecimalField(_('price'), max_digits=10, decimal_places=2, default='0')    # for $ prices we need 2 decimal places like 19.99$ and for rial it's x.00 that should serialize to x    if default=0 (instead default='0') products with price=0 will saves in database as 0 instead '0.00' while all other prices are in two decimal format, this removes integrity and cause problems in like main/tests/test_add_to_session.
     available = models.BooleanField(_('available'), default=False, db_index=True)
     visible = models.BooleanField(_('visible'), default=True, db_index=True)                #we use visible for deleting an object, for deleting visible=False, in fact we must dont delete any product.

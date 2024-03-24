@@ -1,9 +1,7 @@
 from django.conf import settings
-from django.shortcuts import render
 from django.contrib.sites.models import Site
-from django.contrib.auth import login, logout
+from django.contrib.auth import login
 from django.utils.translation import gettext_lazy as _
-from django.contrib.sessions.backends.db import SessionStore
 
 from rest_framework import views
 from rest_framework.response import Response
@@ -13,15 +11,14 @@ import requests
 import uuid
 import jwt
 
-from .serializers import UserSerializer, UserChangeSerializer
+from .serializers import UserSerializer
 from .methods import login_validate
 from .models import User
 from cart.views import CartCategoryView
 from cart.cart import Cart
 from orders.views import ListCreateOrderItem
-from orders.models import ProfileOrder, Order
-from orders.serializers import ProfileOrderSerializer, OrderSerializer
-from customed_files.rest_framework.classes.authentication import SessionAuthenticationCustom
+from orders.models import ProfileOrder
+from orders.serializers import ProfileOrderSerializer
 from main.models import Post, Comment
 from main.serializers import CommentSerializer, PostListSerializer
 
@@ -43,7 +40,7 @@ class LogIn(views.APIView):
         user = login_validate(request)
         #SessionAuthenticationCustom().enforce_csrf(request)          #if you dont put this here, we will havent csrf check (meants without puting csrf codes we can login easily)(because in djangorest, csrf system based on runing class SessionAuthentication(here)SessionAuthenticationCustom and class SessionAuthenticationCustom runs when you are loged in, because of that we use handy method enforce_csrf(we arent here loged in), just in here(in other places, all critical tasks that need csrf checks have permissions.IsAuthenticated require(baese csrf check mishavad)).
         login(request, user)
-        cart = Cart(request)
+        Cart(request)
         supporter_datas = CartCategoryView().get(request, datas_selector='products_user').data
         return Response({'message': 'loged in!', 'sessionid': request.session.session_key, **supporter_datas})
 

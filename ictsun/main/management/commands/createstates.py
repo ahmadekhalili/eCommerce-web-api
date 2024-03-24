@@ -1,7 +1,6 @@
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 from main.models import State, Town
 
-import time
 
 from customed_files.states_towns import list_states_towns
 

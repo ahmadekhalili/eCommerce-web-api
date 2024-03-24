@@ -3,7 +3,6 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.core.validators import MaxLengthValidator
 
-from phonenumber_field.formfields import PhoneNumberField
 
 from .models import User
 

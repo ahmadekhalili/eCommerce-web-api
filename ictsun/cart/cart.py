@@ -3,12 +3,10 @@ from decimal import Decimal
 from django.shortcuts import get_object_or_404
 from django.contrib.sessions.backends.db import SessionStore
 
-import ast
 from datetime import datetime
 
 from .models import SesKey
-from main.models import Product, Filter, ShopFilterItem
-from .serializers import CartProductSerializer
+from main.models import Product, ShopFilterItem
 
 class Cart(object):
 

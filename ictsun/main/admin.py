@@ -1,39 +1,31 @@
 from django.contrib import admin
-from django.urls import path
 from django.conf import settings
 from django import forms
-from django.db import models, router, transaction
+from django.db import models
 from django.shortcuts import render
-from django.http import QueryDict
 from django.utils.html import format_html
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect
-from django.utils.translation import gettext_lazy as _, activate, get_language
+from django.utils.translation import gettext_lazy as _
 from django.contrib.admin.utils import unquote
 from django.conf import settings
 
-from rest_framework.response import Response
-from rest_framework.renderers import JSONRenderer
-from rest_framework.parsers import JSONParser
 
-import io
 import json
 import jdatetime
 import os
 import pymongo
 import environ
-from pathlib import Path
+from pathlib import Path as PathLib
 from urllib.parse import quote_plus
 from modeltranslation.admin import TranslationAdmin
-from modeltranslation.utils import get_translation_fields as g_t
 
 from customed_files.django.classes.ModelAdmin import ModelAdminCust
 from . import serializers as my_serializers
 from . import forms as my_forms
 from .models import *
-from .methods import make_next, get_category_and_fathers, get_parsed_data, save_to_mongo, brand_save_to_mongo, \
-    comment_save_to_mongo, category_save_to_mongo, filter_attribute_save_to_mongo, shopfilteritem_save_to_mongo, \
-    image_save_to_mongo, SavePostProduct
+from .methods import make_next, save_to_mongo, brand_save_to_mongo, comment_save_to_mongo, category_save_to_mongo, \
+    filter_attribute_save_to_mongo, shopfilteritem_save_to_mongo, image_save_to_mongo, SavePostProduct
 from .contexts import PROJECT_VERBOSE_NAME
 from .model_methods import set_levels_afterthis_all_childes_id
 
@@ -44,7 +36,7 @@ admin.site.site_header = _('{} site panel').format(PROJECT_VERBOSE_NAME)#f'پن�
 admin.site.site_title = _('{} admin panel').format(PROJECT_VERBOSE_NAME)
 admin.site.index_title = _('admin panel')
 env = environ.Env()
-environ.Env.read_env(os.path.join(Path(__file__).resolve().parent.parent.parent, '.env'))
+environ.Env.read_env(os.path.join(PathLib(__file__).resolve().parent.parent.parent, '.env'))
 username, password, db_name = quote_plus(env('MONGO_USERNAME')), quote_plus(env('MONGO_USERPASS')), env('MONGO_DBNAME')
 host = env('MONGO_HOST')
 uri = f"mongodb://{username}:{password}@{host}:27017/{db_name}?authSource={db_name}"

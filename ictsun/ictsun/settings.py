@@ -53,8 +53,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'ckeditor',
-    'ckeditor_uploader',
     'django.contrib.sitemaps',
     'django.contrib.sites',
     #'rest_framework.authtoken',
@@ -179,9 +177,7 @@ PHONENUMBER_DEFAULT_REGION = 'IR'
 PHONENUMBER_DB_FORMAT = 'NATIONAL'
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-]
+STATICFILES_DIRS = [BASE_DIR / "static"]
 # STATIC_ROOT = BASE_DIR / "static"      # for run command "python manage.py collectstatic" required
 
 SPECTACULAR_SETTINGS = {
@@ -196,7 +192,6 @@ LOCALE_PATHS = (BASE_DIR / 'locale', )
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-CKEDITOR_UPLOAD_PATH = "uploads/"
 #CART_PRODUCTS_ID = 'cart_cookie'
 #FAVORITE_PRODUCTS_ID = 'favorites_cookie'
 

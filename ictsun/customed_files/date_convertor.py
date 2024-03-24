@@ -29,7 +29,6 @@ def _shamsi_kabiseyears_list(years):                #list all kabise years betwe
 
 
 def _miladi_kabiseyear_finder(year):                
-    kabise_years = []
     if year%4 == 0:
         if year % 100 != 0 or year % 400 == 0:
             return True
@@ -65,7 +64,6 @@ class MiladiToShamsi:
         return days_before_currentyear + days_currentyear + 285
 
     def miladi_days_currentyear(self, kabise):
-        j=0
         days = 0
         miladi_months_days = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31] if kabise else [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
         miladi_months_days = miladi_months_days[:self.m-1]

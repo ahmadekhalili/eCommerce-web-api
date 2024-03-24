@@ -3,7 +3,7 @@ from django.contrib.sites.models import Site
 
 import xml.etree.ElementTree as ET
 
-from main.methods import get_posts_products_by_category, get_page_count
+from main.methods import get_page_count
 
 
 def create_sitemap():  # this method runs in urls.py because there run only one time after running django (with scheduled time)

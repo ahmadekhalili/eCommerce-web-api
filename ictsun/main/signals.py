@@ -1,6 +1,5 @@
 from main.models import Product, Category_Filters, Filter_Attribute
 from django.db.models.signals import m2m_changed
-from django.db.models import Count
 
 
 class FillCategoryfilters_brands:

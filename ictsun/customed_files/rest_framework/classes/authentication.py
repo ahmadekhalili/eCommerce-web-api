@@ -1,11 +1,8 @@
 from rest_framework.authentication import SessionAuthentication
-from django.middleware.csrf import _does_token_match
-from rest_framework import exceptions
 
 
 class SessionAuthenticationCustom(SessionAuthentication):
     def enforce_csrf(self, request):
-        pass
         '''if request.method == 'POST' or request.method == 'PUT':
             try:
                 request_csrf_token = request.data['csrfmiddlewaretoken']

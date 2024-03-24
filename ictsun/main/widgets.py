@@ -1,11 +1,10 @@
 from django import forms
 from django.conf import settings
-from django.contrib.admin.widgets import AdminTextInputWidget, RelatedFieldWidgetWrapper
 
 import json
 
 from . import serializers as my_serializers
-from .models import Product, Category, Filter, Filter_Attribute
+from .models import Category, Filter
 from .methods import make_next
 
 
@@ -217,5 +216,5 @@ class image_widget(forms.widgets.FileInput):
         context['value'] = value
         context['images_ids'] = make_next(images_ids)
         context['inputs_ids'] = make_next(inputs_ids)
-        a = context['inputs_ids']
+        context['inputs_ids']
         return context

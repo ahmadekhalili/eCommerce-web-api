@@ -4,8 +4,6 @@ from django.shortcuts import redirect
 from rest_framework import views
 from rest_framework.response import Response
 
-from zeep import Client
-from decimal import Decimal
 
 from main.models import Product, ShopFilterItem
 from main.model_methods import update_product_stock
@@ -101,7 +99,7 @@ def send_request(request):
 
 def verify(request):
     #return HttpResponse('')
-    cart = Cart(request)
+    Cart(request)
     if request.GET.get('Status') == 'OK':
         global amount
         amount = 100#cart.get_total_prices()
