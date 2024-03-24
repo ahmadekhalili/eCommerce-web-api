@@ -138,11 +138,11 @@ class PostList(views.APIView):
         return Response({'sessionid': sessionid, **serializers, 'pages': page_count})
 
     def post(self, request, *args, **kwargs):
-        form = my_forms.PostAdminForm(request.POST, request.FILES, request=request)
-        if form.is_valid():
-            instance = form.save()
-            return Response(my_serializers.PostDetailSerializer(instance, context={'request': request}).data)
-        return Response(form.errors)
+        serializer = my_serializers.PostDetailMongoSerializer(data=request.data)
+        if serializer.is_valid():
+            instance = serializer.save()
+            return Response(my_serializers.PostDetailMongoSerializer(instance, context={'request': request}).data)
+        return Response(serializer.errors)
 
 
 

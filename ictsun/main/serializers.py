@@ -1,4 +1,4 @@
-#from django.template.defaultfilters import slugify      this  slugify has not allow_unicode argument(from git)    
+from django.template.defaultfilters import slugify
 from django.utils.translation import gettext_lazy as _
 from django.urls import reverse
 
@@ -324,6 +324,7 @@ class ProductListSerializer(serializers.ModelSerializer):
 
 
 class PostDetailSerializer(serializers.ModelSerializer):
+    slug = serializers.SlugField(required=False)
     published_date = serializers.SerializerMethodField(read_only=True)
     updated = serializers.SerializerMethodField(read_only=True)
     tags = serializers.ListField(child=serializers.CharField(max_length=30))
@@ -354,6 +355,7 @@ class PostDetailSerializer(serializers.ModelSerializer):
         return result
 
     def save(self, **kwargs):
+        self.validated_data['slug'] = slugify(self.validated_data['title'])
         return SavePostProduct.save_post(save_func=super().save, save_func_args={**kwargs}, instance=self.instance,
                                          data=self.validated_data)
 
