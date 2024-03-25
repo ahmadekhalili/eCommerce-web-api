@@ -369,9 +369,9 @@ class SavePostProduct:
         # used only for run product.save(). 'save_func' is like: super().save or product.save
         # in 'instance' is pre instance in creation and instance in update. 'partial' is False in admin
         data = {} if not data else data
+        icon = data.pop('icon') if data.get('icon') else None
         post = save_func(**save_func_args)     # in updating or in admin.save_related product is None
         post = post if post else instance
-        icon = data.get('icon')
         if icon:
             SavePostProduct.save_icon(data=icon, post_product=post, partial=partial)
         return post
@@ -383,9 +383,9 @@ class SavePostProduct:
             data['size'] = str(length) + ',' + str(width) + ',' + str(height)  # data is mutable with validated_data
         if data.get('size') and instance:  # in update, we have pre_instance
             instance.size = data['size']
+        icon = data.pop('icon') if data.get('icon') else None
         product = save_func(**save_func_args)
         product = product if product else instance
-        icon = data.get('icon')
         if icon:
             SavePostProduct.save_icon(data=icon, post_product=product, partial=partial)
         return product
