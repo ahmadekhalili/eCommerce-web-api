@@ -1,4 +1,4 @@
-from django.template.defaultfilters import slugify
+from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django.urls import reverse
 
@@ -355,7 +355,7 @@ class PostDetailSerializer(serializers.ModelSerializer):
         return result
 
     def save(self, **kwargs):
-        self.validated_data['slug'] = slugify(self.validated_data['title'])
+        self.validated_data['slug'] = slugify(self.validated_data['title'], allow_unicode=True)
         return SavePostProduct.save_post(save_func=super().save, save_func_args={**kwargs}, instance=self.instance,
                                          data=self.validated_data)
 
@@ -379,6 +379,7 @@ class PostDetailMongoSerializer(PostDetailSerializer):
 
 
 class ProductDetailSerializer(serializers.ModelSerializer):       # important: for saving we should first switch to `en` language by:  django.utils.translation.activate('en').    comment_set will optained by front in other place so we deleted from here.   more description:  # all keys should save in database in `en` laguage(for showing data you can select eny language) otherwise it was problem understading which language should select to run query on them like in:  s = my_serializers.ProductDetailMongoSerializer(form.instance, context={'request': request}).data['shopfilteritems']:     {'رنگ': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} it is false for saving, we should change language by  `activate('en')` and now true form for saving:  {'color': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} and query like: s['color']
+    slug = serializers.SlugField(required=False)
     categories = serializers.SerializerMethodField()
     brand = serializers.SerializerMethodField()
     rating = serializers.SerializerMethodField()
@@ -439,6 +440,8 @@ class ProductDetailSerializer(serializers.ModelSerializer):       # important: f
         # you can't call self.data in save(), 'validated_data' have to be used instead. it is important save_product
         # runs in both update, create. so in updating: product.images[0].image, we are sure image sizes will change too.
         self.images = self.validated_data.pop('images') if self.validated_data.get('images') else None
+        if not self.validated_data.get('slug'):
+            self.validated_data['slug'] = slugify(self.validated_data['name'], allow_unicode=True)
         return SavePostProduct.save_product(save_func=super().save, save_func_args={**kwargs}, instance=self.instance,
                                             data=self.validated_data)
 
