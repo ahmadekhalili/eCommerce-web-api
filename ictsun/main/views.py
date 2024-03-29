@@ -130,11 +130,12 @@ class PostList(views.APIView):
         else:
             posts = None
 
+        posts_count = posts if posts else Post.objects.all()
+        page_count = get_page_count(posts_count, step)
         rang = (page * step - step, page * step)
         posts = get_posts(*rang, posts).select_related('category')
         serializers = {'posts': my_serializers.PostListSerializer(posts, many=True, context={'request': request}).data}             #you must put context={'request': request} in PostListSerializer argument for working request.build_absolute_uri  in PostListSerializer, otherwise request will be None in PostListSerializer and raise error
         sessionid = request.session.session_key
-        page_count = get_page_count(posts, step)
         return Response({'sessionid': sessionid, **serializers, 'pages': page_count})
 
     def post(self, request, *args, **kwargs):
@@ -190,13 +191,13 @@ class ProductList(views.APIView):
             orders = ['-price'] if sort == 'expensivest' else ['price'] if sort == 'cheapest' else ['-ordered_quantity'] if sort == 'bestselling' else ['-id'] if sort == 'newest' else None
             products = products.annotate(ordered_quantity=Coalesce(Sum(Case(When(order_items__order__paid=True, then=F('order_items__quantity')))), 0)) if 'bestselling' in sort else products    #Coalesce duty? answer: when Sum has not resualt, return None(and it makes raise problem in ordering), now return 0 instead None if dont find eny quantity for specefic product.
 
+        page_count = get_page_count(products, step)
         rang = (page * step - step, page * step)
         products = get_products(*rang, products, orders)                                         #note(just for remembering): in nested order_by like: products.order_by('-ordered_quantity').order_by('-available')   ordering start from last order_by here: -available but in one order_by start from first element like:  products..order_by('-available', '-id')  ordering start from "-available"
         products_serialized = {'products': my_serializers.ProductListSerializer(products, many=True, context={'request': request}).data}
         sidebarcategory_checkbox_serialized = my_serializers.CategoryChainedSerializer(sidebarcategory_checkbox, many=True).data
         sidebarcategory_link_serialized = my_serializers.CategoryChainedSerializer(sidebarcategory_link, many=True).data
         sessionid = request.session.session_key
-        page_count = get_page_count(products, step)
         return Response({'sessionid': sessionid, **products_serialized, **{'sidebarcategory_checkbox': sidebarcategory_checkbox_serialized}, **{'sidebarcategory_link': sidebarcategory_link_serialized}, 'brands': brands_serialized, 'filters': filters_serialized, 'pages': page_count})
 
     def post(self, request, *args, **kwargs):
