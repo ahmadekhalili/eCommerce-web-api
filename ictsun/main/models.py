@@ -3,8 +3,6 @@ from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.db import models
-from django.contrib.postgres import fields as postgre_fields
-
 from datetime import datetime
 
 import jdatetime
@@ -59,12 +57,11 @@ class Category(models.Model):                                  #note: supose roo
     father_category = models.ForeignKey('self', related_name='child_categories', related_query_name='childs', null=True, blank=True, on_delete=models.CASCADE, verbose_name=_('father category'))        #if category.level>1 will force to filling this field.
     levels_afterthis = models.PositiveSmallIntegerField(default=0, blank=True)                         #in field neshan midahad chand sath farzand darad in pedar, masalam: <category(1) digital>,  <category(2) mobail>,  <category(3) samsung> farz konid mobail pedare samsung,  digital pedare mobail ast(<category(1) digital>.level=1,  <category(2) mobail>.level=2,  <category(3) samsung>.level=3)   . bala sare digital dar in mesal 2 sath farzand mibashad( mobail va samsung pas <category(1) digital>.levels_afterthis = 2   va <category(2) mobail>.levels_afterthis=1  va <category(3) samsung>.levels_afterthis=0
     previous_father_id = models.PositiveSmallIntegerField(null=True, blank=True)                         #supose you change category.father_category, we cant understant prevouse father was what in Category.save(ony new edited father_category is visible) so we added this field
-    filters = models.ManyToManyField(Filter, through='Category_Filters', blank=True, verbose_name=_('filters'))
-    brands = models.ManyToManyField(Brand, through='Category_Brands', blank=True, verbose_name=_('brands'))
     all_childes_id = models.TextField(default='', blank=True)                      #list all chiles of that object in this structure: "1,2,3,4"    if this field name was chiles_id maybe raise problem with related_query_name of father_category or other.
     post_product = models.CharField(_('post or product'), max_length=10, default='product')      #this should be radio button in admin panel.
+    filters = models.ManyToManyField(Filter, through='Category_Filters', blank=True, verbose_name=_('filters'))
+    brands = models.ManyToManyField(Brand, through='Category_Brands', blank=True, verbose_name=_('brands'))
     #child_categories
-    #post_set
     #product_set
 
     class Meta:
@@ -165,35 +162,6 @@ class Rating(models.Model):                                                   #m
 
 
 
-class Post(models.Model):
-    title = models.CharField(_('title'), max_length=255)
-    slug = models.SlugField(_('slug'), max_length=255, allow_unicode=True, db_index=False)   #default db_index=True
-    meta_title = models.CharField(_('meta title'), max_length=60, blank=True, default='')
-    meta_description = models.TextField(_('meta description'), validators=[MaxLengthValidator(160)], blank=True, default='')    
-    brief_description = models.TextField(_('brief description'), validators=[MaxLengthValidator(1000)])
-    detailed_description = models.TextField(_('detailed description'), blank=True)
-    instagram_link = models.CharField(_('instagram link'), max_length=255, blank=True, default='')        # instagram link of specefied post (for every post we have one associated post)
-    visible = models.BooleanField(_('visible'), default=True)
-    published_date = models.DateTimeField(_('published date'), auto_now_add=True)
-    updated = models.DateTimeField(_('updated date'), auto_now=True)
-    tags = postgre_fields.ArrayField(models.CharField(max_length=150, blank=True), blank=True)
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('category'))
-    author = models.ForeignKey(User, related_name='written_posts', on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('author'))
-    #comment_set                                                   #backward relation
-    #images
-    #image_icon_set               # for one image_icon, several image_icons created with different sizes. default size used in top of a post page and for post icon use smaller (in 160px).
-
-    class Meta:
-        verbose_name = _('Post')
-        verbose_name_plural = _('Posts')
-
-    def __str__(self):
-        represantaion = self.title[:30]+'...' if len(self.title) > 40 else self.title[:30]
-        return represantaion
-
-
-
-
 class ProductManager(models.Manager):                             #we have two seperate way for creating an object,  .create( product.objects.create ) and .save( p=product(..) p.save() ), it is important for us in two way rating creation suported same.
     def create(self, *args, **kwargs):
         product = super().create(*args, **kwargs)
@@ -217,13 +185,13 @@ class Product(models.Model):                                     #.order_by('-av
     visible = models.BooleanField(_('visible'), default=True, db_index=True)                #we use visible for deleting an object, for deleting visible=False, in fact we must dont delete any product.
     created = models.DateTimeField(_('created date'), auto_now_add=True)
     updated = models.DateTimeField(_('updated date'), auto_now=True)
-    filter_attributes = models.ManyToManyField(Filter_Attribute, through='Product_Filter_Attributes', blank=True, verbose_name=_('filter attributes'))
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('category'))
-    brand = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('brand'))          # brand field as CharField is not logical and should be ForeignKey why? because for example in adding product1 we may add brand "nokia" and in second product2 add "Nokia". when products increased (supose more than 100) it will raise real problems
-    rating = models.OneToOneField(Rating, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('rating'))
     stock = models.PositiveIntegerField(_('stock'), default=0)                        # important: stock before creating first shopfilteritem of product shoud be 0 otherwise it will sum with shopfilteritem.stock, example: supose we have product1.stock = 10  now after creating shopfilteritem1 with stock=12 product1.stock will be 10+12   (address: in ShopFilterItem.save and model_methods.py/update_product_stock
     weight = models.FloatField(_('weight'), null=True, blank=False)                   # weight is in gram and used in orders/methods/profile_order_detail/PostDispatchPrice  but if you dont specify weight in saving a product, it will be None and will ignore in PostDispatchPrice. its better null=True easier in creating products in tests.
     size = models.CharField(_('size'), max_length=25, blank=True)          # value should be in mm  and like '100,150,150'  this field seperate to 3 field in ProductAdminForm in __init__ and save func), also we use size in methods.PostDispatchPrice  to define which box size should choice for posting.
+    rating = models.OneToOneField(Rating, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('rating'))
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('category'))
+    brand = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('brand'))          # brand field as CharField is not logical and should be ForeignKey why? because for example in adding product1 we may add brand "nokia" and in second product2 add "Nokia". when products increased (supose more than 100) it will raise real problems
+    filter_attributes = models.ManyToManyField(Filter_Attribute, through='Product_Filter_Attributes', blank=True, verbose_name=_('filter attributes'))
     #images                                                    backward relation field
     #image_icon_set
     #comment_set
@@ -306,8 +274,7 @@ def icon_path_selector(instance, filename):                        #note: if you
 class Image_icon(models.Model):
     image = models.ImageField(_('image'), upload_to=icon_path_selector)
     alt = models.CharField(_('alt'), max_length=55, unique=True, null=True)    # alt should not be dublicate because we used alt instead image_icon id in def __str__(self)
-    path = models.CharField(_('path'), max_length=20, default='products')                  # can be value like: "products"  or  "posts" ....
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, blank=True, null=True, verbose_name=_('post'))
+    path = models.CharField(_('path'), max_length=20, default='products')      # "products" / "posts", ...
     product = models.ForeignKey(Product, on_delete=models.CASCADE, blank=True, null=True, verbose_name=_('product'))
 
     class Meta:
@@ -322,25 +289,25 @@ def image_path_selector(instance, filename):                        #note: if yo
     if settings.IMAGES_PATH_TYPE == 'jalali':
         date = jdatetime.datetime.fromgregorian(date=datetime.now()).strftime('%Y %-m %-d').split()
     else:
-        date = datetime.now().strftime('%Y %-m %-d').split()
+        now = datetime.now()
+        date = f"{now.year} {now.month} {now.day}".split()
     return f'{instance.path}_images/{date[0]}/{date[1]}/{date[2]}/{filename}'
 
 class Image(models.Model):
     image = models.ImageField(_('image'), upload_to=image_path_selector, blank=True, null=True)    # here save default size of image to prevent additional query to ImageSizes class.
     alt = models.CharField(_('alt'), max_length=55, unique=True, null=True)                    # alt should not be dublicate because we used alt instead image id in def __str__(self)
-    path = models.CharField(_('path'), max_length=20, default='products')                  # can be value like: "products"  or  "posts" ....
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='images', blank=True, null=True, verbose_name=_('post'))
+    path = models.CharField(_('path'), max_length=20, default='products')                  # "products" / "posts", ...
     # related_name='images' is required because uses in serializers.ProductDetailSerializer.images
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images', null=True, verbose_name=_('product'))
     #imagesizes
 
-    class Meta:        # ordering by ('post', 'product') should be done in admin separately for image posts and products
+    class Meta:
         verbose_name = _('Image')
         verbose_name_plural = _('Images')
 
     def __str__(self):
         try:
-            name = self.post.title if self.post_id else self.product.name
+            name = self.product.name
         except:
             name = self.id
         return f'{name} - {self.alt}'
@@ -368,11 +335,11 @@ class Comment(models.Model):
     status = models.CharField(_('status'), default='1', max_length=1, choices=statuses)               # review site comments by admin and show comment in site if confirmed, '1' = confirmed     '2' = not checked(admin should check comment to confirm or not)      '3' = not confirmed(admin can confirm afters if want)    '4' = deleted
     published_date = models.DateTimeField(_('published date'), auto_now_add=True)           # published_date should translate in front. for example comment1 (1390/1/27) can translate like: comment1 (2016/4/16)
     content = models.TextField(_('content'), validators=[MaxLengthValidator(500)])
+    post = models.CharField(max_length=100, blank=True)  # stores ObjectID, foreignkey implementation of mongodb
     author = models.ForeignKey(User, related_name='written_comments', related_query_name='comments_author', on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('author'))
     reviewer = models.ForeignKey(User, related_name='reviewed_comments', related_query_name='comments_reviewer', on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('reviewer'))        # reviewer is last admin changed comment.status
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, blank=True, null=True, verbose_name=_('post'))
     product = models.ForeignKey(Product, on_delete=models.CASCADE, blank=True, null=True, verbose_name=_('product'))
-    reply = models.ForeignKey('self', related_name='reply_comments', related_query_name='replies', on_delete=models.SET_NULL, blank=True, null=True, verbose_name=_('reply'))
+    # replies
 
     class Meta:
         verbose_name = _('Comment')
@@ -380,6 +347,10 @@ class Comment(models.Model):
 
     def __str__(self):
         return _('Comment') + ' ' + str(self.id)
+
+
+class Reply(models.Model):
+    comment = models.ForeignKey(Comment, related_name='replies', related_query_name='replies', on_delete=models.SET_NULL, null=True, verbose_name=_('comment'))
 
 
 

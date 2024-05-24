@@ -1,17 +1,16 @@
-
+from django.urls import reverse
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 import jdatetime
+import urllib.parse
 
 from orders.models import ProfileOrder
 from .models import User
 from .methods import user_name_shown
 
 
-
-        
-class UserSerializer(serializers.ModelSerializer):    
+class UserSerializer(serializers.ModelSerializer):  # used in CommentSerializer (mongodb)
     class Meta:
         model = User
         fields = '__all__'
@@ -71,25 +70,29 @@ class UserSerializer(serializers.ModelSerializer):
         profile_order = ProfileOrder.objects.filter(user=request.user, main=True).values_list('postal_code', flat=True) if request else None 
         postal_code = profile_order[0] if profile_order else ''
         return postal_code
-#UserSerializer.serializer_field_mapping[models.EmailField] = serializerfields.EmailFieldCustom
-
- 
 
 
-    
 class UserChangeSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         exclude = ['password']
-        
 
 
-
-class UserNameSerializer(serializers.ModelSerializer):         #UserName = NAme of User for shown in site.
+class UserNameSerializer(serializers.ModelSerializer):
+    url = serializers.SerializerMethodField()
     user_name = serializers.SerializerMethodField()
+
     class Meta:
         model = User
-        fields = ['id', 'user_name']
-        
+        fields = ['id', 'url', 'user_name']
+
+    def get_url(self, obj):
+        if obj.is_staff:
+            url = reverse('users:admin-profile', args=[obj.id])
+            return urllib.parse.unquote(url)
+        else:
+            url = reverse('users:user-profile', args=[obj.id])
+            return urllib.parse.unquote(url)
+
     def get_user_name(self, obj):
         return user_name_shown(obj, 'کاربر')

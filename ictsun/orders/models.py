@@ -24,7 +24,7 @@ class ProfileOrder(models.Model):
     address = models.CharField(_('address'), max_length=250)
     postal_code = models.CharField(_('postal code'), max_length=10, validators=[validate_postal_code])          #profile.postal_code should not be unique supose one 'motager' in its home add profile, when he change its home another 'mostager' come to this home and want add profile to this home so if postale_code was unique he cant.
     email = models.EmailField(_('email address'), blank=True, null=True)
-    main = models.BooleanField(_('main profileorder'), default=False)      #car conflict with verbose_name app main.
+    main = models.BooleanField(_('main profileorder'), default=False)      # can conflict with verbose_name app main
     visible = models.BooleanField(_('delete'), default=True, db_index=True)
     #profileorder_set
 

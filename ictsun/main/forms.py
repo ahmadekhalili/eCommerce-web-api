@@ -10,33 +10,22 @@ from customed_files.django.classes import custforms
 from users.models import User
 from .widgets import *
 from .methods import get_mt_input_classes
-from .models import Post, Product, Category, Filter, Image, Comment, Filter_Attribute, ShopFilterItem, Image_icon
+from .models import Product, Category, Filter, Image, Comment, Filter_Attribute, ShopFilterItem, Image_icon
 # note1: if edit or add a form field exits in translation.py, like add Categoryform.name field, make sure in admin panel shown correctly (in 'tabbed' mode). if not shown correctly, you have to add a widget with required modeltreanslation classes like in ProductAdminForm.alt_fa.widget.attrs
 
 
-
-class PostAdminForm(forms.ModelForm):
-    # in form calling, request is required like: PostAdminForm(data=request.POST, request=request)
-    def __init__(self, data=None, files=None, auto_id='id_%s', prefix=None, initial=None, error_class=ErrorList, label_suffix=None, empty_permitted=False, instance=None, use_required_attribute=None, renderer=None, request=None):
-        self.request = request
-        super(). __init__(data, files, auto_id, prefix, initial, error_class, label_suffix, empty_permitted, instance, use_required_attribute, renderer)
-        if self.fields.get('slug'):                       # when use form manually in views.py, fields is like: [title, title_fa, title_en, slug, slug_fa,..] as expected  but when use PostFrom in adminpanel, self.fields is like: [title_fa, title_en, slug_fa,..] because admin edit and removes original model fields like 'title', 'slug'
-            self.fields['slug'].required = False          # we can define slug field instead this but tab selection for languages will disappeare.
-
-    slug_fa = forms.SlugField(required=False, widget=forms.TextInput(attrs={'class': get_mt_input_classes('slug_fa')}), allow_unicode=True, label=_('slug'))      # Note: slug fa in fronend should be required False to ignore error for slug fa in saving (frontend only sends slug)
-    slug_en = forms.SlugField(required=False, widget=forms.TextInput(attrs={'class': get_mt_input_classes('slug_en')}), allow_unicode=True, label=_('slug'))      # Note: slug en in admin panel should be required False to ignore error for slug en in saving.
-    category = forms.ModelChoiceField(queryset=Category.objects.filter(post_product='post'), label=_('category'))
-    author = forms.ModelChoiceField(queryset=User.objects.all(), required=False, label=_('author'))
-
-    class Meta:
-        model = Post
-        fields = '__all__'#['title', 'meta_title', 'meta_description', 'brief_description', 'detailed_description', 'instagram_link', 'published_date', 'updated', 'tags', 'category', 'author']
-
-    def save(self, commit=True):
-        setattr(self.instance, 'slug', slugify(self.data['title'], allow_unicode=True)) if self.data.get('title') else None   # fill slug field in forms submitted by frontend (front should not fill slug). frontend send data like: 'title': value, 'meta_title': value...   while admin panel send like 'title_fa': value, 'slug_fa': value, 'meta_title': value
-        if getattr(self, 'request', None):          # admin form has not request parameter
-            self.instance.author = self.request.user
-        return super().save(commit)
+class PostAdminForm(forms.Form):
+    #slug_fa = forms.SlugField(required=False, widget=forms.TextInput(attrs={'class': get_mt_input_classes('slug_fa')}), allow_unicode=True, label=_('slug'))      # Note: slug fa in fronend should be required False to ignore error for slug fa in saving (frontend only sends slug)
+    title = forms.CharField()
+    slug = forms.CharField()
+    brief_description = forms.CharField(widget=forms.Textarea)
+    detailed_description = forms.CharField(widget=forms.Textarea, required=False)
+    instagram_link = forms.CharField(required=False)
+    tags = forms.CharField(required=False)
+    published_date = forms.CharField(disabled=True, required=False)
+    updated = forms.CharField(disabled=True, required=False)
+    #category = forms.ModelChoiceField(queryset=Category.objects.filter(post_product='post'), required=False, label=_('category'))
+    #author = forms.ModelChoiceField(queryset=User.objects.all(), required=False, label=_('author'))
 
 
 image_qusmark_text = _('Image rate should be 1:1')

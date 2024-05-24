@@ -8,8 +8,13 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
 import requests
+import pymongo
+import environ
 import uuid
 import jwt
+import os
+from pathlib import Path
+from urllib.parse import quote_plus
 
 from .serializers import UserSerializer
 from .methods import login_validate
@@ -19,8 +24,16 @@ from cart.cart import Cart
 from orders.views import ListCreateOrderItem
 from orders.models import ProfileOrder
 from orders.serializers import ProfileOrderSerializer
-from main.models import Post, Comment
+from main.models import Comment
+from main.methods import DictToObject
 from main.serializers import CommentSerializer, PostListSerializer
+
+env = environ.Env()
+environ.Env.read_env(os.path.join(Path(__file__).resolve().parent.parent.parent, '.env'))
+username, password, db_name = quote_plus(env('MONGO_USERNAME')), quote_plus(env('MONGO_USERPASS')), env('MONGO_DBNAME')
+host = env('MONGO_HOST')
+uri = f"mongodb://{username}:{password}@{host}:27017/{db_name}?authSource={db_name}"
+mongo_db = pymongo.MongoClient(uri)['akh_db']
 
 
 class LogIn(views.APIView):
@@ -143,14 +156,15 @@ class UserProfile(views.APIView):
 
 class AdminProfile(views.APIView):
     def get(self, request, *args, **kwargs):
-        user = User.objects.filter(id=kwargs.get('id'))
+        pk = kwargs.get('pk')
+        user = User.objects.filter(id=pk)
         if user:
             user_serialized = UserSerializer(user[0]).data
             fields = ['first_name', 'last_name', 'date_joined', 'email']
             # we don't want to create admin profile serializer just for reading process. filter UserSerializer instead.
             profile = {key: user_serialized[key] for key in user_serialized if key in fields}
-            posts = Post.objects.filter(author=user[0])
-            posts_serialized = PostListSerializer(posts, many=True, context={'request': request}).data
+            posts = DictToObject(mongo_db.post.find({'author.id': pk}), many=True)
+            posts_serialized = PostListSerializer(posts, many=True).data
             comments = Comment.objects.filter(author=user[0])
             comments_serialized = CommentSerializer(comments, many=True).data
         return Response({'profile': profile, 'posts': posts_serialized, 'comments': comments_serialized})

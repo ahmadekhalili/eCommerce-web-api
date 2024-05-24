@@ -2,14 +2,15 @@ from django.contrib import admin
 from django.conf import settings
 from django import forms
 from django.db import models
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.utils.html import format_html
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect
 from django.utils.translation import gettext_lazy as _
 from django.contrib.admin.utils import unquote
+from django.http import HttpResponseRedirect
 from django.conf import settings
-
+from django.urls import path
 
 import json
 import jdatetime
@@ -18,14 +19,13 @@ import pymongo
 import environ
 from pathlib import Path as PathLib
 from urllib.parse import quote_plus
-from modeltranslation.admin import TranslationAdmin
+from bson.objectid import ObjectId
 
-from customed_files.django.classes.ModelAdmin import ModelAdminCust
 from . import serializers as my_serializers
 from . import forms as my_forms
 from .models import *
 from .methods import make_next, save_to_mongo, brand_save_to_mongo, comment_save_to_mongo, category_save_to_mongo, \
-    filter_attribute_save_to_mongo, shopfilteritem_save_to_mongo, image_save_to_mongo, SavePostProduct
+    filter_attribute_save_to_mongo, shopfilteritem_save_to_mongo, image_save_to_mongo, SaveProduct, DictToObject
 from .contexts import PROJECT_VERBOSE_NAME
 from .model_methods import set_levels_afterthis_all_childes_id
 
@@ -47,7 +47,7 @@ class CommentInline(admin.TabularInline):
     model = Comment
     fields = ('content', 'author', 'reviewer', 'status', 'get_published_date')
     readonly_fields = ('content', 'author', 'reviewer', 'status', 'get_published_date')
-    
+
     def get_published_date(self, obj):                                       #auto_now_add and auto_now fields must be in read_only otherwise raise error (fill by django not user) and you cant control output of read_only fields with widget (from its form) so for this fiels you cant specify eny widget!!
         ymd = jdatetime.datetime.fromgregorian(datetime=obj.published_date).strftime('%Y %B %-d').split()         # this is like ['1388', 'Esfand', '1']
         return format_html('{} {}&rlm; {}، ساعت {}:{}'.format(ymd[2], _(ymd[1]), ymd[0], obj.published_date.minute, obj.published_date.hour))
@@ -59,78 +59,62 @@ class ImageIconInline(admin.TabularInline):
     fields = ('image', 'alt', 'path')
 
 
-class PostAdmin(TranslationAdmin):
-    prepopulated_fields = {'slug':('title',)}
-    inlines = [CommentInline, ImageIconInline]
-    readonly_fields = ('get_published_date', 'get_updated')
-    form = my_forms.PostAdminForm
+class PostAdmin(admin.ModelAdmin):
 
-    class Media:                                 # this cause languages shown separatly in admin panel. (it should be use always, otherwise all field of all languages shown under each other at once)
-        js = (
-            'http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
-            'http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js',
-            'modeltranslation/js/tabbed_translation_fields.js',
-        )
-        css = {
-            'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
-        }
+    class Post(models.Model):       # registering PostAdmin with a fake Post is much simpler than custom AdminSite
+        class Meta:
+            verbose_name = _('Post')
+            verbose_name_plural = _('Posts')
 
-    def get_published_date(self, obj):                                       #auto_now_add and auto_now fields must be in read_only otherwise raise error (must fill by django not form) and you cant control output of read_only fields with widget (from its form) so for this fiels you cant specify eny widget!!
-        date = jdatetime.datetime.fromgregorian(datetime=obj.published_date).strftime('%Y %B %-d').split()
-        return format_html('{} {}&rlm; {}، ساعت {}:{}'.format(date[2], _(date[1]), date[0], obj.published_date.minute, obj.published_date.hour))
-    get_published_date.allow_tags = True
-    get_published_date.short_description = _('published date')
+    def get_urls(self):      # we don't want to 'add' post now (via admin), so we haven't provided it
+        urls = super().get_urls()
+        my_urls = [
+            # you can use it like: 'admin:main_post_changelist'
+            path('posts/', self.admin_site.admin_view(self.changelist_view), name='post_changelist'),
+            path('posts/<path:object_id>/change/', self.admin_site.admin_view(self.change_view), name='post_change'),
+            path('posts/<str:object_id>/delete/', self.admin_site.admin_view(self.delete_view), name='post_delete'),
+        ]
+        return my_urls + urls
 
-    def get_updated(self, obj):                                       #auto_now_add and auto_now fields must be in read_only otherwise raise error (must fill by django not form) and you cant control output of read_only fields with widget (from its form) so for this fiels you cant specify eny widget!!
-        date = jdatetime.datetime.fromgregorian(datetime=obj.updated).strftime('%Y %B %-d').split()
-        return format_html('{} {}&rlm; {}، ساعت {}:{}'.format(date[2], _(date[1]), date[0], obj.updated.minute, obj.updated.hour))
-    get_updated.allow_tags = True
-    get_updated.short_description = _('updated date')
+    def changelist_view(self, request, extra_context=None):
+        self.change_list_template = ['admin/change_list_post.html']
+        posts = list(mongo_db.post.find({}, {'_id', 'title'}))
+        for post in posts:
+            post['id'] = post['_id']
+        context = {'posts': posts, **self.admin_site.each_context(request)}
+        return render(request, "admin/main/post/change_list.html", context)
 
-    def save_model(self, request, obj, form, change):
-        # this method calls 'obj.save()', this have to be done in save_related instead here.
-        self.obj = obj
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        # used only for updating available keys of the document in mongo
+        if request.method == 'POST':
+            form, post = my_forms.PostAdminForm(request.POST), None   # doesn't need post in updating
+            if form.is_valid():
+                form_data = form.cleaned_data
+                mongo_data = mongo_db.post.find_one({'_id': ObjectId(object_id)})
+                for key in form_data:
+                    if form_data[key]:     # we don't want set None values of form_data to mongo
+                        mongo_data[key] = form_data[key]
+                mongo_db.post.update_one({'_id': ObjectId(object_id)}, {'$set': mongo_data})
+                return HttpResponseRedirect('../../')
+        else:
+            post = mongo_db.post.find_one({'_id': ObjectId(object_id)})
+            post['id'] = post['_id']       # post._id can't accessible in django template
+            form = my_forms.PostAdminForm(initial=post)
+        context = {'form': form, 'post': post, 'id': object_id, **self.admin_site.each_context(request)}
+        return render(request, 'admin/main/post/change_form.html', context=context)
 
-    def save_related(self, request, form, formsets, change):
-        # here save post.image_icon_set
-        for formset in formsets:
-            if type(formset).__name__ == 'Image_iconFormFormSet':
-                form.cleaned_data['icon'] = formset.cleaned_data[0]
-                if form.cleaned_data['icon']:    # formset.cleaned_data[0] is {} when don't fill icon formset
-                    del form.cleaned_data['icon']['DELETE']
-                    del form.cleaned_data['icon']['id']  # keys must be Image_icon fields all additional must delete
-                    del formsets[formsets.index(formset)]
-        # formsets is like: Image_iconFormFormSet, CommentFormFormSet.., formset is list of several icons, comments ...
-        # we must delete Image_iconFormFormSet because image saving should be done in save_product not admin.
-        SavePostProduct.save_post(save_func=self.obj.save, save_func_args={}, instance=self.obj,
-                                  data=form.cleaned_data, partial=False)
-        super().save_related(request, form, formsets, change)             # manytomany fields will remove from form.instance._meta.many_to_many after calling save_m2m()
-        save_to_mongo(mongo_db[settings.MONGO_POST_COL], form.instance, my_serializers.PostDetailMongoSerializer, change, request)
+    def delete_view(self, request, object_id):
+        if not settings.DEBUG:  # productions mode
+            mongo_db.post.update_one({'_id': ObjectId(object_id)}, {'$set': {'visible': True}})
+        else:
+            mongo_db.post.delete_one({'_id': ObjectId(object_id)})
+        return redirect('admin:main_post_changelist')
 
-    def delete_model(self, request, obj):
-        if not settings.DEBUG:    # productions mode
-            obj.visible = False
-            obj.save()
-        else:                     # development mode
-            super().delete_model(request, obj)
-
-admin.site.register(Post, PostAdmin)
+admin.site.register(PostAdmin.Post, PostAdmin)
 
 
-
-
-class BrandAdmin(TranslationAdmin):
+class BrandAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug':('name',)}
-
-    class Media:                                 # this cause languages shown separatly in admin panel. (it should be use always, otherwise all field of all languages shown under each other at once)
-        js = (
-            'http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
-            'http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js',
-            'modeltranslation/js/tabbed_translation_fields.js',
-        )
-        css = {
-            'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
-        }
 
     def save_related(self, request, form, formsets, change):             # here update product in mongo database  (productdetailmongo_col['json']['brand']) according to Brand changes. for example if brand_1.name changes to 'Apl'  ProductDetailMongo:  [{ id: 1, json: {brand: 'Apl', ...}}, {id: 2, ...}]
         super().save_related(request, form, formsets, change)
@@ -171,7 +155,7 @@ class ImageInline(admin.StackedInline):
     form = my_forms.ImageForm
 
 
-class ProductAdmin(ModelAdminCust):
+class ProductAdmin(admin.ModelAdmin):
     search_fields = ['id', 'name__contains', 'slug', 'brand']                            #important: update manualy js file searchbar_help_text_product in class media.
     list_display = ['id', 'name', 'price', 'stock', 'rating', 'get_created_brief', 'get_updated_brief']                 #this line is for testing mode!!!
     list_filter = [*filters_list_filter, 'available', 'created', 'updated']
@@ -194,17 +178,6 @@ class ProductAdmin(ModelAdminCust):
             'fields': ('meta_title', 'meta_description'),
         }),
     )
-
-    class Media:                                 # this cause languages shown separatly in admin panel. (it should be use always, otherwise all field of all languages shown under each other at once)
-        js = (
-            'http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
-            'http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js',
-            'modeltranslation/js/tabbed_translation_fields.js',
-            'js/admin/searchbar_help_text_product.js',  # addres is in static folder
-        )
-        css = {
-            'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
-        }
 
     def get_created_brief(self, obj):
         date = jdatetime.datetime.fromgregorian(date=obj.created).strftime('%Y %-m %-d').split()       # -m -d month date in one|two digit,  but m d is month day in two digit
@@ -247,7 +220,7 @@ class ProductAdmin(ModelAdminCust):
                     del formsets[formsets.index(formset)]
         # formsets is like: Image_iconFormFormSet, CommentFormFormSet.., formset is list of several icons, comments ...
         # we must delete Image_iconFormFormSet because image saving should be done in save_product not admin.
-        SavePostProduct.save_product(save_func=self.obj.save, save_func_args={}, instance=self.obj,
+        SaveProduct.save_product(save_func=self.obj.save, save_func_args={}, instance=self.obj,
                                  data=form.cleaned_data, partial=False)
         super().save_related(request, form, formsets, change)             # manytomany fields will remove from form.instance._meta.many_to_many after calling save_m2m()
         save_to_mongo(mongo_db[settings.MONGO_PRODUCT_COL], form.instance, my_serializers.ProductDetailMongoSerializer, change, request)
@@ -372,7 +345,7 @@ class CommentAdmin(admin.ModelAdmin):
 
     def save_related(self, request, form, formsets, change):         # here update product in mongo database  (product_detail_mongo.json.comment_set) according to Comment changes. for example if we have comment_1 (comment_1.product=<Product (1)>)   comment_1.content changes to 'another_content'  ProductDetailMongo:  [{id: 1, json: {comment_set: [{ id: 2, status: '1', published_date: '2022-08-07T17:33:38.724203', content: 'another_content', author: { id: 1, user_name: 'ادمین' }, reviewer: null, post: null, product: 12 }], ...}}, {id: 2, ...}]
         super().save_related(request, form, formsets, change)
-        comment_save_to_mongo(mongo_db, form.instance, my_serializers.CommentSerializer, change, request)
+        comment_save_to_mongo(mongo_db.post, form.instance, my_serializers.CommentSerializer(), change, request)
 
 admin.site.register(Comment, CommentAdmin)
 
@@ -404,7 +377,7 @@ class Category_FiltersInline(admin.StackedInline):
 
 
 Category_level_CHOICES = ((1,'1'), (2,'2'), (3,'3'))               #value for send is first element (here like 1) and value for showing is second (here like '1')
-class CategoryAdmin(TranslationAdmin):
+class CategoryAdmin(admin.ModelAdmin):
     inlines = [CategoryInline]
     prepopulated_fields = {'slug':('name',)}
     #exclude = ('post_product',)
@@ -412,16 +385,6 @@ class CategoryAdmin(TranslationAdmin):
     form = my_forms.CategoryForm
     list_display = ['str_ob', 'id']
     ordering = ['id']
-
-    class Media:                                 # this cause languages shown separatly in admin panel. (it should be use always, otherwise all field of all languages shown under each other at once)
-        js = (
-            'http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
-            'http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js',
-            'modeltranslation/js/tabbed_translation_fields.js',
-        )
-        css = {
-            'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
-        }
 
     def str_ob(self, obj):
         return obj.__str__()
@@ -441,7 +404,8 @@ class CategoryAdmin(TranslationAdmin):
 
     def save_related(self, request, form, formsets, change):         # here update product in mongo database  (product_detail_mongo.json.categories) according to Category changes. for example if <Category digital>.name changes to 'digggital'  all products with category 'digital' os children of 'digital' like 'phone' or 'smart phone' will changes like product_1 (product_1.category=<Category digital>), product_2 (product_2.category=<Category phone>), product_3 (product_3.category=<Category smart phone>):   product detail mongo col:  [{ id: 1, json: {categories: [{ name: 'digggital', slug: 'digital' }], ...}}, { id: 2, json: {categories: [{ name: 'digital', slug: 'digital' }, { name: 'phone', slug: 'phone' }], ...}}, { id: 3, json: {categories: [{ name: 'digggital', slug: 'digital' }, { name: 'phone', slug: 'phone' }, { name: 'smart phone', slug: 'smart-phone' }], ...}}]
         super().save_related(request, form, formsets, change)
-        category_save_to_mongo(mongo_db, form, my_serializers.CategoryChainedSerializer, change)
+        category_save_to_mongo(mongo_db, form, my_serializers.CategoryFathersChainedSerializer,
+                               my_serializers.CategorySerializer, change)
 
     '''
     @csrf_protect_m
@@ -500,37 +464,17 @@ admin.site.register(Category, CategoryAdmin)
 
 
 
-class FilterAdmin(TranslationAdmin):
+class FilterAdmin(admin.ModelAdmin):
     list_display = ['id', 'name']
     form = my_forms.FilterForm
-
-    class Media:                                 # this cause languages shown separatly in admin panel. (it should be use always, otherwise all field of all languages shown under each other at once)
-        js = (
-            'http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
-            'http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js',
-            'modeltranslation/js/tabbed_translation_fields.js',
-        )
-        css = {
-            'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
-        }
 
 admin.site.register(Filter, FilterAdmin)
 
 
-class Filter_AttributeAdmin(TranslationAdmin):
+class Filter_AttributeAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'filterr')                         # filterr doesnt add additional query (can read project\project parts\admin\list_display seperat
     prepopulated_fields = {'slug':('name',)}
     form = my_forms.Filter_AttributeForm
-
-    class Media:                                 # this cause languages shown separatly in admin panel. (it should be use always, otherwise all field of all languages shown under each other at once)
-        js = (
-            'http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
-            'http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js',
-            'modeltranslation/js/tabbed_translation_fields.js',
-        )
-        css = {
-            'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
-        }
 
     def save_related(self, request, form, formsets, change):
         super().save_related(request, form, formsets, change)
@@ -539,19 +483,9 @@ class Filter_AttributeAdmin(TranslationAdmin):
 admin.site.register(Filter_Attribute, Filter_AttributeAdmin)
 
 
-class ShopFilterItemAdmin(TranslationAdmin):
+class ShopFilterItemAdmin(admin.ModelAdmin):
     form = my_forms.ShopFilterItemForm
     list_display = ['get_str', 'stock', 'price']
-
-    class Media:                                 # this cause languages shown separatly in admin panel. (it should be use always, otherwise all field of all languages shown under each other at once)
-        js = (
-            'http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
-            'http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js',
-            'modeltranslation/js/tabbed_translation_fields.js',
-        )
-        css = {
-            'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
-        }
 
     def get_str(self, obj):
         return str(obj)
@@ -569,17 +503,8 @@ class ImageSizesInline(admin.TabularInline):
     fields = ('image', 'alt', 'size')
 
 
-class ImageAdmin(TranslationAdmin):
+class ImageAdmin(admin.ModelAdmin):
     inlines = [ImageSizesInline]
-    class Media:                                 # this cause languages shown separatly in admin panel. (it should be use always, otherwise all field of all languages shown under each other at once)
-        js = (
-            'http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
-            'http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js',
-            'modeltranslation/js/tabbed_translation_fields.js',
-        )
-        css = {
-            'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
-        }
 
     def save_related(self, request, form, formsets, change):
         super().save_related(request, form, formsets, change)

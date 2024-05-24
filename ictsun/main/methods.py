@@ -1,6 +1,8 @@
 from django.conf import settings
 from django.db import transaction
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.utils.translation import activate, get_language
+from django.db.models.query import QuerySet
 
 from rest_framework.renderers import JSONRenderer
 from rest_framework.parsers import JSONParser
@@ -9,19 +11,21 @@ from rest_framework.serializers import Serializer
 import os
 import io
 import uuid
+import pymongo
 import jdatetime
 from datetime import datetime
 from decimal import Decimal
 from bs4 import BeautifulSoup
+from bson.objectid import ObjectId
 import requests
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.ssl_ import create_urllib3_context
+from collections.abc import Iterable
 from PIL import Image as PilImage
 from pathlib import Path
 from itertools import cycle
 from math import ceil
-
-from .models import Product, Post, Category, Image_icon
+from .models import Product, Category, Image_icon
 
 
 
@@ -37,17 +41,16 @@ def get_products(first_index, last_index, queryset=None, orderings=None):    #or
         return []
 
 
-            
-def get_posts(first_index=None, last_index=None, queryset=None):
-    if queryset != None:                                                     #this dont evaluate queryset
-        return queryset.filter(visible=True).order_by('-id')[first_index: last_index]
-    
-    try:
-        return Post.objects.filter(visible=True).order_by('-id')[first_index:last_index] #we can use Product.objects.filter(id__in=ips, visible=True) but reverse is a bit faster(tested in sqlite with 1.5m record for retrive 100 object) is is more clear and breaf (dont need  list(range(min_ip, max_ip))) .....   and most important reason: reverse automaticly retrieve other objects if first objects havnt our conditions(visible=True)  means if in Product.objects.filter(visible=True).reverse().order_by('id')[:5] we have two object with visible=False  in last 5 objects,  this commend will automaticly will go and retrive two other objects from next objects availabe. and if isnt find at all dont raise error and return founded objects,    query by indexed field(id) with an unindexed field (visible) dont affect speed significant(describe complete in:django/database.py/index)
-    except:
-        return []     
+def get_posts(post_col, query=None, first_index=None, last_index=None):
+    # query as dict like: {'category': 1}
+    if not query:
+        query = {}
+    query['visible'] = True
+    data = list(post_col.find(query).skip(first_index).limit(last_index).sort('_id', pymongo.DESCENDING))
+    for d in data:
+        d['_id'] = str(d['_id'])
+    return data
 
-        
 '''
 def childest_category(category, childs=[]):                 
     for child_category in category.child_categories.all():
@@ -63,6 +66,8 @@ def get_childs_and_category(category, return_self=True):
 
 def get_category_and_fathers(category):
     if category:
+        if isinstance(category, QuerySet):
+            category = category[0]
         category_and_fathers = [category]
         for i in range(category.level-1):
             category = category.father_category
@@ -92,7 +97,7 @@ def get_posts_products_by_category(category):
     if category.post_product == 'product':
         return Product.objects.filter(category__id__in=category_children_ids)
     else:
-        return get_posts(queryset=Post.objects.filter(category__id__in=category_children_ids))
+        return get_posts(query={'category': {'$in': category_children_ids}})
 
 
 
@@ -104,6 +109,151 @@ def get_mt_input_classes(name):         # configure md==modeltranslation with Qu
     return f'vTextField mt mt-field-{name}-{lng_cd}' + default
 
 
+
+
+def get_unique_list(items):       # remove duplicates from list and return list
+    no_duplicate = []
+    for item in items:
+        if item not in no_duplicate:
+            no_duplicate.append(item)
+    return no_duplicate
+
+
+def get_parsed_data(data):
+    # data type is dict
+    content = JSONRenderer().render(data)
+    stream = io.BytesIO(content)
+    return JSONParser().parse(stream)
+
+
+def get_page_count(count, step, **kwargs):  # count can be a model class or instances of model class
+    if isinstance(count, int):
+        return ceil(count / step)
+    import inspect
+    if inspect.isclass(count):    # count is like: Product or other model class
+        ceil(count.objects.filter(visible=True, **kwargs).count() / step)
+    else:        # count is like <Queryset Product(1), Product(2), ....> or other model instances
+        # ceil round up number, like: ceil(2.2)==3 ceil(3)==3
+        return ceil(count.count() / step)
+
+
+def save_to_mongo(mongo_col, instance, serializer, change, request=None):
+    # mongo_col like pymongo.MongoClient("...")['db_name']['product_detail'], instance like product1
+    # serializer like ProductDetailSerializer or ProductDetailSerializer()
+    # below serializer calls inside ModelSerializer like save_to_mongo(mongo_db, instance, self, ..)
+    if isinstance(serializer, Serializer):    # serializer instance, like: ProductSerializer(..)
+        serializer.request, serializer.instance = request, instance
+        serialized = serializer.data
+    else:                                     # serializer class
+        serialized = serializer(instance, context={'request': request}).data
+    data = {}
+    if request:             # when Modeladmin use form request is None (admin calls form without request)
+        for tuple in request.POST.items():                              # find all additional fields added in admin panel and add to 'data' in order to save them to db
+            if len(tuple[0]) > 6 and tuple[0][:6] == 'extra_':
+                data[tuple[0]] = tuple[1]
+    language_code = get_language()
+    activate('en')                                                     # all keys should save in database in `en` laguage(for showing data you can select eny language) otherwise it was problem understading which language should select to run query on them like in:  s = my_serializers.ProductDetailMongoSerializer(form.instance, context={'request': request}).data['shopfilteritems']:     {'رنگ': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} it is false for saving, we should change language by  `activate('en')` and now true form for saving:  {'color': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} and query like: s['color']
+    if not change:
+        data = {**get_parsed_data(serialized), **data}                 # s is like: {'id': 12, 'name': 'test2', 'slug': 'test2', ...., 'categories': [OrderedDict([('name', 'Workout'), ('slug', 'Workout')])]} and 'OrderedDict' will cease raise error when want save in mongo so we fixed it in data, so data is like:  {'id': 12, 'name': 'test', 'slug': 'test', ...., 'categories': [{'name': 'Workout', 'slug': 'Workout'}]}   note in Response(some_serializer) some_serializer will fixed auto by Response class like our way
+        mongo_col.insert_one(data)
+    else:
+        data = {**get_parsed_data(serialized), **data}
+        mongo_col.update_one({'id': data['id']}, {"$set": data})
+    activate(language_code)
+
+
+def post_save_to_mongo(post_col, pk=None, data=None, change=None):
+    # 'pk' is pk of post in mongo db used in updating, 'data' type is dict
+    language_code = get_language()
+    activate('en')
+    if not change:
+        data = get_parsed_data(data)
+        post_col.insert_one(data)
+    else:
+        data = get_parsed_data(data)
+        post_col.update_one({'_id': ObjectId(pk)}, {"$set": data})
+    activate(language_code)
+    return data
+
+
+def brand_save_to_mongo(shopdb_mongo, brand, change, request=None):
+    if change:
+        products_ids = list(Product.objects.filter(brand=brand).values_list('id', flat=True))  # doc in Filter_AttributeAdmin.save_related
+        mycol = shopdb_mongo[settings.MONGO_PRODUCT_COL]
+        mycol.update_many({'id': {'$in': products_ids}}, {'$set': {'brand': brand.name}})
+
+
+def comment_save_to_mongo(mongo_db, comment, serializer, change, request=None):
+    comment = comment
+    serializer.instance = comment
+    data = get_parsed_data(serializer.data)
+    if comment.post:
+        post_col = mongo_db.post
+        if not change:
+            post_col.update_one({'_id': ObjectId(comment.post)}, {'$push': {'comments': data}})
+        else:
+            post_col.update_one({'_id': ObjectId(comment.post), 'comments.id': comment.id}, {'$set': {'comments.$': data}})
+
+    elif comment.product_id:
+        product_col, foreignkey = settings.MONGO_PRODUCT_COL, comment.product_id
+        if not change:
+            product_col.update_one({'id': foreignkey}, {'$push': {'comments': data}})
+        else:
+            product_col.update_one({'id': foreignkey, 'comments.id': comment.id}, {'$set': {'comments.$': data}})
+    else:      # this will prevent error in comment editing when there is not any post/product
+        return None
+
+
+def category_save_to_mongo(mongo_db, form, category_chain_serializer, category_serializer=None, change=False):
+    # we can't import CategoryFathersChainedSerializer due to 'circle import error'
+    if change:
+        category = form.instance
+        children_ids = category.all_childes_id.split(',') if category.all_childes_id else []
+        category_children_ids = [category.id] + list(Category.objects.filter(id__in=children_ids).values_list('id', flat=True))   # why we need children of category?  suppose we edit `digital` category in admin, we should update all products with category digital or child of `digital`.  for example: product1.category = <Smart phone...>,  product1 in mongo db: product1['categories'] is like [{ name: 'digital', slug: 'digital' }, { name: 'phone', slug: 'phone'}, { name: 'smart phone', slug: 'smart_phone'}],  now if we edit digital product1 should update!
+
+        if category.post_product == 'post':
+            mycol = mongo_db['post']
+            ids = mongo_db.post.find({'category.id': {'$in': category_children_ids}}, {'_id': 1})
+            ids, id_key = [post['_id'] for post in ids], '_id'
+            if ids:
+                mycol.update_many({'_id': {'$in': ids}},
+                                  {'$set': {'category': category_serializer(category).data}})
+        elif category.product_set.exists():
+            ids = list(Product.objects.filter(category_id__in=category_children_ids).values_list('id', flat=True))
+            mycol, id_key = mongo_db[settings.MONGO_PRODUCT_COL], 'id'
+        else:            # this will prevent error in category editing when there is not any post/product
+            return None
+        mycol.update_many({id_key: {'$in': ids}},
+                          {'$set': {'category_fathers.$[element]': category_chain_serializer(category).data}},
+                          array_filters=[{'element': category_chain_serializer(form.previouse_cat).data}])
+        del form.previouse_cat
+
+
+def filter_attribute_save_to_mongo(shopdb_mongo, form, change):
+    if change:
+        filter_attribute = form.instance
+        filter_name, filterattribute_name = filter_attribute.filterr.name, filter_attribute.name
+        products_ids = list(filter_attribute.product_set.values_list('id', flat=True))                 # products_ids is like ['1', '2', '5', ...]
+        mycol = shopdb_mongo[settings.MONGO_PRODUCT_COL]
+        mycol.update_many({'id': {'$in': products_ids}}, {'$set': {'filters.{}.$[element]'.format(filter_name): filterattribute_name}},
+                          array_filters=[{'element': form.previouse_name}])      # note1: form.previouse_name should be in databse otherwise comment will not work       2:  we can't use like:  mycol.update_many({'id': {'$in': products_ids}}, {'$set': {'filters.{}.{}'.format(filter_name, form.previouse_name): filterattribute_name}})  because filters.filter_name is list not dict  also can't use string type f: f'...' and should use ''.fromat
+        del form.previouse_name
+
+
+def shopfilteritem_save_to_mongo(shopdb_mongo, form, serializer, change):
+    if change:
+        shopfilteritem = form.instance
+        product_id, filter_name = shopfilteritem.product.id, shopfilteritem.filter_attribute.filterr.name  # doc in Filter_AttributeAdmin.save_related
+        mycol = shopdb_mongo[settings.MONGO_PRODUCT_COL]
+        mycol.update_many({'id': product_id}, {'$set': {'shopfilteritems.{}.$[element]'.format(filter_name): serializer(shopfilteritem).data}}, array_filters=[{'element.id': shopfilteritem.id}])
+
+
+def image_save_to_mongo(shopdb_mongo, image, serializer, change):
+    if change:
+        image_id = image.id
+        data = get_parsed_data(serializer(image).data)
+        mycol = shopdb_mongo[settings.MONGO_PRODUCT_COL]
+        mycol.update_one({'images.id': image_id}, {'$set': {'images.$': data}})
 
 
 class PostDispatchPrice:                       # weight in gram, and length in mm.
@@ -202,42 +352,97 @@ class make_next:                             #for adding next to list you shold 
         return nex
 
 
-def get_unique_list(items):       # remove duplicates from list and return list
-    no_duplicate = []
-    for item in items:
-        if item not in no_duplicate:
-            no_duplicate.append(item)
-    return no_duplicate
+# convert dict to object like: DictToObject({'spec': {'age': 22}}).spec.age==22, can also use list
+class DictToObject:
+    # 'data' can be dict or list of dicts (pass many=True)
+    # if a serializer fields are 'a', 'b' and only 'a' provided in data, all_fields make b=None to prevent error
+    def __init__(self, data, many=None, all_fields=None):
+        self.items = None     # used in repr
+        instance = CallBack(data=data)
+        # we set self.sub_counter and self.data, to DictToObject (need in def repr, ...)
+        for attr_name, attr_value in instance.__dict__.items():
+            setattr(self, attr_name, attr_value)
+        if isinstance(data, dict):   # data is dict
+            if all_fields:
+                # {'_id': None} will cause saving _id=None is db (in PostMongoSerializer)
+                if all_fields.get('_id'):
+                    del all_fields['_id']
+                [setattr(instance, field, None) for field in all_fields if field not in data]
+        # manage list and MongoDB cursor (col.find(....))
+        elif isinstance(data, Iterable) and not isinstance(data, (str, bytes)):
+            if not many:
+                raise ValueError("class DictToObject: Iterable data type, pass 'many=True' to fix")
+            if all_fields:
+                for obj, dic in zip(instance, list(data)):
+                    [setattr(obj, field, None) for field in all_fields if field not in dic]
+            self.items = instance.items
+        else:
+            raise ValueError("Unsupported data type for conversion: must be dict or list of dicts")
+
+    def __getitem__(self, key):
+        if hasattr(self, "items"):
+            return self.items[key]
+        else:
+            raise TypeError("Index access is not supported on this object")
+
+    def __repr__(self):
+        if self.sub_counter == 1:
+            # in mongo cursor (.find()) self.data don't show actual data and needs to self.items
+            data = self.items if self.items else self.data
+            return f'Class {self.__class__.__name__}: ' + repr(data)
+        return repr(self.data)
 
 
-def get_parsed_data(instance, serializer, request=None):   # instance like: comment1, serializer like: CommentSerializer
-    s = serializer(instance, context={'request': request}).data
-    content = JSONRenderer().render(s)
-    stream = io.BytesIO(content)
-    return JSONParser().parse(stream)
+class CallBack:
+    # sub_counter counts calls of CallBack like: CallBack(data) sub_counter==1 for use in __repr__
+    def __init__(self, data, sub_counter=None):
+        self.data = data
+        self.sub_counter = 1 if not sub_counter else sub_counter
+        if isinstance(data, dict):
+            self.items = {}
+            for key, value in data.items():
+                # for keys like '240' now we can: obj['240'] and even obj['240'].image, instead obj.240 (error)
+                if isinstance(key, int) or isinstance(key, str) and key.isdigit():
+                    self.items[key] = self._convert(value)
+                else:
+                    setattr(self, key, self._convert(value))
+        # manage list and MongoDB cursor (doc.find(....))
+        elif isinstance(data, Iterable) and not isinstance(data, (str, bytes)):
+            self.items = [self._convert(item) for item in data]
 
+    def _convert(self, value):
+        if isinstance(value, dict):
+            return self.__class__(value, self.sub_counter + 1)
+        elif isinstance(value, list):
+            return [self._convert(item) for item in value]
+        else:
+            return value
 
-def get_page_count(model_instances, step, **kwargs):  # model_instances can be a model class or instances of model class
-    import inspect
-    if inspect.isclass(model_instances):    # model_instances is like: Post, Product or other model class
-        ceil(model_instances.objects.filter(visible=True, **kwargs).count() / step)
-    else:        # model_instances is like <Queryset Post(1), Post(2), ....> or other model instances
-        # ceil round up number, like: ceil(2.2)==3 ceil(3)==3
-        return ceil(model_instances.count() / step)
+    def __getitem__(self, key):
+        if hasattr(self, "items"):
+            return self.items[key]
+        else:
+            raise TypeError("Index access is not supported on this object")
+
+    def __iter__(self):
+        if self.items:
+            return iter(self.items)
+
+    def __repr__(self):
+        if self.sub_counter == 1:
+            return f'Class {self.__class__.__name__}: ' + repr(self.data)
+        return repr(self.data)
 
 
 class ImageCreationSizes:
     # in this class we receive image binary/base64 and save it to disk with specified sizes. if a model specified,
     # that models field will be filled instead, for example: image1.image = size1, image2.image = size2, ...
-    def __init__(self, data, sizes, name=None, model=None, instances=None):
+    def __init__(self, data, sizes, name=None):
         # data is like: {'image': InMemoryUploadFIle(..)} (keys are instance fields)
-        # model like: Image_icon. if you specify model, image creation  will be done by model field
-        # (instance.att_name.save()) instead of PilImage.save()
-        # 'instances' use in updating, so only available image icons will update instead of new image icon creation.
-        self.base_path = str(Path(__file__).resolve().parent.parent)  # is like: /home/akh/eCommerce-web-api/ictsun
+        self.base_path = str(settings.BASE_DIR)  # is like: /home/akh/eCommerce-web-api/ictsun
+        self.data = data.copy()  # we don't want change outside variables has been passed to our class.
         self.sizes = sizes
         self.name = name if name else uuid.uuid4().hex[:12]
-        self.data = data.copy()   # we don't want change outside variables has been passed to our class.
         # when data is like: {'alt': None, ...}, data['alt'] must be removed and replaced with uuid
         try:
             alt = self.data.pop('alt')
@@ -245,17 +450,10 @@ class ImageCreationSizes:
                 alt = uuid.uuid4().hex[:6]
         except:
             alt = uuid.uuid4().hex[:6]
-        if model:
-            self.instances = [model(alt=f'{alt}-{size}', **self.data) for size in self.sizes]
-        elif instances:       # in updating a model instance (like product)
-            self.instances = list(instances)[:len(self.sizes)]
-            for size, instance in zip(self.sizes, instances):
-                # if we have alt in our instance and user don't want update it, so don't change alt.
-                instance.alt = f'{alt}-{size}' if data.get('alt') or not instance.alt else instance.alt
-                [setattr(instance, key, self.data[key]) for key in self.data]
+        self.alt = alt
 
     @staticmethod
-    def get_alt(size, text=None):
+    def add_size_to_alt(size, text=None):
         # text == pre alt
         pre_alt = text if text else uuid.uuid4().hex[:6]
         return f'{pre_alt}-{size}'
@@ -264,12 +462,14 @@ class ImageCreationSizes:
         file = self.files['file'].read() if self.files.get('file') else self.files['image_icon_set-0-image'].read()
         return io.BytesIO(file)
 
-    def get_path(self, middle_path='/media/posts_images/icons/'):
+    def get_path(self, middle_path='posts_images/icons/'):
         # get path like: '/media/posts_images/icons/' returns like: '/media/posts_images/icons/1402/3/15/'
-        if settings.IMAGES_PATH_TYPE == 'jalali':
+        middle_path = '/media/' + middle_path
+        if getattr(settings, 'IMAGES_PATH_TYPE', None) == 'jalali':
             date = jdatetime.datetime.fromgregorian(date=datetime.now()).strftime('%Y %-m %-d').split()
         else:
-            date = datetime.now().strftime('%Y %-m %-d').split()
+            now = datetime.now()
+            date = f"{now.year} {now.month} {now.day}".split()     # %Y %-m %-d format doesn't work in windows
         return f'{middle_path}{date[0]}/{date[1]}/{date[2]}/'
 
     def _save(self, opened_image, path, full_name, format, instance, att_name):
@@ -280,15 +480,49 @@ class ImageCreationSizes:
                 setattr(instance, att_name, SimpleUploadedFile(full_name, buffer.getvalue()))
                 # field.upload_to must change to our path, also '/media/' must remove from path otherwise raise error
                 getattr(instance, att_name).field.upload_to = path.replace('/media/', '', 1)
+                return None
             else:                  # save image (write to disk) by pillow.save()
                 opened_image.save(self.base_path + path + full_name)
+                return SimpleUploadedFile(full_name, open(self.base_path + path + full_name, 'rb').read())
 
-    def save(self, opened_image=None, upload_to=None, att_name='image'):
+    def build(self, model, att_name='image', opened_image=None, upload_to=None):
+        instances = [model(alt=f'{self.alt}-{size}', **self.data) for size in self.sizes]
+        return self.save(opened_image=opened_image, upload_to=upload_to, instances=instances, att_name=att_name)
+
+    def update(self, instances, att_name='image', opened_image=None, upload_to=None):
+        instances = list(instances)[:len(self.sizes)]
+        for size, instance in zip(self.sizes, instances):
+            # if we have alt in our instance and user don't want update it, so don't change alt.
+            instance.alt = f'{self.alt}-{size}' if self.data.get('alt') or not instance.alt else instance.alt
+            [setattr(instance, key, self.data[key]) for key in self.data]
+        return self.save(opened_image=opened_image, upload_to=upload_to, instances=instances, att_name=att_name)
+
+    def upload(self, opened_image=None, upload_to=None):
+        # upload icons without using any models. returned value is simple python objects. each obj has 4 attr. like:
+        # image=<SimpleUploadedFile image.jpg>, url=/media/../qwer43asd2e4-720.JPG, alt=, size=720
+        return self.save(opened_image=opened_image, upload_to=upload_to)
+
+    def save(self, opened_image=None, upload_to=None, instances=None, att_name='image'):
         '''
-        file can be binary (multipart form-data) or base64.
-        path is like: /media/posts_images/icons/  returned value is like:
-        {'default': '/media/../..7a0-default.JPEG', 240: '/media/../..7a0-240.JPEG', ...}.
+        - opened_image can be binary (multipart form-data) or base64.
+        - upload_to is like: posts_images/icons/ will be convert to: /media/posts_images/icons/
+        - model is django model class. if you specify model, image will be saved to disk by model field,
+        (instance.att_name.save()) instead of PilImage.save()
+        - instances uses when associating with django models (build and update methods)
+        1- returned value: {model_instance1, model_instance2, ...}
+        2- returned value: {<Upload object 1 - (.image .url .size)>, <Upload object 2 - (.image .url .size)>}
         '''
+        class Upload:
+            def __init__(self, image, url, alt, size, **kwargs):
+                kwargs['image'], kwargs['url'], kwargs['alt'], kwargs['size'] = image, url, alt, size
+                [setattr(self, key, kwargs[key]) for key in kwargs]
+
+            def __repr__(self):
+                return '<Upload object {} - (.image .url .alt .size)>'.format(id(self))
+
+        if not instances:
+            instances = []
+
         try:         # binary file (multipart form-data)
             stream = io.BytesIO(self.data['image'].read())
         except:      # base64 file
@@ -300,7 +534,7 @@ class ImageCreationSizes:
 
         opened_image = PilImage.open(stream) if not opened_image else opened_image
         path = self.get_path() if not upload_to else self.get_path(upload_to)
-        iter_instances = cycle(self.instances) if self.instances else None
+        iter_instances, objects = cycle(instances) if instances else None, []
         if isinstance(opened_image, PilImage.Image):
             paths, format = {}, opened_image.format              # opened_image.format is like: "JPG"
             if not os.path.exists(self.base_path + path):
@@ -310,11 +544,12 @@ class ImageCreationSizes:
             for height in self.sizes:
                 resized = opened_image.resize((height, int(height / aspect_ratio))) if isinstance(height, int) else opened_image  # height can be 'default' str type
                 full_name = f'{self.name}-{height}' + f'.{format}'
-                instance = next(iter_instances) if self.instances else None
-                self._save(resized, path, full_name, format, instance, att_name)
-                # path is like: /media/posts_images/1402/3/20/qwer43asd2e4-720.JPG
-                paths[height] = path + full_name
-            return (paths, self.instances)
+                instance = next(iter_instances) if iter_instances else None
+                upload_image = self._save(resized, path, full_name, format, instance, att_name)
+                # url is like: /media/posts_images/1402/3/20/qwer43asd2e4-720.JPG
+                if not instances:
+                    objects += [Upload(image=upload_image, url=path+full_name, alt=f'{self.alt}-{height}', size=height)]
+            return instances or objects
 
         elif isinstance(opened_image, io.BufferedReader):      # open image by built-in function open()
             pass
@@ -322,12 +557,12 @@ class ImageCreationSizes:
             raise Exception('opened_image is not object of PilImage or python built in .open()')
 
 
-class SavePostProduct:
-    # this class calls inside ProductAdmin.save_related or ProductDetailSerializer.save to create/update product.
+class SaveProduct:
+    # calls inside admin or serializer to create/update product and all it's relational fields in sql integrally
     def create_icon(data):
         if data.get('image'):
-            obj = ImageCreationSizes(data=data, sizes=[240, 420, 640, 720, 960, 1280, 'default'], model=Image_icon)
-            paths, instances = obj.save(upload_to='/media/products_images/icons/')
+            obj = ImageCreationSizes(data=data, sizes=[240, 420, 640, 720, 960, 1280, 'default'])
+            instances = obj.build(model=Image_icon, upload_to='/media/products_images/icons/')
             Image_icon.objects.bulk_create(instances) if instances else None
 
     def update_icon(product, data, partial):
@@ -344,37 +579,20 @@ class SavePostProduct:
         # partial is True when sending data via api, 'changed' true when in admin panel one of icon fields are changed
         if partial or changed:
             instances = list(product.image_icon_set.all())
-            obj = ImageCreationSizes(data=data, sizes=[240, 420, 640, 720, 960, 1280, 'default'],
-                                     instances=instances)
-            paths, instances = obj.save(upload_to='/media/products_images/icons/')
+            obj = ImageCreationSizes(data=data, sizes=[240, 420, 640, 720, 960, 1280, 'default'])
+            instances = obj.update(instances=instances, upload_to='/media/products_images/icons/')
         with transaction.atomic():  # bulk_update doesn't work for 'image' field. this may improve speed a bit.
             for instance in instances:
                 instance.save()
 
-    def save_icon(data, post_product, partial=True):  # post_product is post or product instance
+    def save_icon(data, product, partial=True):  # 'product' is product instance
         # data = {'image': InMemoryUploadFIle(...), 'alt': ..}, 'alt' is not required
-        if isinstance(post_product, Post):    # without these, icons will save with .product or .post None
-            data['path'], data['post'],  = 'posts', post_product if not data.get('post') else data['post']
-        if isinstance(post_product, Product):
-            data['path'], data['product'] = 'products', post_product if not data.get('post') else data['product']
-        image_icon_exits = post_product.image_icon_set.exists()
+        data['path'], data['product'] = 'products', product if not data.get('product') else data['product']
+        image_icon_exits = product.image_icon_set.exists()
         if not image_icon_exits:
-            SavePostProduct.create_icon(data=data)
+            SaveProduct.create_icon(data=data)
         else:
-            SavePostProduct.update_icon(post_product, data=data, partial=partial)
-
-    def save_post(save_func, save_func_args, instance=None, data=None, partial=True):
-        # 'save_func' can be instance.save or serializer.save
-        # 'data' in admin is 'cleaned_data' and in serializer is 'validated_data', it can also be {} so save_product
-        # used only for run product.save(). 'save_func' is like: super().save or product.save
-        # in 'instance' is pre instance in creation and instance in update. 'partial' is False in admin
-        data = {} if not data else data
-        icon = data.pop('icon') if data.get('icon') else None
-        post = save_func(**save_func_args)     # in updating or in admin.save_related product is None
-        post = post if post else instance
-        if icon:
-            SavePostProduct.save_icon(data=icon, post_product=post, partial=partial)
-        return post
+            SaveProduct.update_icon(product, data=data, partial=partial)
 
     def save_product(save_func, save_func_args, instance=None, data=None, partial=True):
         data = {} if not data else data
@@ -387,109 +605,5 @@ class SavePostProduct:
         product = save_func(**save_func_args)
         product = product if product else instance
         if icon:
-            SavePostProduct.save_icon(data=icon, post_product=product, partial=partial)
+            SaveProduct.save_icon(data=icon, product=product, partial=partial)
         return product
-
-
-def save_to_mongo(mongo_col, instance, serializer, change, request=None):
-    # mongo_col like pymongo.MongoClient("mongodb://localhost:27017/")['db_name']['post_detail'], instance like post1,
-    # serializer like PostDetailSerializer or PostDetailSerializer()
-    # below serializer calls inside ModelSerializer like save_to_mongo(mongo_db, instance, self, ..)
-    if isinstance(serializer, Serializer):
-        serializer.request, serializer.instance = request, instance
-        serialized = serializer.data
-    else:                                     # here serializer is like: PostDetailMongoSerializer
-        serialized = serializer(instance, context={'request': request}).data
-    from django.utils.translation import activate, get_language
-    data = {}
-    if request:             # when Modeladmin use form request is None (admin calls form without request)
-        for tuple in request.POST.items():                              # find all additional fields added in admin panel and add to 'data' in order to save them to db
-            if len(tuple[0]) > 6 and tuple[0][:6] == 'extra_':
-                data[tuple[0]] = tuple[1]
-    language_code = get_language()                                  # get current language code
-    activate('en')                                                  # all keys should save in database in `en` laguage(for showing data you can select eny language) otherwise it was problem understading which language should select to run query on them like in:  s = my_serializers.ProductDetailMongoSerializer(form.instance, context={'request': request}).data['shopfilteritems']:     {'رنگ': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} it is false for saving, we should change language by  `activate('en')` and now true form for saving:  {'color': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} and query like: s['color']
-    if not change:
-        content = JSONRenderer().render(serialized)
-        stream = io.BytesIO(content)
-        data = {**JSONParser().parse(stream), **data}                           # s is like: {'id': 12, 'name': 'test2', 'slug': 'test2', ...., 'categories': [OrderedDict([('name', 'Workout'), ('slug', 'Workout')])]} and 'OrderedDict' will cease raise error when want save in mongo so we fixed it in data, so data is like:  {'id': 12, 'name': 'test', 'slug': 'test', ...., 'categories': [{'name': 'Workout', 'slug': 'Workout'}]}   note in Response(some_serializer) some_serializer will fixed auto by Response class like our way
-        mongo_col.insert_one(data)
-    else:
-        content = JSONRenderer().render(serialized)
-        stream = io.BytesIO(content)
-        data = {**JSONParser().parse(stream), **data}
-        mongo_col.update_one({'id': data['id']}, {"$set": data})
-    activate(language_code)
-
-
-def brand_save_to_mongo(shopdb_mongo, brand, change, request=None):
-    if change:
-        products_ids = list(Product.objects.filter(brand=brand).values_list('id', flat=True))  # doc in Filter_AttributeAdmin.save_related
-        mycol = shopdb_mongo[settings.MONGO_PRODUCT_COL]
-        mycol.update_many({'id': {'$in': products_ids}}, {'$set': {'brand': brand.name}})
-
-
-def comment_save_to_mongo(shopdb_mongo, comment, serializer, change, request=None):
-    if change:
-        comment = comment
-        if comment.post_id:
-            mongo_db_name = settings.MONGO_POST_COL
-            foreignkey = comment.post_id
-        elif comment.product_id:
-            mongo_db_name = settings.MONGO_PRODUCT_COL
-            foreignkey = comment.product_id
-        else:      # this will prevent error in comment editing when there is not any post/product
-            return None
-        data, comment_id = get_parsed_data(comment, serializer), comment.id
-        mycol = shopdb_mongo[mongo_db_name]
-        result = mycol.update_one({'id': foreignkey, 'comment_set.id': comment_id}, {'$set': {'comment_set.$': data}})
-        if result.matched_count == 0:
-            mycol.update_one({'id': foreignkey}, {'$addToSet': {'comment_set': data}})
-
-
-def category_save_to_mongo(shopdb_mongo, form, category_chain_serializer, change):
-    # we can't import CategoryChainedSerializer due to 'circle import error'
-    if change:
-        category = form.instance
-        if category.post_set.exists():
-            col_name, model = settings.MONGO_POST_COL, Post
-        elif category.product_set.exists():
-            col_name, model = settings.MONGO_PRODUCT_COL, Product
-        else:            # this will prevent error in category editing when there is not any post/product
-            return None
-        children_ids = category.all_childes_id.split(',') if category.all_childes_id else []
-        category_children_ids = [category.id] + list(Category.objects.filter(id__in=children_ids).values_list('id', flat=True))   # why we need children of category?  supose we edit `digital` category in admin, we should update all products with category digital or child of `digital`.  for example: product1.category = <Smart phone...>,  product1 in mongo db: product1['categories'] is like [{ name: 'digital', slug: 'digital' }, { name: 'phone', slug: 'phone'}, { name: 'smart phone', slug: 'smart_phone'}],  now if we edit digital product1 should update!
-        ids = list(model.objects.filter(category_id__in=category_children_ids).values_list('id', flat=True))             # doc in Filter_AttributeAdmin.save_related
-        mycol = shopdb_mongo[col_name]
-        mycol.update_many({'id': {'$in': ids}}, {'$set': {'categories.$[element]': category_chain_serializer(category).data}},
-                          array_filters=[{'element': category_chain_serializer(form.previouse_cat).data}])
-        del form.previouse_cat
-
-
-def filter_attribute_save_to_mongo(shopdb_mongo, form, change):
-    if change:
-        filter_attribute = form.instance
-        filter_name, filterattribute_name = filter_attribute.filterr.name, filter_attribute.name
-        products_ids = list(filter_attribute.product_set.values_list('id', flat=True))                 # products_ids is like ['1', '2', '5', ...]
-        mycol = shopdb_mongo[settings.MONGO_PRODUCT_COL]
-        mycol.update_many({'id': {'$in': products_ids}}, {'$set': {'filters.{}.$[element]'.format(filter_name): filterattribute_name}},
-                          array_filters=[{'element': form.previouse_name}])      # note1: form.previouse_name should be in databse otherwise comment will not work       2:  we can't use like:  mycol.update_many({'id': {'$in': products_ids}}, {'$set': {'filters.{}.{}'.format(filter_name, form.previouse_name): filterattribute_name}})  because filters.filter_name is list not dict  also can't use string type f: f'...' and should use ''.fromat
-        del form.previouse_name
-
-
-def shopfilteritem_save_to_mongo(shopdb_mongo, form, serializer, change):
-    if change:
-        shopfilteritem = form.instance
-        product_id, filter_name = shopfilteritem.product.id, shopfilteritem.filter_attribute.filterr.name  # doc in Filter_AttributeAdmin.save_related
-        mycol = shopdb_mongo[settings.MONGO_PRODUCT_COL]
-        mycol.update_many({'id': product_id}, {'$set': {'shopfilteritems.{}.$[element]'.format(filter_name): serializer(shopfilteritem).data}}, array_filters=[{'element.id': shopfilteritem.id}])
-
-
-def image_save_to_mongo(shopdb_mongo, image, serializer, change):
-    if change:
-        image_id = image.id
-        s = serializer(image).data
-        content = JSONRenderer().render(s)
-        stream = io.BytesIO(content)
-        data = JSONParser().parse(stream)
-        mycol = shopdb_mongo[settings.MONGO_PRODUCT_COL]
-        mycol.update_one({'images.id': image_id}, {'$set': {'images.$': data}})

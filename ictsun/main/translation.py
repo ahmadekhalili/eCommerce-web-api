@@ -1,3 +1,4 @@
+'''
 from modeltranslation.translator import translator, TranslationOptions
 
 from main.models import *
@@ -32,18 +33,6 @@ class Image_iconTranslation(TranslationOptions):
     fields = ('alt',)
 
 translator.register(Image_icon, Image_iconTranslation)
-
-
-class PostTranslation(TranslationOptions):
-    exclude = ['id', 'visible', 'published_date', 'updated', 'instagram_link', 'tags', 'category', 'author']    # 'id' mustn't be in fields otherwise raise error. published_date tranlating should implement in future.
-    all_fields = [field.name for field in Post._meta.fields] + [field.name for field in Post._meta.many_to_many]
-
-    def fields_generator(exclude, all_fields):       # we can't use exclude and product_fields in list comprehence without this method.
-        return [field for field in all_fields if field not in exclude]
-
-    fields = fields_generator(exclude, all_fields)         # we have definded fields dynamicly, means if we add a field in models.Product, it will add here automatically. size is not 'mostaqel' field so size translating has not means, we have created size_pr size_en just for future updating.
-
-translator.register(Post, PostTranslation)                # age field is required in amdinpanel, because we definded it blank=False in models.py, if we had definded null=True blank=True for age field that was unrequired.
 
 
 class ProductTranslation(TranslationOptions):
@@ -86,3 +75,4 @@ class TownTranslation(TranslationOptions):
     fields = ('name',)
 
 translator.register(Town, TownTranslation)
+'''

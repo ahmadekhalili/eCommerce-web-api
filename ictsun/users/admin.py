@@ -9,6 +9,7 @@ import os
 import pymongo
 import environ
 from pathlib import Path
+from urllib.parse import quote_plus
 
 from .models import User
 from .forms import CustomUserCreationForm, CustomUserChangeForm
@@ -17,7 +18,10 @@ from main.methods import get_parsed_data
 
 env = environ.Env()
 environ.Env.read_env(os.path.join(Path(__file__).resolve().parent.parent.parent, '.env'))
-shopdb_mongo = pymongo.MongoClient("mongodb://localhost:27017/")[env('MONGO_USERNAME')]
+username, password, db_name = quote_plus(env('MONGO_USERNAME')), quote_plus(env('MONGO_USERPASS')), env('MONGO_DBNAME')
+host = env('MONGO_HOST')
+uri = f"mongodb://{username}:{password}@{host}:27017/{db_name}?authSource={db_name}"
+mongo_db = pymongo.MongoClient(uri)['akh_db']
 
 
 #@admin.register(User)
@@ -51,9 +55,9 @@ class UserAdmin(BaseUserAdmin):
     def save_to_mongo(self, request, form, change):
         if change:
             user = form.instance
-            posts_ids = list(user.written_posts.values_list('id', flat=True))
-            data = get_parsed_data(user, UserNameSerializer)
-            mycol = shopdb_mongo[settings.MONGO_POST_COL]
+            posts_ids = mongo_db.post.find({'author.id': user.id}, {'_id': 1})
+            data = get_parsed_data(UserNameSerializer(user).data)
+            mycol = mongo_db.post
             mycol.update_many({'id': {'$in': posts_ids}}, {'$set': {'json.author': data}})
 
 admin.site.register(User, UserAdmin)

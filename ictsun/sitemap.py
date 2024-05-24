@@ -4,6 +4,7 @@ from django.contrib.sites.models import Site
 import xml.etree.ElementTree as ET
 
 from main.methods import get_page_count
+from main.models import Product, Category
 
 
 def create_sitemap():  # this method runs in urls.py because there run only one time after running django (with scheduled time)
@@ -50,7 +51,7 @@ def create_sitemap():  # this method runs in urls.py because there run only one 
         page_count = get_page_count(products_of_cats, settings.PRODUCT_STEP)
         sitemap += [{'loc': f'{url_body}/products/{page}/<category>/'} for page in list(range(1, page_count+1))]
 
-    sitemap += [{'loc': f'{url_body}/posts/detail/{post.id}/{post.slug}/', 'lastmod': str(post.date())} for post in all_posts]  # lastmod format should be str and like: 2023-07-15
+    sitemap += [{'loc': f'{url_body}/post/{post.id}/{post.slug}/', 'lastmod': str(post.date())} for post in all_posts]  # lastmod format should be str and like: 2023-07-15
 
     sitemap += [{'loc': f'{url_body}/products/detail/{product.id}/{product.slug}/', 'lastmod': str(product.date())} for product in all_products]
 

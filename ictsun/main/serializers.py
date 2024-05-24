@@ -1,24 +1,36 @@
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
+from django.core.validators import MaxLengthValidator
+from django.shortcuts import get_object_or_404
+from django.conf import settings
 from django.urls import reverse
 
 from rest_framework import serializers
 from rest_framework.fields import empty
+from rest_framework.exceptions import ValidationError
 from rest_framework.validators import UniqueValidator
 
-from modeltranslation.utils import get_translation_fields as g_t
-from drf_extra_fields.fields import Base64ImageField
-from pathlib import Path
-import jdatetime
 import re
 import os
 import pymongo
 import environ
+import datetime
+import jdatetime
+import urllib.parse
 from urllib.parse import quote_plus
+from modeltranslation.utils import get_translation_fields as g_t
+from drf_extra_fields.fields import Base64ImageField
+from pathlib import Path
+from bson import ObjectId
 
 from .models import *
-from .methods import get_category_and_fathers, save_to_mongo, SavePostProduct
-from users.serializers import UserNameSerializer
+from .methods import get_category_and_fathers, post_save_to_mongo, save_to_mongo, SaveProduct, DictToObject, \
+    comment_save_to_mongo
+from customed_files.rest_framework.classes.fields import *
+from customed_files.rest_framework.classes.validators import MongoUniqueValidator
+
+from users.models import User
+from users.serializers import UserSerializer, UserNameSerializer
 from users.methods import user_name_shown
 
 env = environ.Env()
@@ -29,24 +41,79 @@ uri = f"mongodb://{username}:{password}@{host}:27017/{db_name}?authSource={db_na
 mongo_db = pymongo.MongoClient(uri)['akh_db']
 
 
+class ReplySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Reply
+        fields = ['id', 'comment']
+
+    def to_representation(self, obj):
+        self.fields['_id'] = IdMongoField(required=False)
+        return super().to_representation(obj)
+
+
 class CommentSerializer(serializers.ModelSerializer):
-    published_date = serializers.SerializerMethodField()
-    author = UserNameSerializer(read_only=True)                                # this field must be read_only otherwise can't save like: c=CommentSerializer(data={'content': 'aaaaa', 'author': 1, 'reviewer': 1, 'product_id': 1}) c.is_valid() c.save()
+    published_date = TimestampField(jalali=True, required=False)
+    author = UserNameSerializer(read_only=True)   # write handles in def to_internal_value. must overide default author field (here done)
+    replies = serializers.SerializerMethodField(required=False)  # ReplySerializer(many=True, read_only=True, required=False)
 
     class Meta:
         model = Comment
         fields = '__all__'
 
+    def __init__(self, instance=None, request=None, mongo=False, **kwargs):
+        # request use to fill .author (in writing), otherwise should provide author explicitly (in data)
+        # in mongo=True, CommentSerializer is used like: validated = CommentSerializer(data={..}),
+        # data = CommentSerializer(DictToObject(validated)).data
+        self.request = request
+        self.mongo = mongo
+        super().__init__(instance, **kwargs)
+
     def to_representation(self, obj):
-        self.fields['reply_comments'] = serializers.SerializerMethodField()
-        return super().to_representation(obj)
+        self.fields['reviewer'] = UserNameSerializer(required=False)
+        self.fields['_id'] = IdMongoField(required=False)
+        fields = super().to_representation(obj)
+        return fields
 
-    def get_published_date(self, obj):
-        return round(jdatetime.datetime.fromgregorian(datetime=obj.published_date).timestamp())
+    def to_internal_value(self, data):
+        internal_value = super().to_internal_value(data)
+        if data.get('author'):
+            internal_value['author'] = get_object_or_404(User, id=data['author'])
+        elif self.request and self.request.user:
+            internal_value['author'] = self.request.user
+        else:
+            raise ValueError("please provide 'author' or login and request again")
 
-    def get_reply_comments(self, obj):
-        return CommentSerializer(obj.reply_comments.all(), many=True).data#ReplyCommentSerializer(obj.reply_comments.all(), many=True).data
+        return internal_value
 
+    def save(self, **kwargs):
+        # we save product in mongo in places: 1- admin 2- serializer
+        change = bool(self.instance)
+        instance = super().save(**kwargs)
+        comment_save_to_mongo(mongo_db, instance, self, change, kwargs.get('request'))
+        return instance
+
+    def set_id(self, data):
+        # receive list of comments and replies, add mongoid to them (to prepare saving in mongo). don't call in updating
+        if data:
+            if isinstance(data, list):      # list of comments
+                for i, comment in enumerate(data):
+                    data[i] = {'_id': ObjectId(), **comment}   # '-id' should be in first of dict
+                    if comment.get('replies'):
+                        for j, reply in enumerate(comment['replies']):
+                            data[i][j] = {'_id': ObjectId, **reply}
+            elif isinstance(data, dict):       # one comment
+                data = {'_id': ObjectId(), **data}
+                if data.get('replies'):
+                    for j, reply in enumerate(data['replies']):
+                        data[j] = {'_id': ObjectId, **reply}
+        return data
+
+    def get_replies(self, obj):
+        if not self.mongo:    # obj.replies.all works only in sql
+            replies = obj.replies.all()
+            if replies:
+                return CommentSerializer(replies, many=True).data
+        return []
 
 class RatingSerializer(serializers.ModelSerializer):
     class Meta:
@@ -69,7 +136,7 @@ class ImageSerializer(serializers.ModelSerializer):
 
     def get_image(self, obj):
         try:
-            url = obj.image.url                 #request.build_absolute_uri()  is like "http://127.0.0.1:8000/product_list/"     and   request.build_absolute_uri(obj.image_icon.url) is like:  "http://192.168.114.6:8000/product_list/media/3.jpg" (request.build_absolute_uri() + obj.image_icon.url)
+            url = obj.image.url
         except:
             url = ''
         return url
@@ -87,7 +154,7 @@ class ImageSerializer(serializers.ModelSerializer):
 
 
 class Image_iconSerializer(serializers.ModelSerializer):
-    image = Base64ImageField(allow_null=True, label='آیکن', required=False)
+    image = Base64ImageField(allow_null=True, required=False)
 
     class Meta:
         model = Image_icon
@@ -107,17 +174,31 @@ class Image_iconSerializer(serializers.ModelSerializer):
         return url
 
 
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = '__all__'
 
 
-class CategoryChainedSerializer(serializers.ModelSerializer):         #this is used for chane roost like: 'digital' > 'phone' > 'sumsung', also used in CategoryAdmin > category_save_to_mongo
+# receive one cat list 'samsung', returns several cat: 'digital' > 'phone' > 'samsung'
+class CategoryFathersChainedSerializer(serializers.ModelSerializer):
     url = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Category
         fields = ['name', 'url']
 
+    def __new__(cls, instance=None, revert=None, *args, **kwargs):
+        if instance and kwargs.get('many'):
+            cats = get_category_and_fathers(instance)
+            if revert:
+                cats.reverse()
+            return super().__new__(cls, cats, **kwargs)
+        return super().__new__(cls, *args, **kwargs)
+
     def get_url(self, obj):
-        return reverse('main:products-list-cat', args=[1, obj.slug]) if obj.post_product == 'products' else reverse('main:posts-list-cat', args=[1, obj.slug])
+        url = reverse('main:products-list-cat', args=[1, obj.slug]) if obj.post_product == 'products' else reverse('main:posts-list-cat', args=[1, obj.slug])
+        return urllib.parse.unquote(url)
 #'/products/categories/detail/{}/{}/'.format(obj.id, slugify(obj.name, allow_unicode=True))
 
 
@@ -130,16 +211,17 @@ class Sub2CategoryListSerializer(serializers.ModelSerializer):         #serializ
 
     class Meta:
         model = Category
-        fields = ['id', *g_t('name'), *g_t('slug'), 'level', 'post_product', 'father_category', 'str', 'url']
+        fields = ['id', 'name', 'slug', 'level', 'post_product', 'father_category', 'str', 'url']
 
     def get_str(self, obj):
         return obj.__str__()
 
     def get_url(self, obj):
         if obj.post_product == 'product':
-            return reverse('main:products-list-cat', args=[1, obj.slug])
+            url = reverse('main:products-list-cat', args=[1, obj.slug])
         else:
-            return reverse('main:posts-list-cat', args=[1, obj.slug])
+            url = reverse('main:posts-list-cat', args=[1, obj.slug])
+        return urllib.parse.unquote(url)
 
 
 class Sub1CategoryListSerializer(serializers.ModelSerializer):         #serialize categories with level=2
@@ -149,35 +231,39 @@ class Sub1CategoryListSerializer(serializers.ModelSerializer):         #serializ
     
     class Meta:
         model = Category
-        fields = ['id', *g_t('name'), *g_t('slug'), 'level', 'post_product', 'father_category', 'str', 'url', 'child_categories']      #for better displaying order we list all field.
+        fields = ['id', 'name', 'slug', 'level', 'post_product', 'father_category', 'str', 'url', 'child_categories']      #for better displaying order we list all field.
 
     def get_str(self, obj):
         return obj.__str__()
 
     def get_url(self, obj):
         if obj.post_product == 'product':
-            return reverse('main:products-list-cat', args=[1, obj.slug])
+            url = reverse('main:products-list-cat', args=[1, obj.slug])
         else:
-            return reverse('main:posts-list-cat', args=[1, obj.slug])
+            url = reverse('main:posts-list-cat', args=[1, obj.slug])
+        return urllib.parse.unquote(url)
 
 
-class CategoryListSerializer(serializers.ModelSerializer):         #urs for products should be like: /products/?slug  and for post should be likst /posts/?slug   note CategoryListSerializer should be before PostListSerializer
+class CategoryListSerializer(serializers.ModelSerializer):
+    # representation like: {'name': 'digital', 'child_categories': {'name': 'PC', 'child_categories':
+    # {'name': 'desktop', 'child_categories': {}}}
     str = serializers.SerializerMethodField()
     url = serializers.SerializerMethodField()
     child_categories = Sub1CategoryListSerializer(many=True)
-    
+
     class Meta:
         model = Category
-        fields = ['id', *g_t('name'), *g_t('slug'), 'level', 'post_product', 'father_category', 'str', 'url', 'child_categories']      #for better displaying order we list all field.
+        fields = ['id', 'name', 'slug', 'level', 'post_product', 'father_category', 'str', 'url', 'child_categories']      #for better displaying order we list all field.
 
     def get_str(self, obj):
         return obj.__str__()
 
     def get_url(self, obj):
         if obj.post_product == 'product':
-            return reverse('main:products-list-cat', args=[1, obj.slug])
+            url = reverse('main:products-list-cat', args=[1, obj.slug])
         else:
-            return reverse('main:posts-list-cat', args=[1, obj.slug])
+            url = reverse('main:posts-list-cat', args=[1, obj.slug])
+        return urllib.parse.unquote(url)
 
 
 
@@ -259,43 +345,6 @@ class BrandSerializer(serializers.ModelSerializer):
 
 
 
-class PostListSerializer(serializers.ModelSerializer):
-    published_date = serializers.SerializerMethodField()
-    tags = serializers.ListField(child=serializers.CharField(max_length=30))
-    image_icons = serializers.SerializerMethodField(read_only=True)
-    category = serializers.SerializerMethodField()
-    author = serializers.SerializerMethodField()
-    url = serializers.SerializerMethodField()                                 #showing solo str datas like 'url' before dict/list type datas like image_icons, category, author  is more readable and clear.
-
-    class Meta:
-        model = Post
-        fields = ['id', *g_t('title'), *g_t('slug'), *g_t('meta_title'), *g_t('meta_description'), *g_t('brief_description'), 'published_date', 'tags', 'image_icons', 'category', 'author', 'url']
-
-    def get_image_icons(self, obj):                                     #we must create form like: <form method="get" action="/posts/?obj.category.slug"> .  note form must shown as link. you can put that form in above of that post.
-        result = {}
-        for image_icon in obj.image_icon_set.all():
-            size = re.split('[.-]', image_icon.image.url)[-2]
-            result[size] = {'image': image_icon.image.url, 'alt': image_icon.alt}
-        return result
-
-    def get_published_date(self, obj):
-        return round(jdatetime.datetime.fromgregorian(datetime=obj.published_date).timestamp())
-
-    def get_category(self, obj):                                        #we must create form like: <form method="get" action="/posts/?obj.category.slug"> .  note form must shown as link.
-        name, url = (obj.category.name, reverse('main:posts-list-cat', args=[1, obj.category.slug])) if obj.category else ('', '')       #post.category has null=True so this field can be blank like when you remove and category.
-        return {'name': name, 'url': url}
-
-    def get_author(self, obj):
-        url = reverse('users:admin-profile', args=[obj.author.id]) if obj.author else ''
-        return {'name': user_name_shown(obj.author), 'url': url}
-    
-    def get_url(self, obj):
-        pk, slug = obj.id, obj.slug
-        return reverse('main:post_detail', args=[pk, slug])
-
-
-
-
 class ProductListSerializer(serializers.ModelSerializer):
     image_icons = serializers.SerializerMethodField(read_only=True)
     rating = serializers.SerializerMethodField()                                        #RatingSerializer(read_only=True)
@@ -318,69 +367,185 @@ class ProductListSerializer(serializers.ModelSerializer):
     
     def get_url(self, obj):
         pk, slug = obj.id, obj.slug
-        return reverse('main:product_detail', args=[pk, slug])
+        return urllib.parse.unquote(reverse('main:product_detail', args=[pk, slug]))
 
 
 
+# don't use this for representation like: PostMongoSerializer(DictToObject(post_col)).data
+# in updating must be like: PostMongoSerializer(pk=1, data=data, partial=True, request=request)
+# in creation: PostMongoSerializer(data=data, prequest=request)
+class PostMongoSerializer(serializers.Serializer):
+    # [title, brief_description, request.user/author required
+    title = serializers.CharField(label=_('title'), validators=[MongoUniqueValidator(mongo_db.post, 'title')], max_length=255)
+    slug = serializers.SlugField(label=_('slug'), required=False)    # slug generates from title (in to_internal_value)
+    published_date = TimestampField(label=_('published date'), jalali=True, required=False)
+    updated = TimestampField(label=_('updated date'), jalali=True, auto_now=True, required=False)
+    tags = serializers.ListField(child=serializers.CharField(max_length=30), default=[])
+    meta_title = serializers.CharField(allow_blank=True, max_length=60, required=False)
+    meta_description = serializers.CharField(allow_blank=True, required=False, validators=[MaxLengthValidator(160)])
+    brief_description = serializers.CharField(validators=[MaxLengthValidator(1000)])
+    detailed_description = serializers.CharField(allow_blank=True, required=False)
+    instagram_link = serializers.CharField(allow_blank=True, max_length=255, required=False)
+    visible = serializers.BooleanField(default=True)
+    author = UserNameSerializer()  # author can fill auto in to_internal_value, otherwise must input
+    icons = OneToMultipleImage(sizes=[240, 420, 640, 720, 960, 1280, 'default'], upload_to='post_images/icons/', required=False)
+    category_fathers = serializers.SerializerMethodField()
+    category = CategorySerializer(required=False, read_only=True)  # it's validated_data fill in 'to_internal_value'
+    comments = CommentSerializer(many=True, required=False)
 
-class PostDetailSerializer(serializers.ModelSerializer):
-    slug = serializers.SlugField(required=False)
-    published_date = serializers.SerializerMethodField(read_only=True)
-    updated = serializers.SerializerMethodField(read_only=True)
-    tags = serializers.ListField(child=serializers.CharField(max_length=30))
-    icon = Image_iconSerializer(write_only=True, required=False)
+    def __init__(self, instance=None, pk=None, *args, **kwargs):
+        # instance and pk should not conflict in updating and retrieving like: updating: serializer(pk=1, data={..}),
+        # retrieving: serializer(instance).data
+        self.request = kwargs.pop('request', None)
+        self.pk = pk
+        if kwargs.get('partial'):      # in updating only provided fields should validate
+            for key in self.fields:
+                self.fields[key].required = False
+        super().__init__(instance=instance, *args, **kwargs)
 
-    class Meta:
-        model = Post
-        fields = '__all__'
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        rep2 = representation.copy()
+        if self.partial:
+            for key in rep2:    # can't change dictionary (representation) size during iteration
+                if representation.get(key) is None:
+                    representation.pop(key)
+        return representation
 
-    def to_representation(self, obj):
-        self.fields['icon'] = serializers.SerializerMethodField()
-        fields = super().to_representation(obj)
-        fields['author'] = UserNameSerializer(obj.author).data
-        fields['categories'] = CategoryChainedSerializer(get_category_and_fathers(obj.category), many=True).data
-        return fields
+    def to_internal_value(self, data):
+        if not data.get('slug') and data.get('title'):  # correct updating, required change data['slug'] here.
+            data['slug'] = slugify(data['title'], allow_unicode=True)  # data==request.data==self.initial_data mutable
+        internal_value = super().to_internal_value(data)
 
-    def get_published_date(self, obj):
-        return round(jdatetime.datetime.fromgregorian(datetime=obj.published_date).timestamp())
+        now = datetime.datetime.now()
+        if not self.pk:         # in creation
+            internal_value['published_date'] = self.fields['published_date'].to_internal_value(now.timestamp())
+        internal_value['updated'] = self.fields['updated'].to_internal_value(now.timestamp())
 
-    def get_updated(self, obj):
-        return round(jdatetime.datetime.fromgregorian(datetime=obj.updated).timestamp())
+        if data.get('category'):
+            level = Category.objects.filter(id=data['category']).values_list('level', flat=True)[0]
+            related = 'father_category'
+            # '__father_category' * -1 == '', prefetch_related('child_categories') don't need because of single category
+            i = Category._meta.get_field('level').validators[1].limit_value-1-level  # raise error when use directly!
+            related += '__father_category' * i
+            cat = Category.objects.filter(id=data['category']).select_related(related)[0]
+            internal_value['category_fathers'] = cat
+            internal_value['category'] = cat
 
-    def get_icon(self, obj):                                     #we must create form like: <form method="get" action="/posts/?obj.category.slug"> .  note form must shown as link. you can put that form in above of that post.
-        result = {}
-        for image_icon in obj.image_icon_set.all():
-            size = re.split('[.-]', image_icon.image.url)[-2]
-            result[size] = {'image': image_icon.image.url, 'alt': image_icon.alt}
-        return result
+        if self.request:
+            if self.request.user:
+                internal_value['author'] = self.request.user
+            else:
+                raise ValidationError({'author': 'please login to fill post.author'})
+        elif data.get('author'):
+            internal_value['author'] = get_object_or_404(User, id=data['author'])
+        else:
+            raise ValidationError({'author': "please login and pass 'request' parameter or add user id manually"})
 
+        return internal_value
+
+    def is_valid(self, *, raise_exception=False):  # separate is_valid behaviour in updating / creation
+        validated_data, errors = {}, {}
+        if self.pk:   # in updating phase, run validation for only provided fields (in data)
+            for field_name in self.initial_data:  # self.initial_data == data passed to serialize
+                try:
+                    field = self.fields[field_name]
+                    validated_data[field_name] = field.run_validation(self.initial_data[field_name])
+                except ValidationError as exc:
+                    validated_data = {}
+                    errors[field_name] = exc.detail
+                else:     # in creation, do DRF default behaviour
+                    errors = {}
+                if errors and raise_exception:
+                    raise ValidationError(errors)
+            validated_data = {**validated_data, **self.to_internal_value(self.initial_data)}
+            return validated_data
+
+        else:         # in creation, do DRF default behaviour
+            return super().is_valid(raise_exception=raise_exception)
+
+    # only save in mongo db
     def save(self, **kwargs):
-        self.validated_data['slug'] = slugify(self.validated_data['title'], allow_unicode=True)
-        return SavePostProduct.save_post(save_func=super().save, save_func_args={**kwargs}, instance=self.instance,
-                                         data=self.validated_data)
+        change = True if self.pk else False
+        if not change:
+            return self.create(self.validated_data)
+        else:
+            return self.update(self.pk, kwargs['validated_data'])
+
+    def create(self, validated_data):
+        data = PostMongoSerializer(DictToObject(validated_data)).data
+        PostMongoSerializer().fields['comments'].child.set_id(data.get('comments'))
+        return post_save_to_mongo(post_col=mongo_db.post, data=data, change=False)
+
+    def update(self, pk, validated_data):
+        # because partial=True don't raise error when 'validated_data' doesn't provide required fields
+        data = PostMongoSerializer(DictToObject(validated_data), partial=True).data
+        data = self.field_filtering_for_update(self.initial_data, data)
+        return post_save_to_mongo(mongo_db.post, pk, data, change=True)
+
+    def field_filtering_for_update(self, input, output):  # 'input', 'output' is dict
+        # keep only fields provided in request.data and remove unexpected which have been added in to_internal_value
+        auto_now_fields = dict(self.fields).copy()   # store 'auto_now=True' fields
+        for key in self.fields:
+            if not getattr(auto_now_fields[key], 'auto_now', None):
+                del auto_now_fields[key]
+        for key in output.copy():
+            if key not in input and key not in auto_now_fields:
+                del output[key]
+        return output
+
+    def get_category_fathers(self, obj):
+        if getattr(obj, 'category', None):
+            return CategoryFathersChainedSerializer(obj.category, revert=True, many=True).data
 
 
-class PostDetailMongoSerializer(PostDetailSerializer):
-    comment_set = serializers.SerializerMethodField(read_only=True)
+class PostListSerializer(serializers.Serializer):
+    title = serializers.CharField(label=_('title'), max_length=255)
+    slug = serializers.SlugField(label=_('slug'), required=False)    # slug generates from title (in to_internal_value)
+    published_date = TimestampField(label=_('published date'), jalali=True, required=False)
+    updated = TimestampField(label=_('updated date'), jalali=True, required=False)
+    tags = serializers.ListField(child=serializers.CharField(max_length=30), default=[])
+    meta_title = serializers.CharField(allow_blank=True, max_length=60, required=False)
+    meta_description = serializers.CharField(allow_blank=True, required=False, validators=[MaxLengthValidator(160)])
+    brief_description = serializers.CharField(validators=[MaxLengthValidator(1000)])
+    url = serializers.SerializerMethodField()  # show simple str before data/list (in serializer(...).data)
+    author = serializers.SerializerMethodField()  # author will fill auto from request.user, otherwise must input
+    icons = serializers.SerializerMethodField()
+    category = serializers.SerializerMethodField()  # it's validated_data fill in 'to_internal_value'
 
-    def get_comment_set(self, obj):
-        # for every post, comments should be like:
-        # [{'id':1,'content':'first comment', 'reply': None, 'reply_comments': [comment20, comment21,..]}, 'id': 2, ...
-        return CommentSerializer(obj.comment_set.filter(reply=None), many=True).data
+    def get_url(self, obj):
+        pk, slug = str(obj._id), obj.slug
+        return urllib.parse.unquote(reverse('main:post_detail', args=[pk, slug]))
 
-    # .save() require kwarg request
-    # if for any reason we pot save_to_mongo to PostAdminForm.save instead here error will raise when save new post, because
-    # post.published_date required, but form.instance.published_date only available after return instance in form.save
-    def save(self, **kwargs):
-        change = bool(self.instance)
-        instance = super().save(**kwargs)
-        save_to_mongo(mongo_db[settings.MONGO_POST_COL], instance, self, change, kwargs.get('request'))
-        return instance
+    def get_author(self, obj):
+        if getattr(obj, 'author', None):
+            author = obj.author
+            if author:
+                url = urllib.parse.unquote(reverse('users:admin-profile', args=[author.id]))
+                return {'url': url, 'user_name': author.user_name}
+
+    def get_icons(self, obj):
+        if getattr(obj, 'icons', None):
+            icons, result = obj.icons, {}
+            if icons:
+                for size in icons:
+                    icon = icons[size]
+                    result[size] = {'image': icon.image, 'alt': icon.alt}
+                return result
+
+    def get_category(self, obj):
+        if getattr(obj, 'category', None):
+            cat = obj.category
+            name = cat.name
+            url = urllib.parse.unquote(reverse('main:posts-list-cat', args=[1, cat.slug]))
+        else:
+            name, url = ('', '')
+        return {'name': name, 'url': url}
 
 
 class ProductDetailSerializer(serializers.ModelSerializer):       # important: for saving we should first switch to `en` language by:  django.utils.translation.activate('en').    comment_set will optained by front in other place so we deleted from here.   more description:  # all keys should save in database in `en` laguage(for showing data you can select eny language) otherwise it was problem understading which language should select to run query on them like in:  s = my_serializers.ProductDetailMongoSerializer(form.instance, context={'request': request}).data['shopfilteritems']:     {'رنگ': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} it is false for saving, we should change language by  `activate('en')` and now true form for saving:  {'color': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} and query like: s['color']
     slug = serializers.SlugField(required=False)
-    categories = serializers.SerializerMethodField()
+    category_fathers = CategoryFathersChainedSerializer(many=True, revert=True)
     brand = serializers.SerializerMethodField()
     rating = serializers.SerializerMethodField()
     images = ImageSerializer(many=True, required=False)
@@ -391,12 +556,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):       # important: f
 
     class Meta:
         model = Product
-        fields = ['id', *g_t('name'), *g_t('slug'), *g_t('meta_title'), *g_t('meta_description'), *g_t('brief_description'), *g_t('detailed_description'), *g_t('price'), *g_t('available'), 'categories', 'category', 'brand', 'rating', *g_t('stock'), *g_t('weight'), 'images', 'icon', 'comment_count', 'shopfilteritems', 'related_products']
-
-    def get_categories(self, obj):
-        category_and_fathers = get_category_and_fathers(obj.category)
-        category_and_fathers.reverse()                           # to fixing display order in front we reversed!!
-        return CategoryChainedSerializer(category_and_fathers, many=True).data
+        fields = ['id', *g_t('name'), *g_t('slug'), *g_t('meta_title'), *g_t('meta_description'), *g_t('brief_description'), *g_t('detailed_description'), *g_t('price'), *g_t('available'), 'category_fathers', 'category', 'brand', 'rating', *g_t('stock'), *g_t('weight'), 'images', 'icon', 'comment_count', 'shopfilteritems', 'related_products']
 
     def get_brand(self, obj):
         try:
@@ -430,7 +590,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):       # important: f
         related_serialized = []
         for product in related_products:
             name, price, image_icons = product.name, str(product.price), product.image_icon_set.all()              #rest_framework for default convert decimal fields to str, so we convert to str too.
-            url = reverse('main:product_detail', args=[product.id, product.slug])
+            url = urllib.parse.unquote(reverse('main:product_detail', args=[product.id, product.slug]))
             image_icons = [{'image': im.image.url, 'alt': im.alt} for im in image_icons]
             related_serialized.append({'name': name, 'price': price, 'url': url, 'image_icons': image_icons})
         return related_serialized
@@ -442,7 +602,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):       # important: f
         self.images = self.validated_data.pop('images') if self.validated_data.get('images') else None
         if not self.validated_data.get('slug'):
             self.validated_data['slug'] = slugify(self.validated_data['name'], allow_unicode=True)
-        return SavePostProduct.save_product(save_func=super().save, save_func_args={**kwargs}, instance=self.instance,
+        return SaveProduct.save_product(save_func=super().save, save_func_args={**kwargs}, instance=self.instance,
                                             data=self.validated_data)
 
     def create(self, validated_data):

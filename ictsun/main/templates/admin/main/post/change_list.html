@@ -1,0 +1,17 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static admin_list %}
+
+{% block content %}
+  <div id="content-main">
+    <form id="changelist-form" method="post" novalidate>
+      {% csrf_token %}
+      {% block result_list %}
+       <h3><span style="width: 200px; display: inline-block;"> ID </span>  <span style="width: 200px">TITLE</span> </h3>
+       <hr><p></p>
+       {% for post in posts %}
+          <p><a href="{% url 'admin:post_change' post.id %}" style="width: 200px; display: inline-block;">{{ post.id }}</a>  <span style="width: 200px">{{ post.title }}</span></p>
+       {% endfor %}
+      {% endblock %}
+    </form>
+  </div>
+{% endblock %}

@@ -1,4 +1,3 @@
-
 from django.db.models import Sum, F, Case, When, Q
 from django.db.models.functions import Coalesce
 from django.shortcuts import render, get_object_or_404
@@ -15,11 +14,13 @@ import pymongo
 import environ
 from pathlib import Path
 from urllib.parse import quote_plus
+from bson import ObjectId
 
+from customed_files.rest_framework.classes.response import ResponseMongo
 from . import serializers as my_serializers
 from . import forms as my_forms
 from .methods import get_products, get_posts, get_posts_products_by_category, ImageCreationSizes, get_parsed_data, \
-    get_page_count, get_unique_list
+    get_page_count, get_unique_list, DictToObject
 from .models import *
 from users.serializers import UserSerializer
 
@@ -32,19 +33,14 @@ mongo_db = pymongo.MongoClient(uri)['akh_db']
 
 def index(request):
     if request.method == 'GET':
-        #cache.set('name', ['mkh is my name', 'akh is my name'])
-        #str(request.META.get('HTTP_COOKIE'))id=14   fied_1=s2
-        #Category._meta.get_field('level').validators[0].limit_value
-        #user_language = 'fa'
-        #translation.activate(user_language)
-        #request.session[translation.LANGUAGE_SESSION_KEY] = user_language
-        #Accept-Language
+        # cache.set('name', ['mkh is my name', 'akh is my name'])
+        # str(request.META.get('HTTP_COOKIE'))id=14   field_1=s2
+        a = ''
+        #f = my_serializers.CommentSerializer(DictToObject({"content": "dsadasd", 'author': User.objects.get(id=1)}), mongo=True).data
+
         a = ''
         b = ''
 
-        #formset_factory(my_forms.ImageForm)()
-        #formset = formset_factory(my_forms.CategoryForm, extra=2)
-        #posts = f(initial=[{'name': 'asdasd', 'slug':'eqwe', 'level': 1, 'father_category': 26, 'post_product': 'product',}])#inlineformset_factory(Product, Category, fields=('name', 'slug', 'level', 'father_category', 'post_product'))(instance=p)
         rend = render(request, 'main/index.html', {'a': a, 'b': b})
         #rend.set_cookie('cart_products', {'1': {'q': 23, 'p': 33}, '2': {'q': 230, 'p': 330}})
         return rend
@@ -104,13 +100,11 @@ class HomePage(views.APIView):
         output 6 last created product and 4 last created post(visible=True, and select products with available=True in first).
         '''
         products = get_products(0, 6)
-        posts = get_posts(0, 4).select_related('category')
-        posts = posts if posts else []
-        #supporter_datas = supporter_datas_serializer(request, mode='read')
+        posts = list(get_posts(mongo_db.post, first_index=0, last_index=4))
+        # supporter_datas = supporter_datas_serializer(request, mode='read')
         products_serialized = {'products': my_serializers.ProductListSerializer(products, many=True, context={'request': request}).data}       #my_serializers.ProductListSerializer(posts, many=True).data  is list not dict so cant use ** before it (like {**serialized})
-        posts_serialized = {'posts': my_serializers.PostListSerializer(posts, many=True, context={'request': request}).data}
         sessionid = request.session.session_key
-        return Response({'sessionid': sessionid, **products_serialized, **posts_serialized})
+        return Response({'sessionid': sessionid, **products_serialized, 'posts': posts})
 
 
 
@@ -121,7 +115,7 @@ class PostList(views.APIView):
         output 12 last created posts(visible=True)
         '''
         category_slug = kwargs.get('category')
-        page = int(kwargs.get('page', 1))
+        page = kwargs.get('page', 1)
         step = settings.POST_STEP
         if category_slug:
             category = get_object_or_404(Category, slug=category_slug)
@@ -130,19 +124,20 @@ class PostList(views.APIView):
         else:
             posts = None
 
-        posts_count = posts if posts else Post.objects.all()
+        post_col = mongo_db.post
+        posts_count = len(posts) if posts else post_col.count_documents({})     # posts_count type is int
         page_count = get_page_count(posts_count, step)
         rang = (page * step - step, page * step)
-        posts = get_posts(*rang, posts).select_related('category')
-        serializers = {'posts': my_serializers.PostListSerializer(posts, many=True, context={'request': request}).data}             #you must put context={'request': request} in PostListSerializer argument for working request.build_absolute_uri  in PostListSerializer, otherwise request will be None in PostListSerializer and raise error
+        posts = get_posts(post_col, first_index=rang[0], last_index=rang[1]) if not posts else posts[rang[0], rang[1]]
+        data = my_serializers.PostListSerializer(DictToObject(posts, many=True), many=True).data
         sessionid = request.session.session_key
-        return Response({'sessionid': sessionid, **serializers, 'pages': page_count})
+        return Response({'sessionid': sessionid, 'posts': data, 'pages': page_count})
 
     def post(self, request, *args, **kwargs):
-        serializer = my_serializers.PostDetailMongoSerializer(data=request.data)
+        serializer = my_serializers.PostMongoSerializer(data=request.data, request=request)
         if serializer.is_valid():
-            instance = serializer.save()
-            return Response(my_serializers.PostDetailMongoSerializer(instance, context={'request': request}).data)
+            serializer.save()
+            return Response('successfully created in mongo!')
         return Response(serializer.errors)
 
 
@@ -157,7 +152,7 @@ class ProductList(views.APIView):
         page = int(kwargs.get('page', 1))
         step = settings.PRODUCT_STEP
         if category_slug:
-            ## 1- category. url example:  /products/category=sumsung (or  /products/?category=sumsung dont differrent) just dont put '/' in end of url!!!!
+            ## 1- category. url example:  /products/category=sumsung (or  /products/?category=samsung dont differrent) just dont put '/' in end of url!!!!
             category = get_object_or_404(Category, slug=category_slug)
             products = get_posts_products_by_category(category)
             category_and_allitschiles = list(Category.objects.filter(id__in=list(filter(None, category.all_childes_id.split(',')))+[category.id]).prefetch_related('filters__filter_attributes', 'brands'))
@@ -209,37 +204,36 @@ class ProductList(views.APIView):
 
 
 
-class PostDetail(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin,
-                 generics.GenericAPIView):
-    queryset = Post.objects.all()
-    serializer_class = my_serializers.PostDetailMongoSerializer
+class PostDetail(views.APIView):
+    serializer = my_serializers.PostMongoSerializer
+    post_col = mongo_db.post
 
-    def get(self, request, *args, **kwargs):                #dont need define like serializer = {'post': my_serializers.PostDetailSerializer(product_categories).data} because my_serializers.PostDetailSerializer(product_categories).data dont has many=True so is dict not list and dont raise error when putin in Reaponse
+    def get(self, request, *args, **kwargs):
         '''
-        input receive from /posts/ like posts0.url = "3/یسشی/"__________
-        output a post depend on pk you specify.
+        url=/post/<mongo_pk>/<slug>/
         '''
-        #permission_classes = [IsAuthenticated]
-        #post = Post.objects.filter(id=kwargs['pk']).select_related('author', 'category').prefetch_related('comment_set')
-        #data = my_serializers.PostDetailSerializer(post, many=True).data[0]
-        post_col = mongo_db[settings.MONGO_POST_COL]
-        data = post_col.find_one({"id": kwargs['pk']})['json']       # kwargs['pk'] must be int
+        # permission_classes = [IsAuthenticated]
+        # post = Post.objects.filter(id=kwargs['pk']).select_related('author', 'category').prefetch_related('comments')
+        # data = my_serializers.PostDetailSerializer(post, many=True).data[0]
+        post = self.post_col.find_one({"_id": ObjectId(kwargs['pk'])})
         sessionid = request.session.session_key
-        return Response({'sessionid': sessionid, **data})               #serializer is list (because of many=True)    serializer[0] is dict
+        return ResponseMongo({'sessionid': sessionid, **post})
 
     def put(self, request, *args, **kwargs):
-        # partial auto will set to serializer like: serializer(instance, data, partial=kwargs.pop('partial'))
-        kwargs['partial'] = request.data.get('partial', True)
-        return self.update(request, *args, **kwargs)
+        # for updating, url=/post/<mongo_pk>/<slug>/   data={"title": "some_title"}
+        kwargs['update'] = True
+        serializer = self.serializer(pk=kwargs['pk'], data=request.data, partial=True, request=request)
+        validated_data = serializer.is_valid(raise_exception=True)
+        data, sessionid = serializer.save(validated_data=validated_data), request.session.session_key
+        return Response({'sessionid': sessionid, **data})
 
     def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
-
-    def perform_destroy(self, instance):
-        instance.visible = False
-        instance.save()
-
-
+        post_col = mongo_db.post
+        if not settings.DEBUG:  # productions mode
+            post_col.update_one({'_id': ObjectId(kwargs['pk'])}, {'$set': {'visible': True}})
+        else:
+            post_col.delete_one({'_id': ObjectId(kwargs['pk'])})
+        return Response({'sessionid': request.session.session_key, 'status': 'deleted successfully!'})
 
 
 class ProductDetail(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin,
@@ -311,25 +305,26 @@ class ProductCategoryList(views.APIView):
 
 
 class CommentCreate(views.APIView):
+    serializer = my_serializers.CommentSerializer
+
     def post(self, request, *args, **kwargs):
-        # request variables in request.data is: content, post_id or product_id
-        try:
-            data, user = dict(request.data), None if not request.user.is_authenticated else request.user
-            comment = Comment.objects.create(**data, author=user)
-            if comment.post_id:
-                mongo_db_name = settings.MONGO_POST_COL
-                foreignkey = comment.post_id
-            else:
-                mongo_db_name = settings.MONGO_PRODUCT_COL
-                foreignkey = comment.product_id
-            data = get_parsed_data(comment, my_serializers.CommentSerializer)
-            mycol = mongo_db[mongo_db_name], comment_id = comment
-            mycol.update_one({'id': foreignkey}, {'$push': {'json.comment_set': data}})
-            return Response({'status': 'نظر شما با موفقيت ثبت شد.'})
-        except:
-            return Response({'status': 'اطلاعات جهت ثبت نظر کافي نيست.'}, status=400)
-
-
+        # required data: 'content', 'post' or 'product_id', 'author'|request.user
+        # unrequired: 'comment_id' (for add reply), ...
+        data = dict(request.data)
+        if data.get('post'):       # create comment of post
+            post_id = data.pop('post')
+            serializer = self.serializer(request=request, data=data)
+            serializer.is_valid(raise_exception=True)
+            validated_data = serializer.validated_data
+            serialized = self.serializer(DictToObject(validated_data), mongo=True).data  # don't touch 'data' variable
+            data = self.serializer().set_id(data)
+            if not data.get('comment_id'):        # create comment
+                mongo_db.post.update_one({'_id': ObjectId(post_id)}, {'$push': {'comments': serialized}})
+            else:                                 # create comment's reply
+                mongo_db.post.update_one({'_id': ObjectId(post_id), 'comments._id': ObjectId(data['comment_id'])},
+                                         {'$push': {'comments.$.replies': serialized}})
+            return ResponseMongo(serialized)
+        return Response({})
 
 
 
@@ -357,10 +352,12 @@ class UploadImage(views.APIView):
         request.data['file'] sent by front is InMemoryUploadedFile object, like data sent by <input type="file"...>
         '''
         sizes = [240, 420, 640, 720, 960, 1280]
-        image = Image(image=request.data['file'], alt=ImageCreationSizes.get_alt('default'), path='posts')
-        obj = ImageCreationSizes(data={'image': request.data['file']}, sizes=sizes, instances=[ImageSizes(alt=ImageCreationSizes.get_alt(size), size=size, father=image) for size in sizes])
-        paths, instances = obj.save(upload_to='/media/posts_images/')
-        image.save()
+        img = Image(image=request.data['file'], alt=ImageCreationSizes.add_size_to_alt('default'), path='posts')
+        obj = ImageCreationSizes(data={'image': request.data['file']}, sizes=sizes)
+        instances = [ImageSizes(alt=ImageCreationSizes.add_size_to_alt(size), size=size, father=img) for size in sizes]
+        instances = obj.update(instances=instances, upload_to='/media/posts_images/')
+        img.save()
         ImageSizes.objects.bulk_create(instances)
-        paths['default'], paths['image_id'] = image.image.url, image.id
+        paths = {size: instance.image.url for size, instance in zip(sizes, instances)}
+        paths['default'], paths['image_id'] = img.image.url, img.id
         return Response(paths)

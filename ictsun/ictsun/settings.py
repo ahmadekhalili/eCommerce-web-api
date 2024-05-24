@@ -35,7 +35,6 @@ ALLOWED_HOSTS = ['*']
 #Application definition
 
 INSTALLED_APPS = [
-    'modeltranslation',
     'debug_toolbar',
     'django_extensions',
     'drf_spectacular',
@@ -226,5 +225,4 @@ POST_STEP = 6       # 6 means you will see 6 post in every PostList page, used i
 PRODUCT_STEP = 12
 DEFAULT_SCHEME = 'http'   # uses in sitmape.py because we dont have access to request and request.scheme
 SECRET_HS = 'mysecret'    # used in HS256 in users send sms
-MONGO_POST_COL = 'postdetailmongo'      # these are used to create/get mongo collection, so change it only in first
-MONGO_PRODUCT_COL = 'productdetailmongo'
+MONGO_PRODUCT_COL = 'product'  # used to create/get mongo collection, so change it only in first. for post static 'post'
