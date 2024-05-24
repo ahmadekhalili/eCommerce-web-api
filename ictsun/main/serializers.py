@@ -86,7 +86,7 @@ class CommentSerializer(serializers.ModelSerializer):
         return internal_value
 
     def save(self, **kwargs):
-        # we save product in mongo in places: 1- admin 2- serializer
+        # here save only product (mongo&sql), post saves done manually in views
         change = bool(self.instance)
         instance = super().save(**kwargs)
         comment_save_to_mongo(mongo_db, instance, self, change, kwargs.get('request'))
@@ -107,6 +107,23 @@ class CommentSerializer(serializers.ModelSerializer):
                     for j, reply in enumerate(data['replies']):
                         data[j] = {'_id': ObjectId, **reply}
         return data
+
+    def field_filtering_for_update(self, input, output):  # input=request.data, output=serializer.data or..
+        # keep only fields provided in request.data and remove unexpected which have been added in to_internal_value
+        auto_now_fields = set()   # store 'auto_now=True' fields without duplicates
+        for field_name, field in self.fields.items():
+            if getattr(field, 'auto_now', False):
+                auto_now_fields.add(field_name)
+
+        model_class = self.Meta.model  # if there isn't any auto_now=True field in serializer, search it in model fields
+        for field in model_class._meta.get_fields():
+            if getattr(field, 'auto_now', False):
+                auto_now_fields.add(field.name)
+
+        for key in output.copy():
+            if key not in input and key not in auto_now_fields:
+                del output[key]
+        return output
 
     def get_replies(self, obj):
         if not self.mongo:    # obj.replies.all works only in sql
