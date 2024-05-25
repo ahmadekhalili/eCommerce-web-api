@@ -348,7 +348,7 @@ class CommentAdmin(admin.ModelAdmin):
         comment_save_to_mongo(mongo_db.post, form.instance, my_serializers.CommentSerializer(), change, request)
 
 admin.site.register(Comment, CommentAdmin)
-
+admin.site.register(Reply)
 
 
 

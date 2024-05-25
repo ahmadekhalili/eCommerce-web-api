@@ -10,9 +10,10 @@ from main.methods import ImageCreationSizes
 
 class TimestampField(serializers.Field):
     # 'jalali' means Solar date instead of Gregorian
-    def __init__(self, jalali=False, auto_now=False, *args, **kwargs):
+    def __init__(self, jalali=False, auto_now=False, auto_now_add=False, *args, **kwargs):
         self.jalali = jalali
         self.auto_now = auto_now
+        self.auto_now_add = auto_now_add
         super().__init__(*args, **kwargs)
 
     def to_representation(self, value):
@@ -22,13 +23,49 @@ class TimestampField(serializers.Field):
         else:                 # when take value from mongo db
             return value
 
+    def get_value(self, dictionary):
+        update_phase = getattr(self.parent, 'pk', False) or getattr(self.parent, 'instance', False)
+        if self.auto_now_add and not update_phase:
+            return True
+        elif self.auto_now and update_phase:
+            return True
+        else:
+            return super().get_value(dictionary)
+
     def to_internal_value(self, data):
-        try:
+        if self.auto_now_add or self.auto_now:
             if self.jalali:
-                return jdatetime.datetime.fromtimestamp(int(data))
-            return datetime.datetime.fromtimestamp(int(data))
-        except ValueError:
-            raise ValueError("you have to input in timestamp format, but provided: {{ data }}")
+                return jdatetime.datetime.now()
+            return datetime.datetime.now()
+        else:
+            try:
+                if self.jalali:
+                    return jdatetime.datetime.fromtimestamp(int(data))
+                return datetime.datetime.fromtimestamp(int(data))
+            except ValueError:
+                raise ValueError("you have to input in timestamp format, but provided: {{ data }}")
+
+
+class DateTimeFieldMongo(serializers.DateTimeField):
+    def __init__(self, auto_now=False, auto_now_add=False, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.auto_now = auto_now
+        self.auto_now_add = auto_now_add
+
+    def to_internal_value(self, data):
+        def get_datetime():
+            if self.jalali:
+                jdatetime.datetime.now()
+            else:
+                datetime.datetime.now()
+
+        update_phase = getattr(self.parent, 'pk', False) or getattr(self.parent, 'instance', False)
+        if self.auto_now_add and not update_phase:
+            return get_datetime()
+        elif self.auto_now and update_phase:
+            return get_datetime()
+        else:
+            return super().to_internal_value(data)
 
 
 class IdMongoField(serializers.Field):

@@ -350,9 +350,21 @@ class Comment(models.Model):
 
 
 class Reply(models.Model):
+    name = models.CharField(max_length=30, blank=True)
+    email = models.EmailField(blank=True)
+    status = models.CharField(_('status'), default='1', max_length=1, choices=statuses)
+    published_date = models.DateTimeField(_('published date'), auto_now_add=True)
+    content = models.TextField(_('content'), validators=[MaxLengthValidator(500)])
+    author = models.ForeignKey(User, related_name='written_replies', related_query_name='reply_author', on_delete=models.SET_NULL, null=True, blank=False, verbose_name=_('author'))
+    reviewer = models.ForeignKey(User, related_name='reviewed_replies', related_query_name='reply_reviewer', on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('reviewer'))
     comment = models.ForeignKey(Comment, related_name='replies', related_query_name='replies', on_delete=models.SET_NULL, null=True, verbose_name=_('comment'))
 
+    class Meta:
+        verbose_name = _('Reply')
+        verbose_name_plural = _('Replies')
 
+    def __str__(self):
+        return _('Reply') + ' ' + str(self.id) + ',' + _('Comment') + str(self.comment_id)
 
 
 class State(models.Model):

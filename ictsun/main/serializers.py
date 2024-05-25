@@ -44,17 +44,17 @@ mongo_db = pymongo.MongoClient(uri)['akh_db']
 class ReplySerializer(serializers.ModelSerializer):
     class Meta:
         model = Reply
-        fields = ['id', 'comment']
+        fields = '__all__'
 
     def to_representation(self, obj):
         self.fields['_id'] = IdMongoField(required=False)
         return super().to_representation(obj)
 
 
-class CommentSerializer(serializers.ModelSerializer):
-    published_date = TimestampField(jalali=True, required=False)
+class CommentSerializer(serializers.ModelSerializer):  # used in both mongo (post's comment) and sql (product's comment)
+    published_date = TimestampField(jalali=True, auto_now_add=True, required=False)
     author = UserNameSerializer(read_only=True)   # write handles in def to_internal_value. must overide default author field (here done)
-    replies = serializers.SerializerMethodField(required=False)  # ReplySerializer(many=True, read_only=True, required=False)
+    replies = serializers.SerializerMethodField(required=False)
 
     class Meta:
         model = Comment
@@ -129,7 +129,7 @@ class CommentSerializer(serializers.ModelSerializer):
         if not self.mongo:    # obj.replies.all works only in sql
             replies = obj.replies.all()
             if replies:
-                return CommentSerializer(replies, many=True).data
+                return ReplySerializer(replies, many=True).data
         return []
 
 class RatingSerializer(serializers.ModelSerializer):

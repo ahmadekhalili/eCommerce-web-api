@@ -1,3 +1,5 @@
+import datetime
+
 from django.db.models import Sum, F, Case, When, Q
 from django.db.models.functions import Coalesce
 from django.shortcuts import render, get_object_or_404
@@ -35,9 +37,6 @@ def index(request):
     if request.method == 'GET':
         # cache.set('name', ['mkh is my name', 'akh is my name'])
         # str(request.META.get('HTTP_COOKIE'))id=14   field_1=s2
-        a = ''
-        #f = my_serializers.CommentSerializer(DictToObject({"content": "dsadasd", 'author': User.objects.get(id=1)}), mongo=True).data
-
         a = ''
         b = ''
 
@@ -307,9 +306,8 @@ class ProductCategoryList(views.APIView):
 class CommentList(views.APIView):
     serializer = my_serializers.CommentSerializer
 
-    def post(self, request, *args, **kwargs):
-        # create comment or comment's reply
-        # required data: 'content', 'post'|'product_id', 'author'|request.user, 'comment_id' (only in reply creation)
+    def post(self, request, *args, **kwargs):  # create comment
+        # required data(post): 'content', 'post', 'author'|request.user
         request_data = dict(request.data)
         if request_data.get('post'):       # create comment of post
             post_id = request_data.pop('post')
@@ -318,44 +316,69 @@ class CommentList(views.APIView):
             validated_data = serializer.validated_data
             serialized = self.serializer(DictToObject(validated_data), mongo=True).data
             data = self.serializer().set_id(serialized)
-            if not request_data.get('comment_id'):        # create comment
-                message = 'comment'
-                result = mongo_db.post.update_one({'_id': ObjectId(post_id)}, {'$push': {'comments': data}})
-            else:                                 # create comment's reply
-                message = 'reply'
-                result = mongo_db.post.update_one(
-                    {'_id': ObjectId(post_id), 'comments._id': ObjectId(request_data['comment_id'])},
-                    {'$push': {'comments.$.replies': data}})
-
+            result = mongo_db.post.update_one({'_id': ObjectId(post_id)}, {'$push': {'comments': data}})
             if result.modified_count > 0:
-                response_message = f"{message} with {data} successfully updated."
+                response_message = f"comment with {data} successfully created."
             else:
-                response_message = f"{message} not created."
+                response_message = f"comment not created."
             return ResponseMongo(response_message)
-        return Response({})
+
+        # required data(product): 'content', 'product_id', 'author'|request.user
+        elif request_data.get('product_id'):   # create comment of product
+            author_id = request_data.pop('author') if request_data.get('author') else request.user.id
+            comment = Comment.objects.create(**request_data, author_id=author_id)
+            return Response(self.serializer(comment).data)
+        else:
+            return ValueError("please provide 'post' or 'product_id'")
 
 
 class CommentDetail(views.APIView):
     serializer = my_serializers.CommentSerializer
 
+    # required data: 'post', 'content', 'author'|request.user
+    def post(self, request, *args, **kwargs):     # create reply
+        request_data = dict(request.data)
+        if request_data.get('post'):  # create reply of post
+            post_id = request_data.pop('post')
+            serializer = self.serializer(request=request, data=request_data)
+            serializer.is_valid(raise_exception=True)
+            validated_data = serializer.validated_data
+            serialized = self.serializer(DictToObject(validated_data), mongo=True).data
+            data = self.serializer().set_id(serialized)
+            result = mongo_db.post.update_one(
+                {'_id': ObjectId(post_id), 'comments._id': ObjectId(kwargs['pk'])},
+                {'$push': {'comments.$.replies': data}})
+            if result.modified_count > 0:
+                response_message = f"reply with {data} successfully created."
+            else:
+                response_message = f"reply not created."
+            return ResponseMongo(response_message)
+
+        # required data: 'content', 'author'|request.user
+        else:       # create reply of product
+            request_data['comment_id'] = kwargs['pk']
+            author_id = request_data.pop('author') if request_data.get('author') else request.user.id
+            reply = Reply.objects.create(author_id=author_id, **request_data)
+            return Response(my_serializers.ReplySerializer(reply).data)
+
     def put(self, request, *args, **kwargs):
         # update comment or comment's reply
-        # required data: 'post'|'product_id', 'reply_id' (only in updating comment's reply)
         request_data = dict(request.data)
-        if request_data.get('post'):       # update post's comment
+        # required data (post): 'post', 'reply_id' (only in updating comment's reply)
+        if request_data.get('post'):       # update post's comment/reply
             post_id, comment_id = request_data.pop('post'), kwargs['pk']
             serializer = self.serializer(request=request, data=request_data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer = self.serializer(DictToObject(serializer.validated_data), mongo=True)
             serialized = serializer.field_filtering_for_update(request_data, serializer.data)
-            if not request_data.get('reply_id'):
+            if not request_data.get('reply_id'):      # update post's comment
                 # don't want to replace whole comment
                 message = 'comment'
                 update_fields = {f'comments.$[elem].{k}': v for k, v in serialized.items()}
                 result =mongo_db.post.update_one({'_id': ObjectId(post_id)},
                                          {'$set': update_fields},
                                          array_filters=[{'elem._id': ObjectId(comment_id)}])
-            else:
+            else:               # update post's reply
                 message = 'reply'
                 update_fields = {f'comments.$[elem].replies.$[reply].{k}': v for k, v in serialized.items()}
                 result = mongo_db.post.update_one({'_id': ObjectId(post_id)},
@@ -369,55 +392,55 @@ class CommentDetail(views.APIView):
             else:
                 response_message = f"{message} not found or already updated."
             return ResponseMongo(response_message)
-        return Response("product's comment updating not implemented yet")
+
+        else:
+            # required data (product): 'reply_id' (only in updating comment's reply)
+            if not request_data.get('reply_id'):     # update comment
+                comment = get_object_or_404(Comment, id=kwargs['pk'])
+                for key, value in request_data.items():
+                    setattr(comment, key, value)
+                comment.save()
+                return Response(self.serializer(comment).data)
+            else:              # update reply
+                reply = get_object_or_404(Reply, id=request_data.pop('reply_id'))
+                for key, value in request_data.items():
+                    setattr(reply, key, value)
+                reply.save()
+                return Response(my_serializers.ReplySerializer(reply).data)
 
     def delete(self, request, *args, **kwargs):
-        # required data: 'post'|'product_id', 'reply_id' (only in removing comment's reply)
-        request_data = dict(request.data)
-        if request_data.get('post'):       # update post's comment
-            post_id, comment_id, reply_id = request_data.pop('post'), kwargs['pk'], request_data.get('reply_id')
-            if not reply_id:
+        query_params = {key: request.GET[key] for key in request.GET.keys()}
+        # required data(post): 'post', 'reply_id' (only in removing comment's reply)
+        if query_params.get('post'):   # delete post's comment/reply
+            post_id, comment_id, reply_id = query_params.get('post'), kwargs['pk'], query_params.get('reply_id')
+            if not reply_id:        # delete post's comment
+                message = 'Comment'
                 result = mongo_db.post.update_one(
                     {'_id': ObjectId(post_id)},
                     {'$pull': {'comments': {'_id': ObjectId(comment_id)}}}
                 )
-            else:
+            else:                  # delete post's reply
+                message = 'Reply'
                 result = mongo_db.post.update_one(
                     {'_id': ObjectId(post_id)},
                     {'$pull': {'comments.$[comment].replies': {'_id': ObjectId(reply_id)}}},
                     array_filters=[{'comment._id': ObjectId(comment_id)}]
                 )
             if result.modified_count > 0:
-                response_message = "Comment successfully deleted."
+                response_message = f"{message} successfully deleted."
             else:
-                response_message = "Comment not found or already deleted."
+                response_message = f"{message} not found or already deleted."
             return ResponseMongo(response_message)
-        return Response("product's comment deleting not implemented yet")
 
-
-class ReplyCreate(views.APIView):
-    serializer = my_serializers.ReplySerializer
-
-    def post(self, request, *args, **kwargs):
-        # required data: 'content', 'post_id', 'comment_id', 'author'|request.user
-        request_data = dict(request.data)
-        post_id = request_data.pop('post_id')
-        comment_id = request_data.pop('comment_id')
-        serializer = self.serializer(data=request_data)
-        serializer.is_valid(raise_exception=True)
-
-        reply_data = serializer.validated_data
-        reply_data['_id'] = ObjectId()  # Generate a new ObjectId for the reply
-
-        result = mongo_db.post.update_one(
-            {'_id': ObjectId(post_id), 'comments._id': ObjectId(comment_id)},
-            {'$push': {'comments.$.replies': reply_data}}
-        )
-
-        if result.modified_count > 0:
-            return ResponseMongo(reply_data)
-        else:
-            return ResponseMongo("Comment not found or unable to add reply", status=400)
+        # required data(product): 'reply_id' (only in removing comment's reply)
+        else:       # delete product's comment/reply
+            if not query_params.get('reply_id'):
+                response_message = "Comment successfully deleted."
+                Comment.objects.get(id=kwargs['pk']).delete()
+            else:
+                response_message = "Reply successfully deleted."
+                Reply.objects.get(id=query_params['reply_id']).delete()
+        return Response(response_message)
 
 
 class States(views.APIView):
