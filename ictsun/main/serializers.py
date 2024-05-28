@@ -395,7 +395,7 @@ class PostMongoSerializer(serializers.Serializer):
     # [title, brief_description, request.user/author required
     title = serializers.CharField(label=_('title'), validators=[MongoUniqueValidator(mongo_db.post, 'title')], max_length=255)
     slug = serializers.SlugField(label=_('slug'), required=False)    # slug generates from title (in to_internal_value)
-    published_date = TimestampField(label=_('published date'), jalali=True, required=False)
+    published_date = TimestampField(label=_('published date'), auto_now_add=True, jalali=True, required=False)
     updated = TimestampField(label=_('updated date'), jalali=True, auto_now=True, required=False)
     tags = serializers.ListField(child=serializers.CharField(max_length=30), default=[])
     meta_title = serializers.CharField(allow_blank=True, max_length=60, required=False)
@@ -404,7 +404,7 @@ class PostMongoSerializer(serializers.Serializer):
     detailed_description = serializers.CharField(allow_blank=True, required=False)
     instagram_link = serializers.CharField(allow_blank=True, max_length=255, required=False)
     visible = serializers.BooleanField(default=True)
-    author = UserNameSerializer()  # author can fill auto in to_internal_value, otherwise must input
+    author = UserNameSerializer(required=False)  # author can fill auto in to_internal_value, otherwise must input
     icons = OneToMultipleImage(sizes=[240, 420, 640, 720, 960, 1280, 'default'], upload_to='post_images/icons/', required=False)
     category_fathers = serializers.SerializerMethodField()
     category = CategorySerializer(required=False, read_only=True)  # it's validated_data fill in 'to_internal_value'
@@ -433,11 +433,6 @@ class PostMongoSerializer(serializers.Serializer):
         if not data.get('slug') and data.get('title'):  # correct updating, required change data['slug'] here.
             data['slug'] = slugify(data['title'], allow_unicode=True)  # data==request.data==self.initial_data mutable
         internal_value = super().to_internal_value(data)
-
-        now = datetime.datetime.now()
-        if not self.pk:         # in creation
-            internal_value['published_date'] = self.fields['published_date'].to_internal_value(now.timestamp())
-        internal_value['updated'] = self.fields['updated'].to_internal_value(now.timestamp())
 
         if data.get('category'):
             level = Category.objects.filter(id=data['category']).values_list('level', flat=True)[0]
@@ -479,15 +474,18 @@ class PostMongoSerializer(serializers.Serializer):
             return validated_data
 
         else:         # in creation, do DRF default behaviour
-            return super().is_valid(raise_exception=raise_exception)
+            bol = super().is_valid(raise_exception=raise_exception)
+            if bol:
+                return self.validated_data
+            return bol
 
     # only save in mongo db
-    def save(self, **kwargs):
+    def save(self, validated_data, **kwargs):
         change = True if self.pk else False
         if not change:
-            return self.create(self.validated_data)
+            return self.create(validated_data)
         else:
-            return self.update(self.pk, kwargs['validated_data'])
+            return self.update(self.pk, validated_data)
 
     def create(self, validated_data):
         data = PostMongoSerializer(DictToObject(validated_data)).data

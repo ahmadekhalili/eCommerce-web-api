@@ -1,4 +1,5 @@
 __pycache__
 ictsun/media/
 ictsun/.idea/
+.idea/
 **/.env
