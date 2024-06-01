@@ -21,10 +21,13 @@ from urllib.parse import quote_plus
 from modeltranslation.utils import get_translation_fields as g_t
 from drf_extra_fields.fields import Base64ImageField
 from pathlib import Path
+from mongoserializer.serializer import MongoSerializer
+from mongoserializer.fields import TimestampField, IdMongoField
+from mongoserializer.methods import save_to_mongo as general_save_to_mongo
 from bson import ObjectId
 
 from .models import *
-from .methods import get_category_and_fathers, post_save_to_mongo, save_to_mongo, SaveProduct, DictToObject, \
+from .methods import get_category_and_fathers, save_to_mongo, SaveProduct, DictToObject, \
     comment_save_to_mongo
 from customed_files.rest_framework.classes.fields import *
 from customed_files.rest_framework.classes.validators import MongoUniqueValidator
@@ -76,10 +79,11 @@ class CommentSerializer(serializers.ModelSerializer):  # used in both mongo (pos
 
     def to_internal_value(self, data):
         internal_value = super().to_internal_value(data)
+        request = self.request or self.context.get('request')  # self.context inherited from superclass
         if data.get('author'):
             internal_value['author'] = get_object_or_404(User, id=data['author'])
-        elif self.request and self.request.user:
-            internal_value['author'] = self.request.user
+        elif request and request.user:
+            internal_value['author'] = request.user
         else:
             raise ValueError("please provide 'author' or login and request again")
 
@@ -108,20 +112,10 @@ class CommentSerializer(serializers.ModelSerializer):  # used in both mongo (pos
                         data[j] = {'_id': ObjectId, **reply}
         return data
 
-    def field_filtering_for_update(self, input, output):  # input=request.data, output=serializer.data or..
-        # keep only fields provided in request.data and remove unexpected which have been added in to_internal_value
-        auto_now_fields = set()   # store 'auto_now=True' fields without duplicates
-        for field_name, field in self.fields.items():
-            if getattr(field, 'auto_now', False):
-                auto_now_fields.add(field_name)
-
-        model_class = self.Meta.model  # if there isn't any auto_now=True field in serializer, search it in model fields
-        for field in model_class._meta.get_fields():
-            if getattr(field, 'auto_now', False):
-                auto_now_fields.add(field.name)
-
+    def field_filtering_for_update(self, input, output):  # input=validated_data, output=serializer.data or..
+        # keep only fields provided in validated_data and remove unexpected others
         for key in output.copy():
-            if key not in input and key not in auto_now_fields:
+            if key not in input:
                 del output[key]
         return output
 
@@ -391,7 +385,7 @@ class ProductListSerializer(serializers.ModelSerializer):
 # don't use this for representation like: PostMongoSerializer(DictToObject(post_col)).data
 # in updating must be like: PostMongoSerializer(pk=1, data=data, partial=True, request=request)
 # in creation: PostMongoSerializer(data=data, prequest=request)
-class PostMongoSerializer(serializers.Serializer):
+class PostMongoSerializer(MongoSerializer):
     # [title, brief_description, request.user/author required
     title = serializers.CharField(label=_('title'), validators=[MongoUniqueValidator(mongo_db.post, 'title')], max_length=255)
     slug = serializers.SlugField(label=_('slug'), required=False)    # slug generates from title (in to_internal_value)
@@ -408,29 +402,10 @@ class PostMongoSerializer(serializers.Serializer):
     icons = OneToMultipleImage(sizes=[240, 420, 640, 720, 960, 1280, 'default'], upload_to='post_images/icons/', required=False)
     category_fathers = serializers.SerializerMethodField()
     category = CategorySerializer(required=False, read_only=True)  # it's validated_data fill in 'to_internal_value'
-    comments = CommentSerializer(many=True, required=False)
-
-    def __init__(self, instance=None, pk=None, *args, **kwargs):
-        # instance and pk should not conflict in updating and retrieving like: updating: serializer(pk=1, data={..}),
-        # retrieving: serializer(instance).data
-        self.request = kwargs.pop('request', None)
-        self.pk = pk
-        if kwargs.get('partial'):      # in updating only provided fields should validate
-            for key in self.fields:
-                self.fields[key].required = False
-        super().__init__(instance=instance, *args, **kwargs)
-
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        rep2 = representation.copy()
-        if self.partial:
-            for key in rep2:    # can't change dictionary (representation) size during iteration
-                if representation.get(key) is None:
-                    representation.pop(key)
-        return representation
+    comments = CommentSerializer(many=True, required=False, mongo=True)
 
     def to_internal_value(self, data):
-        if not data.get('slug') and data.get('title'):  # correct updating, required change data['slug'] here.
+        if not data.get('slug') and data.get('title'):
             data['slug'] = slugify(data['title'], allow_unicode=True)  # data==request.data==self.initial_data mutable
         internal_value = super().to_internal_value(data)
 
@@ -456,58 +431,10 @@ class PostMongoSerializer(serializers.Serializer):
 
         return internal_value
 
-    def is_valid(self, *, raise_exception=False):  # separate is_valid behaviour in updating / creation
-        validated_data, errors = {}, {}
-        if self.pk:   # in updating phase, run validation for only provided fields (in data)
-            for field_name in self.initial_data:  # self.initial_data == data passed to serialize
-                try:
-                    field = self.fields[field_name]
-                    validated_data[field_name] = field.run_validation(self.initial_data[field_name])
-                except ValidationError as exc:
-                    validated_data = {}
-                    errors[field_name] = exc.detail
-                else:     # in creation, do DRF default behaviour
-                    errors = {}
-                if errors and raise_exception:
-                    raise ValidationError(errors)
-            validated_data = {**validated_data, **self.to_internal_value(self.initial_data)}
-            return validated_data
-
-        else:         # in creation, do DRF default behaviour
-            bol = super().is_valid(raise_exception=raise_exception)
-            if bol:
-                return self.validated_data
-            return bol
-
-    # only save in mongo db
-    def save(self, validated_data, **kwargs):
-        change = True if self.pk else False
-        if not change:
-            return self.create(validated_data)
-        else:
-            return self.update(self.pk, validated_data)
-
-    def create(self, validated_data):
-        data = PostMongoSerializer(DictToObject(validated_data)).data
+    def create(self, collection):
+        data = self.serialize_and_filter(self.validated_data)
         PostMongoSerializer().fields['comments'].child.set_id(data.get('comments'))
-        return post_save_to_mongo(post_col=mongo_db.post, data=data, change=False)
-
-    def update(self, pk, validated_data):
-        # because partial=True don't raise error when 'validated_data' doesn't provide required fields
-        data = PostMongoSerializer(DictToObject(validated_data), partial=True).data
-        data = self.field_filtering_for_update(self.initial_data, data)
-        return post_save_to_mongo(mongo_db.post, pk, data, change=True)
-
-    def field_filtering_for_update(self, input, output):  # 'input', 'output' is dict
-        # keep only fields provided in request.data and remove unexpected which have been added in to_internal_value
-        auto_now_fields = dict(self.fields).copy()   # store 'auto_now=True' fields
-        for key in self.fields:
-            if not getattr(auto_now_fields[key], 'auto_now', None):
-                del auto_now_fields[key]
-        for key in output.copy():
-            if key not in input and key not in auto_now_fields:
-                del output[key]
-        return output
+        return general_save_to_mongo(mongo_db.post, data=data)
 
     def get_category_fathers(self, obj):
         if getattr(obj, 'category', None):

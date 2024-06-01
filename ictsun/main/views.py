@@ -135,8 +135,8 @@ class PostList(views.APIView):
     def post(self, request, *args, **kwargs):
         serializer = my_serializers.PostMongoSerializer(data=request.data, request=request)
         if serializer.is_valid():
-            serializer.save()
-            return Response('successfully created in mongo!')
+            data = serializer.save(mongo_db.post)
+            return Response(f'successfully created (in mongo): {data}!')
         return Response(serializer.errors)
 
 
@@ -220,10 +220,9 @@ class PostDetail(views.APIView):
 
     def put(self, request, *args, **kwargs):
         # for updating, url=/post/<mongo_pk>/<slug>/   data={"title": "some_title"}
-        kwargs['update'] = True
         serializer = self.serializer(pk=kwargs['pk'], data=request.data, partial=True, request=request)
-        validated_data = serializer.is_valid(raise_exception=True)
-        data, sessionid = serializer.save(validated_data=validated_data), request.session.session_key
+        serializer.is_valid(raise_exception=True)
+        data, sessionid = serializer.save(mongo_db.post), request.session.session_key
         return Response({'sessionid': sessionid, **data})
 
     def delete(self, request, *args, **kwargs):
