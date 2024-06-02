@@ -16,12 +16,13 @@ import pymongo
 import environ
 from pathlib import Path
 from urllib.parse import quote_plus
+from onetomultipleimage.methods import ImageCreationSizes
 from bson import ObjectId
 
 from customed_files.rest_framework.classes.response import ResponseMongo
 from . import serializers as my_serializers
 from . import forms as my_forms
-from .methods import get_products, get_posts, get_posts_products_by_category, ImageCreationSizes, get_parsed_data, \
+from .methods import get_products, get_posts, get_posts_products_by_category, get_parsed_data, \
     get_page_count, get_unique_list, DictToObject
 from .models import *
 from users.serializers import UserSerializer
@@ -465,11 +466,11 @@ class UploadImage(views.APIView):
         {'default': '/media/../..7a0-default.JPEG', 240: '/media/../..7a0-240.JPEG', ..., 'image_id': 1}
         request.data['file'] sent by front is InMemoryUploadedFile object, like data sent by <input type="file"...>
         '''
-        sizes = [240, 420, 640, 720, 960, 1280]
+        sizes = ['240', '420', '640', '720', '960', '1280']
         img = Image(image=request.data['file'], alt=ImageCreationSizes.add_size_to_alt('default'), path='posts')
         obj = ImageCreationSizes(data={'image': request.data['file']}, sizes=sizes)
         instances = [ImageSizes(alt=ImageCreationSizes.add_size_to_alt(size), size=size, father=img) for size in sizes]
-        instances = obj.update(instances=instances, upload_to='/media/posts_images/')
+        instances = obj.update(instances=instances, upload_to='posts_images/')
         img.save()
         ImageSizes.objects.bulk_create(instances)
         paths = {size: instance.image.url for size, instance in zip(sizes, instances)}

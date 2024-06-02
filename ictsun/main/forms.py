@@ -31,24 +31,23 @@ class PostAdminForm(forms.Form):
 image_qusmark_text = _('Image rate should be 1:1')
 weight_qusmark_text = _('weight in gram')
 length_qusmark_text = _('size in millimeter')
-class ProductAdminForm(custforms.ProductModelForm):
-    def __init__(self, data=None, files=None, auto_id='id_%s', prefix=None, initial=None, error_class=ErrorList, label_suffix=None, empty_permitted=False, instance=None, use_required_attribute=None, renderer=None):
-        initial = initial if initial else {}
+class ProductAdminForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        initial, instance = kwargs.get('initial'), kwargs.get('instance')
+        initial = kwargs['initial'] if kwargs.get('initial') else {}
         length, width, height = [float(i) for i in instance.size.split(',')] if instance and instance.size else (None,None,None)
         initial = {**initial, 'length': length, 'width': width, 'height': height} if length else initial
-        super(). __init__(data, files, auto_id, prefix, initial, error_class, label_suffix, empty_permitted, instance, use_required_attribute, renderer)
+        super(). __init__(*args, **kwargs)
+        self.fields['length'] = forms.FloatField(widget=NumberInputQuesMark(qus_text=length_qusmark_text), label=_('length'))
+        self.fields['width'] = forms.FloatField(label=_('width'))
+        self.fields['height'] = forms.FloatField(label=_('height'))
 
-    #category = custforms.ChoiceFieldCustom(choices=(), widget=product_category_widget, required=True, label=_('category'))
     category = custforms.ModelChoiceFieldCustom(queryset=Category.objects.all(), widget=product_category_widget, required=True, label=_('category'))
-    weight_fa = forms.FloatField(widget=NumberInputQuesMark(attrs={'class': get_mt_input_classes('weight_fa')}, qus_text=weight_qusmark_text), required=True, label=_('weight'))
-    weight_en = forms.FloatField(widget=NumberInputQuesMark(attrs={'class': get_mt_input_classes('weight_en')}, qus_text=weight_qusmark_text), required=False, label=_('weight'))
-    length = forms.FloatField(widget=NumberInputQuesMark(qus_text=length_qusmark_text), label=_('length'))
-    width = forms.FloatField(label=_('width'))
-    height = forms.FloatField(label=_('height'))
+    #weight_fa = forms.FloatField(widget=NumberInputQuesMark(attrs={'class': get_mt_input_classes('weight_fa')}, qus_text=weight_qusmark_text), required=True, label=_('weight'))
 
-    class Meta:                                          #take fields from admin.fiedset but this is needed for validation.
+    class Meta:                               # take fields from admin.fiedset but this is needed for validation
         model = Product
-        fields = ['name', 'slug', 'meta_title', 'meta_description', 'brief_description', 'detailed_description', 'price', 'available', 'visible', 'filter_attributes', 'category', 'brand', 'rating', 'weight_fa', 'weight_en', 'length', 'width', 'height']
+        fields = '__all__'
 
 
 class CommentForm(forms.ModelForm):

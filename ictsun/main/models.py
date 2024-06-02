@@ -1,10 +1,12 @@
 from django.core.validators import MinValueValidator, MaxValueValidator, MaxLengthValidator
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
+from django.utils.text import slugify
 from django.conf import settings
 from django.db import models
 from datetime import datetime
 
+import os
 import jdatetime
 
 from .model_methods import set_levels_afterthis_all_childes_id, update_product_stock
@@ -285,13 +287,15 @@ class Image_icon(models.Model):
         return self.alt if self.alt else self.image.path
 
 
-def image_path_selector(instance, filename):                        #note: if you use method in upload_to, strftime ("%Y/%m/%d/") dont work and should provided manualy.
+def image_path_selector(instance, filename, path=None):                        #note: if you use method in upload_to, strftime ("%Y/%m/%d/") dont work and should provided manualy.
     if settings.IMAGES_PATH_TYPE == 'jalali':
         date = jdatetime.datetime.fromgregorian(date=datetime.now()).strftime('%Y %-m %-d').split()
     else:
         now = datetime.now()
         date = f"{now.year} {now.month} {now.day}".split()
-    return f'{instance.path}_images/{date[0]}/{date[1]}/{date[2]}/{filename}'
+    path = path or instance.path
+    return os.path.join(f'{path}_images/{date[0]}/{date[1]}/{date[2]}/{filename}')
+
 
 class Image(models.Model):
     image = models.ImageField(_('image'), upload_to=image_path_selector, blank=True, null=True)    # here save default size of image to prevent additional query to ImageSizes class.
@@ -324,7 +328,13 @@ class ImageSizes(models.Model):
         verbose_name = _('Image size')
         verbose_name_plural = _('Images sizes')
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._meta.get_field('image').upload_to = lambda instance, filename: image_path_selector(instance, filename, path=self.father.path)
+
     def __str__(self):
+        if '-' in self.alt:      # if alt has size, like: 'banana-240'
+            return self.alt
         return f'{self.alt} {self.size}'
 
 

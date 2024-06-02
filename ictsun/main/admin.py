@@ -116,7 +116,7 @@ admin.site.register(PostAdmin.Post, PostAdmin)
 class BrandAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug':('name',)}
 
-    def save_related(self, request, form, formsets, change):             # here update product in mongo database  (productdetailmongo_col['json']['brand']) according to Brand changes. for example if brand_1.name changes to 'Apl'  ProductDetailMongo:  [{ id: 1, json: {brand: 'Apl', ...}}, {id: 2, ...}]
+    def save_related(self, request, form, formsets, change):             # here update product in mongo database  (productdetailmongo_col['brand']) according to Brand changes. for example if brand_1.name changes to 'Apl'  ProductDetailMongo:  [{ id: 1, json: {brand: 'Apl', ...}}, {id: 2, ...}]
         super().save_related(request, form, formsets, change)
         brand_save_to_mongo(mongo_db, form.instance, change, request)
 
@@ -164,14 +164,10 @@ class ProductAdmin(admin.ModelAdmin):
     filter_horizontal = ('filter_attributes',)
     inlines = [ImageInline, CommentInline, ImageIconInline]
     readonly_fields = ('rating', 'get_created', 'get_updated')
-    form = my_forms.ProductAdminForm
+    #form = my_forms.ProductAdminForm
     fieldsets = (
         (None, {
             'fields': ('name', 'slug', 'brief_description', 'detailed_description', 'price', 'available', 'category', 'filter_attributes', 'rating', 'stock', 'brand', 'weight', 'get_created', 'get_updated')
-        }),
-        (_('size'), {
-            'classes': ('collapse',),
-            'fields': ('length', 'width', 'height'),
         }),
         (_('seo fields'), {
             'classes': ('collapse',),
@@ -255,13 +251,13 @@ class ProductAdmin(admin.ModelAdmin):
         if object_id:
             selected_filter_attributes = obj.filter_attributes.select_related('filterr')      #value is current product.  
             selected_filters = [filter_attribute.filterr for filter_attribute in selected_filter_attributes if filter_attribute]             #if obj.filter_attributes.all() was blank, filter_attribute.id  raise error so we need check with if filter_attribute
-            extra_context['selected_filter_attributes'] = make_next(selected_filter_attributes)  
+            extra_context['selected_filter_attributes'] = make_next(selected_filter_attributes)
             extra_context['selected_filters'] = make_next(selected_filters)
             # if add product in shell, mongo_product can be None
-            mongo_product = mongo_db[settings.MONGO_PRODUCT_COL].find_one({"id": obj.id})['json']
+            mongo_product = mongo_db[settings.MONGO_PRODUCT_COL].find_one({"id": obj.id})
             extra_fields = {}
             if mongo_product:
-                for tuple in mongo_product.json.items():                              # find all additional fields added in admin panel and add to 'data' in order to save them to db
+                for tuple in mongo_product.items():                              # find all additional fields added in admin panel and add to 'data' in order to save them to db
                     if len(tuple[0]) > 6 and tuple[0][:6] == 'extra_':
                         extra_fields[tuple[0]] = tuple[1]
                 extra_context['extra_fields'] = extra_fields                          # extra_fields is like: {'extra_colorbody': 'orange', 'extra_bodyweight': 2}

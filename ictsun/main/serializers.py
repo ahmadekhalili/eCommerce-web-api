@@ -21,6 +21,7 @@ from urllib.parse import quote_plus
 from modeltranslation.utils import get_translation_fields as g_t
 from drf_extra_fields.fields import Base64ImageField
 from pathlib import Path
+from onetomultipleimage.fields import OneToMultipleImage
 from mongoserializer.serializer import MongoSerializer
 from mongoserializer.fields import TimestampField, IdMongoField
 from mongoserializer.methods import save_to_mongo as general_save_to_mongo
@@ -170,7 +171,7 @@ class Image_iconSerializer(serializers.ModelSerializer):
     class Meta:
         model = Image_icon
         # 'alt' must be here otherwise we will have problem in ProductDetailSerializer.save
-        fields = ['id', 'image', *g_t('alt'), 'alt']
+        fields = ['id', 'image', 'alt', 'alt']
 
     def to_representation(self, obj):
         self.fields['image'] = serializers.SerializerMethodField()
@@ -315,7 +316,7 @@ class FilterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Filter
-        fields = ['id', *g_t('name'), *g_t('verbose_name'), 'genre', 'symbole', 'filter_attributes']
+        fields = ['id', 'name', 'verbose_name', 'genre', 'symbole', 'filter_attributes']
 
 
 
@@ -329,7 +330,7 @@ class FilterFromFilterAttribute(serializers.ModelSerializer):
 
     class Meta:
         model = Filter
-        fields = ['id', *g_t('verbose_name'), 'genre', 'symbole', 'filter_attributes']
+        fields = ['id', 'verbose_name', 'genre', 'symbole', 'filter_attributes']
 
     def __new__(cls, *args, **kwargs):
         filter_attributes = next(iter(args), None) or kwargs.get('instance')
@@ -363,7 +364,7 @@ class ProductListSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Product
-        fields = ['id', *g_t('name'), *g_t('slug'), *g_t('meta_title'), *g_t('meta_description'), *g_t('brief_description'), *g_t('price'), *g_t('available'), 'image_icons', 'rating', 'url']       #visible, filter_attributes, category are filtered(removed) here.
+        fields = ['id', 'name', 'slug', 'meta_title', 'meta_description', 'brief_description', 'price', 'available', 'image_icons', 'rating', 'url']       #visible, filter_attributes, category are filtered(removed) here.
 
     def get_image_icons(self, obj):                                     #we must create form like: <form method="get" action="/posts/?obj.category.slug"> .  note form must shown as link. you can put that form in above of that post.
         result = {}
@@ -399,7 +400,7 @@ class PostMongoSerializer(MongoSerializer):
     instagram_link = serializers.CharField(allow_blank=True, max_length=255, required=False)
     visible = serializers.BooleanField(default=True)
     author = UserNameSerializer(required=False)  # author can fill auto in to_internal_value, otherwise must input
-    icons = OneToMultipleImage(sizes=[240, 420, 640, 720, 960, 1280, 'default'], upload_to='post_images/icons/', required=False)
+    icons = OneToMultipleImage(sizes=['240', '420', '640', '720', '960', '1280', 'default'], upload_to='post_images/icons/', required=False)
     category_fathers = serializers.SerializerMethodField()
     category = CategorySerializer(required=False, read_only=True)  # it's validated_data fill in 'to_internal_value'
     comments = CommentSerializer(many=True, required=False, mongo=True)
@@ -487,10 +488,11 @@ class PostListSerializer(serializers.Serializer):
 
 class ProductDetailSerializer(serializers.ModelSerializer):       # important: for saving we should first switch to `en` language by:  django.utils.translation.activate('en').    comment_set will optained by front in other place so we deleted from here.   more description:  # all keys should save in database in `en` laguage(for showing data you can select eny language) otherwise it was problem understading which language should select to run query on them like in:  s = my_serializers.ProductDetailMongoSerializer(form.instance, context={'request': request}).data['shopfilteritems']:     {'رنگ': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} it is false for saving, we should change language by  `activate('en')` and now true form for saving:  {'color': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} and query like: s['color']
     slug = serializers.SlugField(required=False)
-    category_fathers = CategoryFathersChainedSerializer(many=True, revert=True)
     brand = serializers.SerializerMethodField()
     rating = serializers.SerializerMethodField()
     images = ImageSerializer(many=True, required=False)
+    category = serializers.PrimaryKeyRelatedField(read_only=True)  # writing handles in 'to_internal_value'
+    category_fathers = serializers.SerializerMethodField()
     icon = Image_iconSerializer(write_only=True, required=False)
     comment_count = serializers.SerializerMethodField()
     shopfilteritems = serializers.SerializerMethodField()
@@ -498,7 +500,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):       # important: f
 
     class Meta:
         model = Product
-        fields = ['id', *g_t('name'), *g_t('slug'), *g_t('meta_title'), *g_t('meta_description'), *g_t('brief_description'), *g_t('detailed_description'), *g_t('price'), *g_t('available'), 'category_fathers', 'category', 'brand', 'rating', *g_t('stock'), *g_t('weight'), 'images', 'icon', 'comment_count', 'shopfilteritems', 'related_products']
+        fields = ['id', 'name', 'slug', 'meta_title', 'meta_description', 'brief_description', 'detailed_description', 'price', 'available', 'category_fathers', 'category', 'brand', 'rating', 'stock', 'weight', 'images', 'icon', 'comment_count', 'shopfilteritems', 'related_products']
 
     def get_brand(self, obj):
         try:
@@ -509,6 +511,10 @@ class ProductDetailSerializer(serializers.ModelSerializer):       # important: f
     def get_rating(self, obj):
         rate = obj.rating.rate
         return rate
+
+    def get_category_fathers(self, obj):
+        if getattr(obj, 'category', None):
+            return CategoryFathersChainedSerializer(obj.category, revert=True, many=True).data
 
     def get_comment_count(self, obj):
         count = obj.comment_set.count()
@@ -536,6 +542,23 @@ class ProductDetailSerializer(serializers.ModelSerializer):       # important: f
             image_icons = [{'image': im.image.url, 'alt': im.alt} for im in image_icons]
             related_serialized.append({'name': name, 'price': price, 'url': url, 'image_icons': image_icons})
         return related_serialized
+
+    def to_internal_value(self, data):
+        if not data.get('slug') and data.get('title'):
+            data['slug'] = slugify(data['title'], allow_unicode=True)  # data==request.data==self.initial_data mutable
+        internal_value = super().to_internal_value(data)
+
+        if data.get('category'):
+            level = Category.objects.filter(id=data['category']).values_list('level', flat=True)[0]
+            related = 'father_category'
+            # '__father_category' * -1 == '', prefetch_related('child_categories') don't need because of single category
+            i = Category._meta.get_field('level').validators[1].limit_value-1-level  # raise error when use directly!
+            related += '__father_category' * i
+            cat = Category.objects.filter(id=data['category']).select_related(related)[0]
+            internal_value['category_fathers'] = cat
+            internal_value['category'] = cat
+
+        return internal_value
 
     def save(self, **kwargs):
         # save_product calls in both serializer and admin
@@ -614,10 +637,10 @@ class ProductDetailMongoSerializer(ProductDetailSerializer):
 class StateSerializer(serializers.ModelSerializer):
     class Meta:
         model = State
-        fields = ['key', *g_t('name')]                            #we use key instead id for saving of states and towns. (id can be change in next db but key is more stable)
+        fields = ['key', 'name']                            #we use key instead id for saving of states and towns. (id can be change in next db but key is more stable)
 
 
 class TownSerializer(serializers.ModelSerializer):
     class Meta:
         model = Town
-        fields = ['key', *g_t('name')]                            #key is unique so dont need to state or other fields for saving ProfileOrder or ...
+        fields = ['key', 'name']                            #key is unique so dont need to state or other fields for saving ProfileOrder or ...
