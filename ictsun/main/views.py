@@ -470,7 +470,7 @@ class UploadImage(views.APIView):
         img = Image(image=request.data['file'], alt=ImageCreationSizes.add_size_to_alt('default'), path='posts')
         obj = ImageCreationSizes(data={'image': request.data['file']}, sizes=sizes)
         instances = [ImageSizes(alt=ImageCreationSizes.add_size_to_alt(size), size=size, father=img) for size in sizes]
-        instances = obj.update(instances=instances, upload_to='posts_images/')
+        instances = obj.update(instances=instances)
         img.save()
         ImageSizes.objects.bulk_create(instances)
         paths = {size: instance.image.url for size, instance in zip(sizes, instances)}

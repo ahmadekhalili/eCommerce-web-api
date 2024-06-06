@@ -319,7 +319,7 @@ class Image(models.Model):
 
 # here saves different sizes of Image model (except default size that saves in Image.image)
 class ImageSizes(models.Model):
-    image = models.ImageField(_('image'), upload_to=image_path_selector, blank=True, null=True)    # here save differente size of image
+    image = models.ImageField(_('image'), blank=True, null=True)  # upload_to sets in __init__ dynamically
     alt = models.CharField(_('alt'), max_length=55, unique=True, null=True)
     size = models.CharField(_('size'), max_length=20)
     father = models.ForeignKey(Image, related_name='imagesizes', on_delete=models.CASCADE, blank=True, null=True, verbose_name=_('image'))
