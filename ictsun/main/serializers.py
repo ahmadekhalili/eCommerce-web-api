@@ -400,7 +400,7 @@ class PostMongoSerializer(MongoSerializer):
     instagram_link = serializers.CharField(allow_blank=True, max_length=255, required=False)
     visible = serializers.BooleanField(default=True)
     author = UserNameSerializer(required=False)  # author can fill auto in to_internal_value, otherwise must input
-    icons = OneToMultipleImage(sizes=['240', '420', '640', '720', '960', '1280', 'default'], upload_to='post_images/icons/', required=False)
+    icon = OneToMultipleImage(sizes=['240', '420', '640', '720', '960', '1280', 'default'], upload_to='post_images/icons/', required=False)
     category_fathers = serializers.SerializerMethodField()
     category = CategorySerializer(required=False, read_only=True)  # it's validated_data fill in 'to_internal_value'
     comments = CommentSerializer(many=True, required=False, mongo=True)
@@ -453,7 +453,7 @@ class PostListSerializer(serializers.Serializer):
     brief_description = serializers.CharField(validators=[MaxLengthValidator(1000)])
     url = serializers.SerializerMethodField()  # show simple str before data/list (in serializer(...).data)
     author = serializers.SerializerMethodField()  # author will fill auto from request.user, otherwise must input
-    icons = serializers.SerializerMethodField()
+    icon = serializers.SerializerMethodField()
     category = serializers.SerializerMethodField()  # it's validated_data fill in 'to_internal_value'
 
     def get_url(self, obj):
@@ -467,13 +467,13 @@ class PostListSerializer(serializers.Serializer):
                 url = urllib.parse.unquote(reverse('users:admin-profile', args=[author.id]))
                 return {'url': url, 'user_name': author.user_name}
 
-    def get_icons(self, obj):
-        if getattr(obj, 'icons', None):
-            icons, result = obj.icons, {}
-            if icons:
-                for size in icons:
-                    icon = icons[size]
-                    result[size] = {'image': icon.image, 'alt': icon.alt}
+    def get_icon(self, obj):
+        if getattr(obj, 'icon', None):
+            icon, result = obj.icon, {}
+            if icon:
+                for size in icon:
+                    ic = icon[size]
+                    result[size] = {'image': ic.image, 'alt': ic.alt}
                 return result
 
     def get_category(self, obj):
