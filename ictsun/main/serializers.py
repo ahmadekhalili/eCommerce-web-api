@@ -443,6 +443,7 @@ class PostMongoSerializer(MongoSerializer):
 
 
 class PostListSerializer(serializers.Serializer):
+    _id = IdMongoField(required=False)
     title = serializers.CharField(label=_('title'), max_length=255)
     slug = serializers.SlugField(label=_('slug'), required=False)    # slug generates from title (in to_internal_value)
     published_date = TimestampField(label=_('published date'), jalali=True, required=False)
