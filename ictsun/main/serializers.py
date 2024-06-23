@@ -389,7 +389,7 @@ class ProductListSerializer(serializers.ModelSerializer):
 class PostMongoSerializer(MongoSerializer):
     # [title, brief_description, request.user/author required
     title = serializers.CharField(label=_('title'), validators=[MongoUniqueValidator(mongo_db.post, 'title')], max_length=255)
-    slug = serializers.SlugField(label=_('slug'), required=False)    # slug generates from title (in to_internal_value)
+    slug = serializers.SlugField(label=_('slug'), allow_unicode=True, required=False)    # slug generates from title (in to_internal_value)
     published_date = TimestampField(label=_('published date'), auto_now_add=True, jalali=True, required=False)
     updated = TimestampField(label=_('updated date'), jalali=True, auto_now=True, required=False)
     tags = serializers.ListField(child=serializers.CharField(max_length=30), default=[])
@@ -445,7 +445,7 @@ class PostMongoSerializer(MongoSerializer):
 class PostListSerializer(serializers.Serializer):
     _id = IdMongoField(required=False)
     title = serializers.CharField(label=_('title'), max_length=255)
-    slug = serializers.SlugField(label=_('slug'), required=False)    # slug generates from title (in to_internal_value)
+    slug = serializers.SlugField(label=_('slug'), allow_unicode=True, required=False)    # slug generates from title (in to_internal_value)
     published_date = TimestampField(label=_('published date'), jalali=True, required=False)
     updated = TimestampField(label=_('updated date'), jalali=True, required=False)
     tags = serializers.ListField(child=serializers.CharField(max_length=30), default=[])
@@ -488,7 +488,7 @@ class PostListSerializer(serializers.Serializer):
 
 
 class ProductDetailSerializer(serializers.ModelSerializer):       # important: for saving we should first switch to `en` language by:  django.utils.translation.activate('en').    comment_set will optained by front in other place so we deleted from here.   more description:  # all keys should save in database in `en` laguage(for showing data you can select eny language) otherwise it was problem understading which language should select to run query on them like in:  s = my_serializers.ProductDetailMongoSerializer(form.instance, context={'request': request}).data['shopfilteritems']:     {'رنگ': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} it is false for saving, we should change language by  `activate('en')` and now true form for saving:  {'color': [{'id': 3, ..., 'name': 'سفید'}, {'id': 8, ..., 'name': 'طلایی'}]} and query like: s['color']
-    slug = serializers.SlugField(required=False)
+    slug = serializers.SlugField(required=False, allow_unicode=True)
     brand = serializers.SerializerMethodField()
     rating = serializers.SerializerMethodField()
     images = ImageSerializer(many=True, required=False)
