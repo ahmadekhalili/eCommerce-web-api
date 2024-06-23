@@ -190,8 +190,8 @@ class ProductList(views.APIView):
         rang = (page * step - step, page * step)
         products = get_products(*rang, products, orders)                                         #note(just for remembering): in nested order_by like: products.order_by('-ordered_quantity').order_by('-available')   ordering start from last order_by here: -available but in one order_by start from first element like:  products..order_by('-available', '-id')  ordering start from "-available"
         products_serialized = {'products': my_serializers.ProductListSerializer(products, many=True, context={'request': request}).data}
-        sidebarcategory_checkbox_serialized = my_serializers.CategoryChainedSerializer(sidebarcategory_checkbox, many=True).data
-        sidebarcategory_link_serialized = my_serializers.CategoryChainedSerializer(sidebarcategory_link, many=True).data
+        sidebarcategory_checkbox_serialized = my_serializers.CategoryFathersChainedSerializer(sidebarcategory_checkbox, many=True).data
+        sidebarcategory_link_serialized = my_serializers.CategoryFathersChainedSerializer(sidebarcategory_link, many=True).data
         sessionid = request.session.session_key
         return Response({'sessionid': sessionid, **products_serialized, **{'sidebarcategory_checkbox': sidebarcategory_checkbox_serialized}, **{'sidebarcategory_link': sidebarcategory_link_serialized}, 'brands': brands_serialized, 'filters': filters_serialized, 'pages': page_count})
 

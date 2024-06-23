@@ -48,7 +48,7 @@ def get_posts(post_col, query=None, first_index=None, last_index=None):
     if not query:
         query = {}
     query['visible'] = True
-    data = list(post_col.find(query).skip(first_index).limit(last_index).sort('_id', pymongo.DESCENDING))
+    data = list(post_col.find(query).skip(first_index).limit(last_index-first_index).sort('_id', pymongo.DESCENDING))
     for d in data:
         d['_id'] = str(d['_id'])
     return data
