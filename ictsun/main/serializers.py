@@ -40,9 +40,9 @@ from users.methods import user_name_shown
 env = environ.Env()
 environ.Env.read_env(os.path.join(Path(__file__).resolve().parent.parent.parent, '.env'))
 username, password, db_name = quote_plus(env('MONGO_USERNAME')), quote_plus(env('MONGO_USERPASS')), env('MONGO_DBNAME')
-host = env('MONGO_HOST')
-uri = f"mongodb://{username}:{password}@{host}:27017/{db_name}?authSource={db_name}"
-mongo_db = pymongo.MongoClient(uri)['akh_db']
+auth_source, host = env('MONGO_SOURCE'), env('MONGO_HOST')
+uri = f"mongodb://{username}:{password}@{host}:27017/{db_name}?authSource={auth_source}"
+mongo_db = pymongo.MongoClient(uri)[db_name]
 
 
 class ReplySerializer(serializers.ModelSerializer):
