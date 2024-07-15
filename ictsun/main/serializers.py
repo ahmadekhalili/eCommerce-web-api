@@ -405,6 +405,15 @@ class PostMongoSerializer(MongoSerializer):
     category = CategorySerializer(required=False, read_only=True)  # it's validated_data fill in 'to_internal_value'
     comments = CommentSerializer(many=True, required=False, mongo=True)
 
+    def to_representation(self, obj):
+        ret = super().to_representation(obj)
+        icons = {}
+        if ret.get('icon'):
+            for icon in ret['icon']:
+                icons[icon['size']] = {'image': icon['image'], 'alt': icon['alt']}
+            ret['icon'] = icons
+        return ret
+
     def to_internal_value(self, data):
         if not data.get('slug') and data.get('title'):
             data['slug'] = slugify(data['title'], allow_unicode=True)  # data==request.data==self.initial_data mutable
